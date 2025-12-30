@@ -3,990 +3,1245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real Voice-to-Voice Translation | Tamil ↔ English</title>
-    <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
+    <title>Fast Phone Dialer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <style>
+        /* Reset & Base */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #1a2980, #26d0ce);
-            color: white;
-            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            padding: 2rem;
         }
         
-        .container {
+        /* Phone Container - Optimized */
+        .phone {
+            width: 380px;
+            height: 700px;
+            background: #000;
+            border-radius: 40px;
+            position: relative;
+            overflow: hidden;
+            border: 12px solid #111;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+        
+        /* Status Bar */
+        .status-bar {
+            height: 32px;
+            background: #000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Screen Area */
+        .screen {
+            height: calc(100% - 100px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Screen Base */
+        .screen-base {
             width: 100%;
-            max-width: 1200px;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            margin-top: 1rem;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+            flex-direction: column;
+            background: linear-gradient(180deg, #0f0f1a 0%, #000 100%);
         }
         
-        header {
+        .screen-base.active {
+            display: flex;
+            animation: slideIn 0.2s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Home Screen */
+        .home {
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
             text-align: center;
-            margin-bottom: 2rem;
         }
         
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(to right, #ff7e5f, #feb47b);
+        .home .icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        
+        .home .icon i {
+            font-size: 48px;
+            color: white;
+        }
+        
+        .home h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.8;
+        .home p {
+            color: #888;
+            font-size: 14px;
         }
         
-        .connection-setup {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 1.5rem;
-            border-radius: 15px;
-            margin-bottom: 2rem;
-            text-align: center;
+        /* Dialer Screen */
+        .dialer {
+            padding: 20px;
         }
         
-        .status-container {
+        .dialer-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            gap: 1rem;
+            align-items: center;
+            margin-bottom: 20px;
         }
         
-        .status-box {
+        .dialer-header h2 {
+            color: white;
+            font-size: 20px;
+        }
+        
+        .sound-toggle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
             background: rgba(255, 255, 255, 0.1);
-            padding: 1rem;
-            border-radius: 10px;
-            flex: 1;
-            min-width: 200px;
-            text-align: center;
-        }
-        
-        .status-label {
-            font-size: 0.9rem;
-            opacity: 0.7;
-            margin-bottom: 0.5rem;
-        }
-        
-        .status-value {
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-        
-        .language-setup {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-        
-        .language-box {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 1.5rem;
-            border-radius: 15px;
-            text-align: center;
-        }
-        
-        .language-title {
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
+            border: none;
+            color: #667eea;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
-        }
-        
-        .mode-selector {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .mode-btn {
-            padding: 0.8rem 1rem;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            background: transparent;
-            color: white;
             cursor: pointer;
-            transition: all 0.3s;
-            flex: 1;
         }
         
-        .mode-btn.active {
-            background: linear-gradient(to right, #ff7e5f, #feb47b);
-            border-color: transparent;
+        .sound-toggle.muted {
+            color: #ff4444;
         }
         
-        .translation-controls {
+        .id-card {
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        .control-title {
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
+        .id-label {
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 6px;
         }
         
-        .translation-status {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin: 1rem 0;
-            padding: 1rem;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-        }
-        
-        .indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #ff4757;
-        }
-        
-        .indicator.active {
-            background: #2ed573;
-            animation: pulse 1.5s infinite;
-        }
-        
-        .indicator.listening {
-            background: #ffa502;
-        }
-        
-        .indicator.speaking {
-            background: #3742fa;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-        
-        .call-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .input-group {
-            display: flex;
-            gap: 1rem;
-        }
-        
-        input {
-            flex: 1;
-            padding: 1rem;
-            border: none;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.1);
+        .id-value {
             color: white;
-            font-size: 1rem;
+            font-size: 18px;
+            font-weight: 600;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
         }
         
-        input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
+        .peer-input {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        button {
-            padding: 1rem 1.5rem;
+        .peer-input input {
+            width: 100%;
+            background: transparent;
             border: none;
-            border-radius: 10px;
-            background: linear-gradient(to right, #ff7e5f, #feb47b);
             color: white;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            flex: 1;
+            font-size: 20px;
+            text-align: center;
+            outline: none;
         }
         
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        .peer-input input::placeholder {
+            color: #666;
         }
         
-        button:active {
-            transform: translateY(0);
-        }
-        
-        button:disabled {
-            background: rgba(255, 255, 255, 0.2);
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .secondary-btn {
-            background: linear-gradient(to right, #576574, #8395a7);
-        }
-        
-        .success-btn {
-            background: linear-gradient(to right, #2ed573, #1dd1a1);
-        }
-        
-        .voice-status {
+        .action-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            gap: 12px;
+            margin-bottom: 20px;
         }
         
-        .voice-box {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 1.5rem;
-            min-height: 200px;
-        }
-        
-        .voice-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .voice-content {
-            height: 150px;
-            overflow-y: auto;
-            padding: 0.5rem;
-        }
-        
-        .voice-text {
-            margin-bottom: 0.8rem;
-            padding: 0.8rem;
-            border-radius: 10px;
+        .action-btn {
             background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
         }
         
-        .voice-text.original {
-            border-left: 4px solid #ff7e5f;
+        .action-btn i {
+            font-size: 20px;
         }
         
-        .voice-text.translated {
-            border-left: 4px solid #2ed573;
+        .action-btn.call {
+            background: linear-gradient(135deg, #00c853, #64dd17);
         }
         
-        .voice-text.received {
-            border-left: 4px solid #ffa502;
+        .action-btn.copy {
+            background: rgba(255, 255, 255, 0.15);
         }
         
-        .voice-text.spoken {
-            border-left: 4px solid #3742fa;
+        .action-btn:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
         }
         
-        .voice-time {
-            font-size: 0.7rem;
-            opacity: 0.6;
-            margin-bottom: 0.3rem;
+        /* Call Screen */
+        .call {
+            background: #000;
         }
         
-        .audio-status {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-top: 1rem;
+        .call-header {
+            padding: 24px 20px;
+            background: rgba(0, 0, 0, 0.8);
             text-align: center;
         }
         
-        @media (max-width: 768px) {
-            .container {
-                padding: 1.5rem;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .input-group {
-                flex-direction: column;
-            }
-            
-            .voice-status {
-                grid-template-columns: 1fr;
-            }
-            
-            .language-setup {
-                grid-template-columns: 1fr;
-            }
-            
-            .mode-selector {
-                flex-direction: column;
-            }
+        .caller-name {
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .call-timer {
+            color: #4caf50;
+            font-size: 14px;
+        }
+        
+        .video-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+        
+        .remote-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .local-preview {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            width: 100px;
+            height: 133px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: #000;
+        }
+        
+        .local-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+        }
+        
+        .call-controls {
+            padding: 24px 20px;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .call-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .call-btn.hangup {
+            background: #f44336;
+        }
+        
+        .call-btn.speaker.active {
+            background: #2196f3;
+        }
+        
+        .call-btn.video.active {
+            background: #4caf50;
+        }
+        
+        .call-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Incoming Call Screen */
+        .incoming {
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .caller-avatar {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(102, 126, 234, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
+        }
+        
+        .caller-avatar i {
+            font-size: 48px;
+            color: white;
+        }
+        
+        .incoming-name {
+            color: white;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .incoming-status {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .ringing-icon {
+            animation: ring 1.5s infinite;
+        }
+        
+        @keyframes ring {
+            0% { transform: rotate(0); }
+            15% { transform: rotate(20deg); }
+            30% { transform: rotate(-20deg); }
+            45% { transform: rotate(20deg); }
+            60% { transform: rotate(-20deg); }
+            75% { transform: rotate(0); }
+            100% { transform: rotate(0); }
+        }
+        
+        .incoming-controls {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .answer-btn, .decline-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .answer-btn {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .decline-btn {
+            background: #f44336;
+            color: white;
+        }
+        
+        .answer-btn:hover, .decline-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Help Screen */
+        .help {
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .help-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .help-header h2 {
+            color: white;
+            font-size: 20px;
+        }
+        
+        .close-help {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .help-section {
+            margin-bottom: 24px;
+        }
+        
+        .help-section h3 {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .help-section p {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+        
+        /* Bottom Nav */
+        .nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 68px;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 10px;
+        }
+        
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #888;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            flex: 1;
+        }
+        
+        .nav-btn i {
+            font-size: 20px;
+        }
+        
+        .nav-btn span {
+            font-size: 11px;
+        }
+        
+        .nav-btn.active {
+            color: #667eea;
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4caf50;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 1000;
+            display: none;
+            animation: slideDown 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        @keyframes slideDown {
+            from { transform: translate(-50%, -20px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+        
+        .toast.error {
+            background: #f44336;
+        }
+        
+        /* Loading */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            display: none;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Media Queries */
+        @media (max-height: 700px) {
+            .phone { height: 600px; }
+            .caller-avatar { width: 100px; height: 100px; }
+            .caller-avatar i { font-size: 40px; }
+        }
+        
+        @media (max-width: 400px) {
+            .phone { width: 340px; height: 650px; }
+            .action-buttons { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Real Voice-to-Voice Translation</h1>
-        <p class="subtitle">Tamil ↔ English | Speak & Hear Translations Aloud</p>
-    </header>
+    <!-- Toast Messages -->
+    <div id="toast" class="toast"></div>
     
-    <div class="container">
-        <div class="connection-setup">
-            <div class="status-label">Your Connection ID</div>
-            <div id="my-id" class="status-value" style="font-size: 1.5rem; margin: 0.5rem 0;">Generating...</div>
-            <button class="success-btn" onclick="shareMyId()">📋 Copy My ID</button>
-        </div>
-        
-        <div class="status-container">
-            <div class="status-box">
-                <div class="status-label">Connection Status</div>
-                <div id="connection-status" class="status-value">Connecting...</div>
-            </div>
-            <div class="status-box">
-                <div class="status-label">Translation Mode</div>
-                <div id="translation-mode" class="status-value">Tamil → English</div>
-            </div>
-            <div class="status-box">
-                <div class="status-label">Call Status</div>
-                <div id="call-status" class="status-value">No Call</div>
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <!-- Phone Container -->
+    <div class="phone">
+        <div class="status-bar">
+            <span id="time">9:41</span>
+            <div>
+                <i class="fas fa-signal"></i>
+                <i class="fas fa-wifi" style="margin-left: 8px;"></i>
+                <i class="fas fa-battery-full" style="margin-left: 8px;"></i>
             </div>
         </div>
         
-        <div class="language-setup">
-            <div class="language-box">
-                <div class="language-title">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 5.5V7H9V10H10C10.8 10 11.56 10.26 12.18 10.72C12.07 11.14 12 11.57 12 12C12 12.43 12.07 12.86 12.18 13.28C11.56 13.74 10.8 14 10 14H9V17H15V18.5L21 17V15L16 16.3V13.91C17.8 13.52 19 12.06 19 10.3C19 9.82 18.9 9.35 18.7 8.93L21 9ZM15 10C15.55 10 16 10.45 16 11C16 11.55 15.55 12 15 12C14.45 12 14 11.55 14 11C14 10.45 14.45 10 15 10ZM7 12C5.34 12 4 13.34 4 15C4 16.66 5.34 18 7 18C8.66 18 10 16.66 10 15C10 13.34 8.66 12 7 12Z" fill="currentColor"/>
-                    </svg>
-                    <span>You Speak</span>
+        <div class="screen">
+            <!-- Home Screen -->
+            <div id="homeScreen" class="screen-base home active">
+                <div class="icon">
+                    <i class="fas fa-phone-alt"></i>
                 </div>
-                <div class="mode-selector">
-                    <button class="mode-btn active" onclick="setMyLanguage('ta')">தமிழ்</button>
-                    <button class="mode-btn" onclick="setMyLanguage('en')">English</button>
+                <h1>FastCall</h1>
+                <p>HD Video Calls with Noise Cancellation</p>
+            </div>
+            
+            <!-- Dialer Screen -->
+            <div id="dialerScreen" class="screen-base dialer">
+                <div class="dialer-header">
+                    <h2>Connect</h2>
+                    <button id="soundToggle" class="sound-toggle">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                </div>
+                
+                <div class="id-card">
+                    <div class="id-label">
+                        <i class="fas fa-id-card"></i> Your ID
+                    </div>
+                    <div id="yourId" class="id-value">Loading...</div>
+                </div>
+                
+                <div class="peer-input">
+                    <input type="text" id="remoteId" placeholder="Enter Peer ID">
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="copyBtn" class="action-btn copy">
+                        <i class="fas fa-copy"></i>
+                        <span>Copy ID</span>
+                    </button>
+                    <button id="callBtn" class="action-btn call">
+                        <i class="fas fa-phone-alt"></i>
+                        <span>Call</span>
+                    </button>
+                </div>
+                
+                <div style="color: #666; font-size: 12px; text-align: center; padding: 10px;">
+                    Share your ID • Enter peer ID to call
                 </div>
             </div>
             
-            <div class="language-box">
-                <div class="language-title">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12.87 15.07L10.33 12.56L10.36 12.53C12.1 10.59 13.34 8.36 14.07 6H17V4H10V2H8V4H1V6H12.17C11.5 7.92 10.44 9.75 9 11.35C8.07 10.32 7.3 9.19 6.69 8H4.69C5.42 9.63 6.42 11.17 7.67 12.56L2.58 17.58L4 19L9 14L12.11 17.11L12.87 15.07ZM18.5 10H16.5L12 22H14L15.12 19H19.87L21 22H23L18.5 10ZM15.88 17L17.5 12.67L19.12 17H15.88Z" fill="currentColor"/>
-                    </svg>
-                    <span>Friend Speaks</span>
+            <!-- Call Screen -->
+            <div id="callScreen" class="screen-base call">
+                <div class="call-header">
+                    <div id="callerName" class="caller-name">Connecting...</div>
+                    <div id="callTimer" class="call-timer">00:00</div>
                 </div>
-                <div class="mode-selector">
-                    <button class="mode-btn" onclick="setFriendLanguage('ta')">தமிழ்</button>
-                    <button class="mode-btn active" onclick="setFriendLanguage('en')">English</button>
-                </div>
-            </div>
-        </div>
-        
-        <div class="translation-controls">
-            <div class="control-title">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 15C13.6569 15 15 13.6569 15 12V5C15 3.34315 13.6569 2 12 2C10.3431 2 9 3.34315 9 5V12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="2"/>
-                    <path d="M19 10V12C19 15.866 15.866 19 12 19C8.13401 19 5 15.866 5 12V10" stroke="currentColor" stroke-width="2"/>
-                    <path d="M12 19V22" stroke="currentColor" stroke-width="2"/>
-                </svg>
-                <span>Voice-to-Voice Translation</span>
-            </div>
-            
-            <div class="translation-status">
-                <div class="indicator" id="translation-indicator"></div>
-                <div id="translation-message">Set languages and start voice translation</div>
-            </div>
-            
-            <div class="input-group">
-                <button id="start-translation" onclick="startVoiceTranslation()">🎤 Start Voice Translation</button>
-                <button id="stop-translation" onclick="stopVoiceTranslation()" disabled>⏹️ Stop Translation</button>
-                <button class="secondary-btn" onclick="testVoiceTranslation()">🧪 Test Voice</button>
-            </div>
-        </div>
-        
-        <div class="call-controls">
-            <div class="input-group">
-                <input type="text" id="remoteId" placeholder="Enter friend's ID to call">
-                <button id="call-btn" onclick="startVoiceCall()">📞 Start Voice Call</button>
-            </div>
-            
-            <div class="input-group">
-                <button id="toggle-mic" onclick="toggleMicrophone()">🎤 Mute My Voice</button>
-                <button class="secondary-btn" onclick="endCall()">📞 End Call</button>
-            </div>
-        </div>
-        
-        <div class="voice-status">
-            <div class="voice-box">
-                <div class="voice-header">
-                    <span>Your Side</span>
-                </div>
-                <div class="voice-content" id="my-speech">
-                    <div class="voice-text original">
-                        <div class="voice-time">Ready</div>
-                        <div>You will hear translated voice here</div>
+                
+                <div class="video-area">
+                    <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
+                    <div class="local-preview">
+                        <video id="localVideo" autoplay playsinline muted></video>
                     </div>
                 </div>
+                
+                <div class="call-controls">
+                    <button id="speakerBtn" class="call-btn speaker active">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                    <button id="hangupBtn" class="call-btn hangup">
+                        <i class="fas fa-phone-slash"></i>
+                    </button>
+                    <button id="videoBtn" class="call-btn video active">
+                        <i class="fas fa-video"></i>
+                    </button>
+                </div>
             </div>
             
-            <div class="voice-box">
-                <div class="voice-header">
-                    <span>Friend's Side</span>
+            <!-- Incoming Call Screen -->
+            <div id="incomingScreen" class="screen-base incoming">
+                <div class="caller-avatar">
+                    <i class="fas fa-user"></i>
                 </div>
-                <div class="voice-content" id="friend-speech">
-                    <div class="voice-text received">
-                        <div class="voice-time">Ready</div>
-                        <div>Friend will hear translated voice</div>
-                    </div>
+                <div id="incomingName" class="incoming-name">Unknown</div>
+                <div class="incoming-status">
+                    <i class="fas fa-phone-alt ringing-icon"></i>
+                    <span id="ringStatus">Incoming Call</span>
+                </div>
+                
+                <div class="incoming-controls">
+                    <button id="declineBtn" class="decline-btn">
+                        <i class="fas fa-phone-slash"></i>
+                    </button>
+                    <button id="answerBtn" class="answer-btn">
+                        <i class="fas fa-phone-alt"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Help Screen -->
+            <div id="helpScreen" class="screen-base help">
+                <div class="help-header">
+                    <h2>Help</h2>
+                    <button id="closeHelp" class="close-help">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="help-section">
+                    <h3><i class="fas fa-bolt"></i> Fast Connection</h3>
+                    <p>• Optimized Peer.js connection</p>
+                    <p>• Noise cancellation enabled</p>
+                    <p>• Low latency video streaming</p>
+                </div>
+                
+                <div class="help-section">
+                    <h3><i class="fas fa-volume-up"></i> Audio Quality</h3>
+                    <p>• Advanced noise suppression</p>
+                    <p>• Echo cancellation</p>
+                    <p>• Auto gain control</p>
+                </div>
+                
+                <div class="help-section">
+                    <h3><i class="fas fa-phone"></i> How to Call</h3>
+                    <p>1. Share your Peer ID</p>
+                    <p>2. Enter other's ID</p>
+                    <p>3. Tap Call button</p>
+                    <p>4. Answer incoming calls</p>
                 </div>
             </div>
         </div>
         
-        <div class="audio-status">
-            <div class="status-label">Voice Translation Status</div>
-            <div id="audio-status">Start voice call and translation to hear spoken translations</div>
+        <!-- Bottom Navigation -->
+        <div class="nav">
+            <button id="navHome" class="nav-btn active">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </button>
+            <button id="navDialer" class="nav-btn">
+                <i class="fas fa-phone"></i>
+                <span>Dialer</span>
+            </button>
+            <button id="navHelp" class="nav-btn">
+                <i class="fas fa-question-circle"></i>
+                <span>Help</span>
+            </button>
         </div>
     </div>
 
-    <!-- Audio elements for voice playback -->
-    <audio id="remoteAudio" autoplay></audio>
-    <audio id="translationAudio" style="display: none;"></audio>
-
     <script>
-        // ==================== COMPREHENSIVE TRANSLATION DICTIONARY ====================
-        const translationDictionary = {
-            // Basic Greetings & Responses
-            'வணக்கம்': 'Hello', 'வணக்க': 'Hi', 'நமஸ்காரம்': 'Namaste', 
-            'நன்றி': 'Thank you', 'நன்றிகள்': 'Thanks', 'ரொம்ப நன்றி': 'Thank you very much',
-            'வரவேற்க': 'Welcome', 'மன்னிக்க': 'Sorry', 'மன்னிய': 'Sorry', 
-            'பரவாயில்ல': "It's okay", 'ஆமாம்': 'Yes', 'இல்லை': 'No', 'சரி': 'Okay',
+        // Fast Optimized App
+        const App = {
+            // DOM Elements
+            elements: {},
             
-            // Questions
-            'எப்படி': 'How', 'என்ன': 'What', 'எங்கே': 'Where', 'யார்': 'Who',
-            'ஏன்': 'Why', 'எப்போது': 'When', 'எத்தனை': 'How many', 
-            'எப்படி இருக்கிறீர்கள்': 'How are you', 'சௌக்கியமா': 'Are you fine',
-            'உங்கள் பெயர் என்ன': 'What is your name',
+            // State
+            state: {
+                peer: null,
+                call: null,
+                stream: null,
+                isMuted: false,
+                isVideoOn: true,
+                isSpeakerOn: true,
+                callStart: null,
+                timer: null,
+                soundEnabled: true,
+                audioContext: null,
+                oscillator: null
+            },
             
-            // Pronouns & People
-            'நான்': 'I', 'நீ': 'You', 'அவர்': 'He', 'அவள்': 'She', 
-            'நாங்கள்': 'We', 'அவர்கள்': 'They', 'எல்லோரும்': 'Everyone',
-            'என்': 'My', 'உங்க': 'Your',
+            // Initialize
+            init() {
+                console.time('App Init');
+                this.cacheElements();
+                this.setupTime();
+                this.initPeer();
+                this.bindEvents();
+                this.setupAudio();
+                console.timeEnd('App Init');
+                this.showToast('Ready to connect', 'success');
+            },
             
-            // Family
-            'அப்பா': 'Father', 'அம்மா': 'Mother', 'தம்பி': 'Brother', 
-            'தங்கை': 'Sister', 'மனைவி': 'Wife', 'கணவன்': 'Husband',
-            'மகன்': 'Son', 'மகள்': 'Daughter',
-            
-            // Common Nouns
-            'பெயர்': 'Name', 'வயது': 'Age', 'இடம்': 'Place', 'நேரம்': 'Time',
-            'வீடு': 'House', 'பள்ளி': 'School', 'வேலை': 'Work', 
-            'சாப்பாடு': 'Food', 'தண்ணீர்': 'Water', 'காபி': 'Coffee', 'டீ': 'Tea',
-            'நகரம்': 'City', 'நாடு': 'Country',
-            
-            // Numbers
-            'ஒன்று': 'One', 'இரண்டு': 'Two', 'மூன்று': 'Three', 'நான்கு': 'Four',
-            'ஐந்து': 'Five', 'பத்து': 'Ten', 'இருபது': 'Twenty', 'நூறு': 'Hundred',
-            
-            // Time
-            'இப்போது': 'Now', 'இன்று': 'Today', 'நேற்று': 'Yesterday', 
-            'நாளை': 'Tomorrow', 'காலை': 'Morning', 'மாலை': 'Evening', 'இரவு': 'Night',
-            
-            // Common Adjectives & Verbs
-            'நல்ல': 'Good', 'மோசமான': 'Bad', 'பெரிய': 'Big', 'சிறிய': 'Small',
-            'அழகான': 'Beautiful', 'சூடான': 'Hot', 'குளிரான': 'Cold',
-            'போ': 'Go', 'வா': 'Come', 'சாப்பிடு': 'Eat', 'குடி': 'Drink',
-            'தூங்கு': 'Sleep', 'பார்': 'See', 'கேள்': 'Listen', 'பேசு': 'Speak',
-            'வாங்க': 'Buy', 'கொடு': 'Give',
-
-            // Reverse mapping for English to Tamil
-            'hello': 'வணக்கம்', 'hi': 'வணக்கம்', 'thank you': 'நன்றி',
-            'thanks': 'நன்றிகள்', 'sorry': 'மன்னிக்க', 'yes': 'ஆமாம்',
-            'no': 'இல்லை', 'okay': 'சரி', 'how': 'எப்படி', 'what': 'என்ன',
-            'where': 'எங்கே', 'who': 'யார்', 'why': 'ஏன்', 'when': 'எப்போது',
-            'i': 'நான்', 'you': 'நீங்க', 'he': 'அவர்', 'she': 'அவள்',
-            'we': 'நாங்கள்', 'they': 'அவர்கள்', 'name': 'பெயர்', 'age': 'வயது',
-            'place': 'இடம்', 'time': 'நேரம்', 'house': 'வீடு', 'school': 'பள்ளி',
-            'work': 'வேலை', 'food': 'சாப்பாடு', 'water': 'தண்ணீர்', 'coffee': 'காபி',
-            'good': 'நல்ல', 'bad': 'மோசமான', 'big': 'பெரிய', 'small': 'சிறிய',
-            'beautiful': 'அழகான', 'hot': 'சூடான', 'cold': 'குளிரான',
-            'go': 'போ', 'come': 'வா', 'eat': 'சாப்பிடு', 'drink': 'குடி',
-            'sleep': 'தூங்கு', 'see': 'பார்', 'listen': 'கேள்', 'speak': 'பேசு',
-            'buy': 'வாங்க', 'give': 'கொடு'
-        };
-
-        // ==================== APPLICATION STATE ====================
-        let peer = null;
-        let peerId = null;
-        let currentCall = null;
-        let dataConnection = null;
-        let localStream = null;
-        let recognition = null;
-        let isTranslating = false;
-        let myLanguage = 'ta';  // Default: Tamil
-        let friendLanguage = 'en'; // Default: English
-        let isMicrophoneMuted = false;
-
-        // ==================== PEERJS CONNECTION ====================
-        function initializePeerJS() {
-            try {
-                peerId = 'User_' + Math.random().toString(36).substring(2, 8).toUpperCase();
+            // Cache DOM elements
+            cacheElements() {
+                const ids = [
+                    'homeScreen', 'dialerScreen', 'callScreen', 'incomingScreen', 'helpScreen',
+                    'yourId', 'remoteId', 'copyBtn', 'callBtn', 'hangupBtn', 'speakerBtn', 'videoBtn',
+                    'answerBtn', 'declineBtn', 'soundToggle', 'closeHelp',
+                    'callerName', 'callTimer', 'incomingName', 'ringStatus',
+                    'remoteVideo', 'localVideo', 'time', 'toast', 'loading',
+                    'navHome', 'navDialer', 'navHelp'
+                ];
                 
-           peer = new Peer(peerId, {
-    host: '0.peerjs.com', // public server
-    port: 443,
-    path: '/',
-    secure: true,
-    config: {
-        iceServers: [
-            { urls: "stun:stun.l.google.com:19302" },
-            { urls: "stun:stun1.l.google.com:19302" },
-            {
-                urls: 'turn:numb.viagenie.ca',
-                credential: 'muazkh',
-                username: 'webrtc@live.com'
-            }
-        ]
-    }
-});
-
-                peer.on('open', (id) => {
-                    document.getElementById('my-id').textContent = id;
-                    document.getElementById('connection-status').textContent = 'Connected';
-                    document.getElementById('connection-status').style.color = '#2ed573';
+                ids.forEach(id => {
+                    this.elements[id] = document.getElementById(id);
                 });
-
-                peer.on('error', (err) => {
-                    console.error('PeerJS error:', err);
-                    document.getElementById('connection-status').textContent = 'Local Mode';
-                });
-
-                // Handle incoming calls
-                peer.on('call', async (call) => {
-                    try {
-                        if (!localStream) {
-                            localStream = await navigator.mediaDevices.getUserMedia({ 
-                                audio: true, video: false 
-                            });
-                        }
-                        
-                        call.answer(localStream);
-                        currentCall = call;
-                        
-                        call.on('stream', (remoteStream) => {
-                            document.getElementById('remoteAudio').srcObject = remoteStream;
-                            document.getElementById('call-status').textContent = 'Call Connected';
-                            document.getElementById('audio-status').textContent = 'Voice call active - You can hear each other';
-                        });
-                        
-                    } catch (error) {
-                        console.error('Error answering call:', error);
-                    }
-                });
-
-                // Handle data connections for translations
-                peer.on('connection', (conn) => {
-                    dataConnection = conn;
-                    conn.on('data', (data) => {
-                        if (data.type === 'voice_translation') {
-                            // Friend sent a translation - speak it aloud
-                            handleIncomingVoiceTranslation(data);
-                        }
-                    });
-                });
-
-            } catch (error) {
-                console.error('Error initializing PeerJS:', error);
-                document.getElementById('my-id').textContent = 'Local-' + peerId;
-                document.getElementById('connection-status').textContent = 'Local Mode';
-            }
-        }
-
-        // ==================== VOICE-TO-VOICE TRANSLATION ENGINE ====================
-        function initializeSpeechRecognition() {
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert('Speech recognition not supported. Please use Chrome or Edge.');
-                return false;
-            }
-
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
+            },
             
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.lang = myLanguage === 'ta' ? 'ta-IN' : 'en-US';
-
-            recognition.onstart = () => {
-                isTranslating = true;
-                updateTranslationUI('listening', '🎤 Listening... Speak now');
-            };
-
-            recognition.onresult = (event) => {
-                let finalTranscript = '';
-                let confidence = 0;
-
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript;
-                        confidence = Math.max(confidence, event.results[i][0].confidence);
-                    }
-                }
-
-                if (finalTranscript) {
-                    processVoiceTranslation(finalTranscript, confidence);
-                }
-            };
-
-            recognition.onerror = (event) => {
-                if (event.error !== 'aborted') {
-                    updateTranslationUI('error', `Error: ${event.error}`);
-                }
-                stopVoiceTranslation();
-            };
-
-            recognition.onend = () => {
-                if (isTranslating) {
-                    setTimeout(() => {
-                        if (isTranslating && recognition) {
-                            try {
-                                recognition.start();
-                            } catch (e) {
-                                console.error('Error restarting recognition:', e);
-                            }
-                        }
-                    }, 100);
-                }
-            };
-
-            return true;
-        }
-
-        function processVoiceTranslation(originalText, confidence) {
-            // Display original speech
-            addSpeechMessage('my-speech', `You: ${originalText}`, 'original', confidence);
+            // Setup clock
+            setupTime() {
+                const update = () => {
+                    const now = new Date();
+                    const time = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    this.elements.time.textContent = time;
+                };
+                update();
+                setInterval(update, 60000);
+            },
             
-            // Translate the text
-            const translatedText = translateText(originalText, myLanguage, friendLanguage);
-            
-            // Display translation
-            addSpeechMessage('my-speech', `Translated: ${translatedText}`, 'translated');
-            
-            // SPEAK THE TRANSLATION ALOUD
-            speakTranslationAloud(translatedText, friendLanguage);
-            
-            // Send to friend so they can see the translation
-            if (dataConnection && dataConnection.open) {
-                dataConnection.send({
-                    type: 'voice_translation',
-                    original: originalText,
-                    translated: translatedText,
-                    fromLanguage: myLanguage,
-                    toLanguage: friendLanguage,
-                    timestamp: new Date().toISOString()
-                });
-            }
-            
-            updateTranslationUI('translated', `✅ Translated & Spoken (${Math.round(confidence * 100)}% confidence)`);
-        }
-
-        function handleIncomingVoiceTranslation(data) {
-            // Display friend's original speech
-            addSpeechMessage('friend-speech', `Friend: ${data.original}`, 'received');
-            
-            // Display translation
-            addSpeechMessage('friend-speech', `Translated: ${data.translated}`, 'translated');
-            
-            // SPEAK THE TRANSLATION ALOUD (from friend's speech)
-            const translationForMe = translateText(data.original, data.fromLanguage, myLanguage);
-            speakTranslationAloud(translationForMe, myLanguage);
-            
-            document.getElementById('audio-status').textContent = 'Speaking translation...';
-        }
-
-        function speakTranslationAloud(text, language) {
-            if (!('speechSynthesis' in window)) {
-                console.log('Text-to-speech not supported');
-                return;
-            }
-
-            // Cancel any ongoing speech
-            window.speechSynthesis.cancel();
-
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 0.9;
-            utterance.pitch = 1;
-            utterance.volume = 0.8;
-            utterance.lang = language === 'ta' ? 'ta-IN' : 'en-US';
-
-            // Show speaking indicator
-            updateTranslationUI('speaking', '🔊 Speaking translation...');
-
-            utterance.onstart = () => {
-                document.getElementById('audio-status').textContent = 'Speaking translation aloud...';
-            };
-
-            utterance.onend = () => {
-                updateTranslationUI('translated', '✅ Translation spoken');
-                document.getElementById('audio-status').textContent = 'Ready for next translation';
-            };
-
-            utterance.onerror = (event) => {
-                console.error('Speech synthesis error:', event);
-                updateTranslationUI('translated', '✅ Translation ready');
-                document.getElementById('audio-status').textContent = 'Translation ready';
-            };
-
-            window.speechSynthesis.speak(utterance);
-        }
-
-        function translateText(text, fromLang, toLang) {
-            let translated = text;
-            
-            if (fromLang === 'ta' && toLang === 'en') {
-                // Tamil to English
-                for (const [tamil, english] of Object.entries(translationDictionary)) {
-                    if (tamil.length > 2) {
-                        const regex = new RegExp('\\b' + tamil + '\\b', 'g');
-                        translated = translated.replace(regex, english);
-                    }
-                }
-            } else if (fromLang === 'en' && toLang === 'ta') {
-                // English to Tamil
-                const words = translated.toLowerCase().split(/\s+/);
-                for (const word of words) {
-                    if (translationDictionary[word] && word.length > 2) {
-                        const regex = new RegExp('\\b' + word + '\\b', 'gi');
-                        translated = translated.replace(regex, translationDictionary[word]);
-                    }
-                }
-            }
-            
-            return translated !== text ? translated : text;
-        }
-
-        // ==================== UI CONTROLS ====================
-        function setMyLanguage(lang) {
-            myLanguage = lang;
-            document.querySelectorAll('.language-box:first-child .mode-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            updateTranslationModeDisplay();
-            
-            if (isTranslating) {
-                stopVoiceTranslation();
-                setTimeout(startVoiceTranslation, 500);
-            }
-        }
-
-        function setFriendLanguage(lang) {
-            friendLanguage = lang;
-            document.querySelectorAll('.language-box:last-child .mode-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            updateTranslationModeDisplay();
-        }
-
-        function updateTranslationModeDisplay() {
-            const myLangText = myLanguage === 'ta' ? 'Tamil' : 'English';
-            const friendLangText = friendLanguage === 'ta' ? 'Tamil' : 'English';
-            document.getElementById('translation-mode').textContent = 
-                `${myLangText} → ${friendLangText}`;
-        }
-
-        function startVoiceTranslation() {
-            if (!recognition && !initializeSpeechRecognition()) {
-                return;
-            }
-
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(stream => {
-                    stream.getTracks().forEach(track => track.stop());
-                    recognition.lang = myLanguage === 'ta' ? 'ta-IN' : 'en-US';
-                    recognition.start();
-                    document.getElementById('audio-status').textContent = 'Voice translation active - Speak now';
-                })
-                .catch(err => {
-                    alert('Microphone access required for voice translation.');
-                });
-        }
-
-        function stopVoiceTranslation() {
-            if (recognition && isTranslating) {
-                isTranslating = false;
+            // Setup audio context for ringtone
+            setupAudio() {
                 try {
-                    recognition.stop();
-                } catch (e) {
-                    console.error('Error stopping recognition:', e);
+                    this.state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch(e) {
+                    console.log('Audio context not supported');
                 }
-                updateTranslationUI('stopped', 'Voice translation stopped');
-                document.getElementById('audio-status').textContent = 'Voice translation stopped';
-            }
-        }
-
-        async function startVoiceCall() {
-            const remoteId = document.getElementById('remoteId').value.trim();
-            if (!remoteId) {
-                alert('Please enter your friend\'s ID');
-                return;
-            }
-
-            try {
-                if (!localStream) {
-                    localStream = await navigator.mediaDevices.getUserMedia({ 
-                        audio: true, video: false 
+            },
+            
+            // Play ringtone
+            playRingtone() {
+                if (!this.state.soundEnabled || !this.state.audioContext) return;
+                
+                try {
+                    this.stopRingtone();
+                    
+                    const oscillator = this.state.audioContext.createOscillator();
+                    const gainNode = this.state.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.state.audioContext.destination);
+                    
+                    let time = this.state.audioContext.currentTime;
+                    
+                    // Simple two-beep ringtone
+                    oscillator.frequency.setValueAtTime(800, time);
+                    gainNode.gain.setValueAtTime(0.3, time);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+                    
+                    oscillator.start();
+                    
+                    this.state.oscillator = oscillator;
+                    
+                    // Stop after 0.1s and repeat
+                    setTimeout(() => {
+                        if (this.state.oscillator === oscillator) {
+                            this.playRingtone();
+                        }
+                    }, 2000);
+                    
+                } catch(e) {
+                    console.log('Ringtone error:', e);
+                }
+            },
+            
+            // Stop ringtone
+            stopRingtone() {
+                if (this.state.oscillator) {
+                    try {
+                        this.state.oscillator.stop();
+                    } catch(e) {}
+                    this.state.oscillator = null;
+                }
+            },
+            
+            // Play beep sound
+            playBeep(freq = 800, duration = 0.1) {
+                if (!this.state.soundEnabled || !this.state.audioContext) return;
+                
+                try {
+                    const oscillator = this.state.audioContext.createOscillator();
+                    const gainNode = this.state.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.state.audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(freq, this.state.audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.2, this.state.audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.state.audioContext.currentTime + duration);
+                    
+                    oscillator.start();
+                    oscillator.stop(this.state.audioContext.currentTime + duration);
+                } catch(e) {}
+            },
+            
+            // Initialize Peer.js
+            initPeer() {
+                const peerId = 'user-' + Math.floor(1000 + Math.random() * 9000);
+                
+                this.state.peer = new Peer(peerId, {
+                    host: '0.peerjs.com',
+                    port: 443,
+                    path: '/',
+                    secure: true,
+                    config: {
+                        'iceServers': [
+                            { urls: 'stun:stun.l.google.com:19302' },
+                            { urls: 'stun:stun1.l.google.com:19302' }
+                        ]
+                    },
+                    debug: 0 // Reduced logging for speed
+                });
+                
+                this.state.peer.on('open', (id) => {
+                    this.elements.yourId.textContent = id;
+                    this.showToast('Connected ✓');
+                });
+                
+                this.state.peer.on('error', (err) => {
+                    this.showToast('Connection error', 'error');
+                });
+                
+                this.state.peer.on('call', (call) => {
+                    this.state.incomingCall = call;
+                    this.elements.incomingName.textContent = call.peer;
+                    this.showScreen('incoming');
+                    this.playRingtone();
+                    
+                    // Auto decline after 30 seconds
+                    setTimeout(() => {
+                        if (this.state.incomingCall === call) {
+                            this.declineCall();
+                        }
+                    }, 30000);
+                });
+            },
+            
+            // Get media with noise cancellation
+            async getMedia() {
+                try {
+                    this.showLoading(true);
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: { ideal: 640 },
+                            height: { ideal: 480 },
+                            frameRate: { ideal: 30 }
+                        },
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true,
+                            channelCount: 1,
+                            sampleRate: 48000,
+                            sampleSize: 16,
+                            latency: 0.01
+                        }
                     });
+                    
+                    // Apply additional audio processing if supported
+                    if (typeof AudioContext !== 'undefined') {
+                        const audioContext = new AudioContext();
+                        const source = audioContext.createMediaStreamSource(stream);
+                        const destination = audioContext.createMediaStreamDestination();
+                        
+                        // Create noise suppressor
+                        const processor = audioContext.createScriptProcessor(1024, 1, 1);
+                        
+                        processor.onaudioprocess = (e) => {
+                            const input = e.inputBuffer.getChannelData(0);
+                            const output = e.outputBuffer.getChannelData(0);
+                            
+                            // Simple noise gate
+                            for (let i = 0; i < input.length; i++) {
+                                const sample = input[i];
+                                // Only pass samples above threshold
+                                output[i] = Math.abs(sample) > 0.02 ? sample : 0;
+                            }
+                        };
+                        
+                        source.connect(processor);
+                        processor.connect(destination);
+                        
+                        // Create new stream with processed audio
+                        const processedStream = new MediaStream([
+                            stream.getVideoTracks()[0],
+                            destination.stream.getAudioTracks()[0]
+                        ]);
+                        
+                        this.showLoading(false);
+                        return processedStream;
+                    }
+                    
+                    this.showLoading(false);
+                    return stream;
+                    
+                } catch(err) {
+                    this.showLoading(false);
+                    this.showToast('Camera/mic access required', 'error');
+                    throw err;
                 }
-
-                const call = peer.call(remoteId, localStream);
-                currentCall = call;
-
-                call.on('stream', (remoteStream) => {
-                    document.getElementById('remoteAudio').srcObject = remoteStream;
-                    document.getElementById('call-status').textContent = 'Call Connected';
-                    document.getElementById('audio-status').textContent = 'Voice call active - You can hear each other';
+            },
+            
+            // Start call
+            async startCall() {
+                const peerId = this.elements.remoteId.value.trim();
+                if (!peerId) {
+                    this.showToast('Enter Peer ID', 'error');
+                    return;
+                }
+                
+                try {
+                    this.playBeep(1200, 0.1);
+                    this.state.stream = await this.getMedia();
+                    this.elements.localVideo.srcObject = this.state.stream;
+                    
+                    const call = this.state.peer.call(peerId, this.state.stream);
+                    this.setupCall(call);
+                    this.showScreen('call');
+                    this.startTimer();
+                    this.elements.callerName.textContent = peerId;
+                    
+                } catch(err) {
+                    this.showToast('Failed to start call', 'error');
+                }
+            },
+            
+            // Answer call
+            async answerCall() {
+                if (!this.state.incomingCall) return;
+                
+                try {
+                    this.stopRingtone();
+                    this.playBeep(1000, 0.2);
+                    
+                    this.state.stream = await this.getMedia();
+                    this.elements.localVideo.srcObject = this.state.stream;
+                    
+                    this.state.incomingCall.answer(this.state.stream);
+                    this.setupCall(this.state.incomingCall);
+                    this.showScreen('call');
+                    this.startTimer();
+                    this.elements.callerName.textContent = this.state.incomingCall.peer;
+                    this.state.incomingCall = null;
+                    
+                } catch(err) {
+                    this.showToast('Failed to answer', 'error');
+                }
+            },
+            
+            // Decline call
+            declineCall() {
+                if (this.state.incomingCall) {
+                    this.playBeep(400, 0.1);
+                    this.state.incomingCall.close();
+                    this.state.incomingCall = null;
+                }
+                this.stopRingtone();
+                this.showScreen('dialer');
+            },
+            
+            // Setup call handlers
+            setupCall(call) {
+                this.state.call = call;
+                
+                call.on('stream', (stream) => {
+                    this.elements.remoteVideo.srcObject = stream;
                 });
-
+                
                 call.on('close', () => {
-                    document.getElementById('call-status').textContent = 'Call Ended';
-                    document.getElementById('audio-status').textContent = 'Call ended';
-                    currentCall = null;
+                    this.endCall();
                 });
-
-                // Setup data connection for translations
-                dataConnection = peer.connect(remoteId);
-                dataConnection.on('open', () => {
-                    console.log('Data connection for voice translations established');
+                
+                call.on('error', () => {
+                    this.endCall();
                 });
-
-            } catch (error) {
-                console.error('Error starting call:', error);
-                alert('Failed to start voice call: ' + error.message);
-            }
-        }
-
-        function toggleMicrophone() {
-            if (localStream) {
-                const audioTracks = localStream.getAudioTracks();
-                audioTracks.forEach(track => {
-                    track.enabled = !track.enabled;
+            },
+            
+            // End call
+            endCall() {
+                this.playBeep(300, 0.1);
+                
+                if (this.state.call) {
+                    this.state.call.close();
+                    this.state.call = null;
+                }
+                
+                if (this.state.stream) {
+                    this.state.stream.getTracks().forEach(track => track.stop());
+                    this.state.stream = null;
+                }
+                
+                this.elements.localVideo.srcObject = null;
+                this.elements.remoteVideo.srcObject = null;
+                this.stopTimer();
+                this.showScreen('dialer');
+            },
+            
+            // Start call timer
+            startTimer() {
+                this.state.callStart = Date.now();
+                this.state.timer = setInterval(() => {
+                    const seconds = Math.floor((Date.now() - this.state.callStart) / 1000);
+                    const mins = Math.floor(seconds / 60);
+                    const secs = seconds % 60;
+                    this.elements.callTimer.textContent = 
+                        `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                }, 1000);
+            },
+            
+            // Stop timer
+            stopTimer() {
+                if (this.state.timer) {
+                    clearInterval(this.state.timer);
+                    this.state.timer = null;
+                }
+                this.elements.callTimer.textContent = '00:00';
+            },
+            
+            // Toggle speaker
+            toggleSpeaker() {
+                this.state.isSpeakerOn = !this.state.isSpeakerOn;
+                if (this.elements.remoteVideo) {
+                    this.elements.remoteVideo.muted = !this.state.isSpeakerOn;
+                }
+                this.elements.speakerBtn.classList.toggle('active', this.state.isSpeakerOn);
+                this.elements.speakerBtn.innerHTML = this.state.isSpeakerOn ? 
+                    '<i class="fas fa-volume-up"></i>' : 
+                    '<i class="fas fa-volume-mute"></i>';
+                this.playBeep(this.state.isSpeakerOn ? 800 : 400, 0.1);
+            },
+            
+            // Toggle video
+            toggleVideo() {
+                if (this.state.stream) {
+                    const videoTrack = this.state.stream.getVideoTracks()[0];
+                    if (videoTrack) {
+                        this.state.isVideoOn = !videoTrack.enabled;
+                        videoTrack.enabled = this.state.isVideoOn;
+                        this.elements.videoBtn.classList.toggle('active', this.state.isVideoOn);
+                        this.elements.videoBtn.innerHTML = this.state.isVideoOn ? 
+                            '<i class="fas fa-video"></i>' : 
+                            '<i class="fas fa-video-slash"></i>';
+                        this.playBeep(this.state.isVideoOn ? 1000 : 500, 0.1);
+                    }
+                }
+            },
+            
+            // Toggle sound
+            toggleSound() {
+                this.state.soundEnabled = !this.state.soundEnabled;
+                this.elements.soundToggle.classList.toggle('muted', !this.state.soundEnabled);
+                this.elements.soundToggle.innerHTML = this.state.soundEnabled ? 
+                    '<i class="fas fa-volume-up"></i>' : 
+                    '<i class="fas fa-volume-mute"></i>';
+                
+                if (!this.state.soundEnabled) {
+                    this.stopRingtone();
+                }
+                
+                this.showToast(this.state.soundEnabled ? 'Sound ON' : 'Sound OFF');
+            },
+            
+            // Copy ID to clipboard
+            copyId() {
+                const id = this.elements.yourId.textContent;
+                navigator.clipboard.writeText(id).then(() => {
+                    const original = this.elements.copyBtn.innerHTML;
+                    this.elements.copyBtn.innerHTML = '<i class="fas fa-check"></i><span>Copied</span>';
+                    this.playBeep(1200, 0.1);
+                    this.showToast('ID copied!');
+                    
+                    setTimeout(() => {
+                        this.elements.copyBtn.innerHTML = original;
+                    }, 2000);
                 });
-                isMicrophoneMuted = !audioTracks[0].enabled;
-                document.getElementById('toggle-mic').textContent = 
-                    isMicrophoneMuted ? '🎤 Unmute My Voice' : '🎤 Mute My Voice';
+            },
+            
+            // Show screen
+            showScreen(screen) {
+                const screens = ['home', 'dialer', 'call', 'incoming', 'help'];
+                screens.forEach(s => {
+                    this.elements[s + 'Screen'].classList.remove('active');
+                });
+                
+                this.elements[screen + 'Screen'].classList.add('active');
+                
+                // Update nav
+                ['Home', 'Dialer', 'Help'].forEach(nav => {
+                    this.elements['nav' + nav].classList.remove('active');
+                });
+                
+                if (screen === 'home') this.elements.navHome.classList.add('active');
+                if (screen === 'dialer') this.elements.navDialer.classList.add('active');
+                if (screen === 'help') this.elements.navHelp.classList.add('active');
+                
+                this.playBeep(600, 0.05);
+            },
+            
+            // Show toast message
+            showToast(message, type = 'success') {
+                const toast = this.elements.toast;
+                toast.textContent = message;
+                toast.className = 'toast';
+                if (type === 'error') toast.classList.add('error');
+                toast.style.display = 'block';
+                
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 3000);
+            },
+            
+            // Show loading
+            showLoading(show) {
+                this.elements.loading.style.display = show ? 'flex' : 'none';
+            },
+            
+            // Bind events
+            bindEvents() {
+                // Navigation
+                this.elements.navHome.addEventListener('click', () => this.showScreen('home'));
+                this.elements.navDialer.addEventListener('click', () => this.showScreen('dialer'));
+                this.elements.navHelp.addEventListener('click', () => this.showScreen('help'));
+                
+                // Dialer actions
+                this.elements.copyBtn.addEventListener('click', () => this.copyId());
+                this.elements.callBtn.addEventListener('click', () => this.startCall());
+                this.elements.soundToggle.addEventListener('click', () => this.toggleSound());
+                
+                // Call controls
+                this.elements.hangupBtn.addEventListener('click', () => this.endCall());
+                this.elements.speakerBtn.addEventListener('click', () => this.toggleSpeaker());
+                this.elements.videoBtn.addEventListener('click', () => this.toggleVideo());
+                
+                // Incoming call
+                this.elements.answerBtn.addEventListener('click', () => this.answerCall());
+                this.elements.declineBtn.addEventListener('click', () => this.declineCall());
+                
+                // Help
+                this.elements.closeHelp.addEventListener('click', () => this.showScreen('home'));
+                
+                // Enter key in input
+                this.elements.remoteId.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.startCall();
+                });
             }
-        }
-
-        function endCall() {
-            if (currentCall) {
-                currentCall.close();
-                currentCall = null;
-                document.getElementById('call-status').textContent = 'Call Ended';
-                document.getElementById('audio-status').textContent = 'Call ended';
-            }
-        }
-
-        function shareMyId() {
-            const myId = document.getElementById('my-id').textContent;
-            navigator.clipboard.writeText(myId).then(() => {
-                alert('Your ID copied to clipboard: ' + myId + '\n\nShare this with your friend for voice translation!');
-            });
-        }
-
-        function testVoiceTranslation() {
-            const testPhrases = {
-                'ta': ['வணக்கம்', 'நன்றி', 'எப்படி இருக்கிறீர்கள்', 'என் பெயர் ராஜ்'],
-                'en': ['Hello', 'Thank you', 'How are you', 'My name is Raj']
-            };
-
-            const phrases = testPhrases[myLanguage] || testPhrases.ta;
-            const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
-            
-            // Simulate voice translation
-            addSpeechMessage('my-speech', `You: ${randomPhrase}`, 'original', 0.9);
-            const translatedText = translateText(randomPhrase, myLanguage, friendLanguage);
-            addSpeechMessage('my-speech', `Translated: ${translatedText}`, 'translated');
-            
-            // SPEAK the translation aloud
-            speakTranslationAloud(translatedText, friendLanguage);
-            
-            document.getElementById('audio-status').textContent = 'Speaking test translation...';
-        }
-
-        function updateTranslationUI(state, message) {
-            const indicator = document.getElementById('translation-indicator');
-            const messageEl = document.getElementById('translation-message');
-            const startBtn = document.getElementById('start-translation');
-            const stopBtn = document.getElementById('stop-translation');
-
-            indicator.className = 'indicator';
-            messageEl.textContent = message;
-
-            switch(state) {
-                case 'listening':
-                    indicator.classList.add('active', 'listening');
-                    startBtn.disabled = true;
-                    stopBtn.disabled = false;
-                    break;
-                case 'speaking':
-                    indicator.classList.add('active', 'speaking');
-                    break;
-                case 'translated':
-                    indicator.classList.add('active');
-                    break;
-                case 'stopped':
-                    startBtn.disabled = false;
-                    stopBtn.disabled = true;
-                    break;
-                case 'error':
-                    indicator.style.background = '#ff4757';
-                    startBtn.disabled = false;
-                    stopBtn.disabled = true;
-                    break;
-            }
-        }
-
-        function addSpeechMessage(containerId, text, type, confidence = 1) {
-            const container = document.getElementById(containerId);
-            const messageClass = `voice-text ${type}`;
-            
-            if (container.children.length > 6) {
-                container.removeChild(container.children[0]);
-            }
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = messageClass;
-            
-            const timeDiv = document.createElement('div');
-            timeDiv.className = 'voice-time';
-            timeDiv.textContent = `${new Date().toLocaleTimeString()}`;
-            
-            const textDiv = document.createElement('div');
-            textDiv.textContent = text;
-            
-            messageDiv.appendChild(timeDiv);
-            messageDiv.appendChild(textDiv);
-            container.appendChild(messageDiv);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        // Initialize the application
-        document.addEventListener('DOMContentLoaded', function() {
-            initializePeerJS();
-            updateTranslationModeDisplay();
+        };
+        
+        // Initialize app when DOM loads
+        document.addEventListener('DOMContentLoaded', () => {
+            App.init();
         });
     </script>
 </body>
