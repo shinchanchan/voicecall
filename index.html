@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <style>
-        /* Reset & Base */
         * {
             margin: 0;
             padding: 0;
@@ -25,7 +24,6 @@
             align-items: center;
         }
         
-        /* Phone Container - Optimized */
         .phone {
             width: 380px;
             height: 700px;
@@ -37,7 +35,6 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
         }
         
-        /* Status Bar */
         .status-bar {
             height: 32px;
             background: #000;
@@ -52,14 +49,12 @@
             z-index: 10;
         }
         
-        /* Screen Area */
         .screen {
             height: calc(100% - 100px);
             position: relative;
             overflow: hidden;
         }
         
-        /* Screen Base */
         .screen-base {
             width: 100%;
             height: 100%;
@@ -73,12 +68,12 @@
         
         .screen-base.active {
             display: flex;
-            animation: slideIn 0.2s ease;
+            animation: fadeIn 0.3s ease;
         }
         
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         /* Home Screen */
@@ -240,7 +235,7 @@
             opacity: 0.9;
         }
         
-        /* Call Screen */
+        /* Call Screen - FIXED VIDEO */
         .call {
             background: #000;
         }
@@ -249,6 +244,8 @@
             padding: 24px 20px;
             background: rgba(0, 0, 0, 0.8);
             text-align: center;
+            position: relative;
+            z-index: 2;
         }
         
         .caller-name {
@@ -274,6 +271,8 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            background: #000;
+            display: block;
         }
         
         .local-preview {
@@ -286,6 +285,7 @@
             overflow: hidden;
             border: 2px solid rgba(255, 255, 255, 0.2);
             background: #000;
+            z-index: 3;
         }
         
         .local-preview video {
@@ -293,6 +293,23 @@
             height: 100%;
             object-fit: cover;
             transform: scaleX(-1);
+            display: block;
+        }
+        
+        .video-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #666;
+            text-align: center;
+            display: none;
+        }
+        
+        .video-placeholder i {
+            font-size: 48px;
+            margin-bottom: 10px;
+            display: block;
         }
         
         .call-controls {
@@ -301,6 +318,8 @@
             display: flex;
             justify-content: center;
             gap: 20px;
+            position: relative;
+            z-index: 2;
         }
         
         .call-btn {
@@ -426,6 +445,22 @@
         
         .answer-btn:hover, .decline-btn:hover {
             transform: scale(1.1);
+        }
+        
+        /* Ringtone Selector */
+        .ringtone-selector {
+            margin-top: 20px;
+            width: 200px;
+        }
+        
+        .ringtone-selector select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            outline: none;
         }
         
         /* Help Screen */
@@ -614,7 +649,7 @@
                     <i class="fas fa-phone-alt"></i>
                 </div>
                 <h1>FastCall</h1>
-                <p>HD Video Calls with Noise Cancellation</p>
+                <p>HD Video Calls with Ringtone Options</p>
             </div>
             
             <!-- Dialer Screen -->
@@ -661,9 +696,18 @@
                 </div>
                 
                 <div class="video-area">
+                    <!-- Remote Video -->
                     <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
+                    
+                    <!-- Local Video Preview -->
                     <div class="local-preview">
                         <video id="localVideo" autoplay playsinline muted></video>
+                    </div>
+                    
+                    <!-- Video Placeholder -->
+                    <div id="videoPlaceholder" class="video-placeholder">
+                        <i class="fas fa-video-slash"></i>
+                        <div>Waiting for video...</div>
                     </div>
                 </div>
                 
@@ -691,6 +735,17 @@
                     <span id="ringStatus">Incoming Call</span>
                 </div>
                 
+                <!-- Ringtone Selector -->
+                <div class="ringtone-selector">
+                    <select id="ringtoneSelect">
+                        <option value="classic">Classic Ringtone</option>
+                        <option value="digital">Digital Beep</option>
+                        <option value="melody">Soft Melody</option>
+                        <option value="pulse">Pulse Tone</option>
+                        <option value="bell">Bell Ring</option>
+                    </select>
+                </div>
+                
                 <div class="incoming-controls">
                     <button id="declineBtn" class="decline-btn">
                         <i class="fas fa-phone-slash"></i>
@@ -711,17 +766,20 @@
                 </div>
                 
                 <div class="help-section">
-                    <h3><i class="fas fa-bolt"></i> Fast Connection</h3>
-                    <p>• Optimized Peer.js connection</p>
-                    <p>• Noise cancellation enabled</p>
-                    <p>• Low latency video streaming</p>
+                    <h3><i class="fas fa-bell"></i> Ringtone Options</h3>
+                    <p>• Classic Ringtone - Traditional phone ring</p>
+                    <p>• Digital Beep - Modern digital sound</p>
+                    <p>• Soft Melody - Pleasant melody</p>
+                    <p>• Pulse Tone - Pulsating tone</p>
+                    <p>• Bell Ring - Bell sound</p>
                 </div>
                 
                 <div class="help-section">
-                    <h3><i class="fas fa-volume-up"></i> Audio Quality</h3>
-                    <p>• Advanced noise suppression</p>
-                    <p>• Echo cancellation</p>
-                    <p>• Auto gain control</p>
+                    <h3><i class="fas fa-video"></i> Video Fixes</h3>
+                    <p>• Both videos now display properly</p>
+                    <p>• Local preview in corner</p>
+                    <p>• Remote video full screen</p>
+                    <p>• Auto play enabled</p>
                 </div>
                 
                 <div class="help-section">
@@ -752,7 +810,7 @@
     </div>
 
     <script>
-        // Fast Optimized App
+        // Fast Optimized App with Video Fix
         const App = {
             // DOM Elements
             elements: {},
@@ -769,18 +827,28 @@
                 timer: null,
                 soundEnabled: true,
                 audioContext: null,
-                oscillator: null
+                oscillator: null,
+                currentRingtone: 'classic',
+                ringtoneInterval: null
+            },
+            
+            // Ringtone Patterns
+            ringtones: {
+                classic: { freq1: 800, freq2: 800, pattern: [0.1, 0.1, 0.1, 0.1, 1.6] },
+                digital: { freq1: 1000, freq2: 1200, pattern: [0.05, 0.05, 0.05, 0.05, 0.8] },
+                melody: { freq1: 523, freq2: 659, pattern: [0.2, 0.2, 0.2, 0.2, 1.2] },
+                pulse: { freq1: 600, freq2: 800, pattern: [0.3, 0.1, 0.3, 0.1, 1.2] },
+                bell: { freq1: 880, freq2: 440, pattern: [0.5, 1.5] }
             },
             
             // Initialize
             init() {
-                console.time('App Init');
+                console.log('🚀 App Initializing...');
                 this.cacheElements();
                 this.setupTime();
                 this.initPeer();
                 this.bindEvents();
                 this.setupAudio();
-                console.timeEnd('App Init');
                 this.showToast('Ready to connect', 'success');
             },
             
@@ -789,9 +857,9 @@
                 const ids = [
                     'homeScreen', 'dialerScreen', 'callScreen', 'incomingScreen', 'helpScreen',
                     'yourId', 'remoteId', 'copyBtn', 'callBtn', 'hangupBtn', 'speakerBtn', 'videoBtn',
-                    'answerBtn', 'declineBtn', 'soundToggle', 'closeHelp',
+                    'answerBtn', 'declineBtn', 'soundToggle', 'closeHelp', 'ringtoneSelect',
                     'callerName', 'callTimer', 'incomingName', 'ringStatus',
-                    'remoteVideo', 'localVideo', 'time', 'toast', 'loading',
+                    'remoteVideo', 'localVideo', 'time', 'toast', 'loading', 'videoPlaceholder',
                     'navHome', 'navDialer', 'navHelp'
                 ];
                 
@@ -820,13 +888,16 @@
                 }
             },
             
-            // Play ringtone
+            // Play selected ringtone
             playRingtone() {
                 if (!this.state.soundEnabled || !this.state.audioContext) return;
                 
+                this.stopRingtone();
+                
+                const ringtone = this.ringtones[this.state.currentRingtone];
+                if (!ringtone) return;
+                
                 try {
-                    this.stopRingtone();
-                    
                     const oscillator = this.state.audioContext.createOscillator();
                     const gainNode = this.state.audioContext.createGain();
                     
@@ -834,22 +905,32 @@
                     gainNode.connect(this.state.audioContext.destination);
                     
                     let time = this.state.audioContext.currentTime;
+                    const pattern = ringtone.pattern;
                     
-                    // Simple two-beep ringtone
-                    oscillator.frequency.setValueAtTime(800, time);
-                    gainNode.gain.setValueAtTime(0.3, time);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+                    // Play pattern
+                    for (let i = 0; i < pattern.length; i++) {
+                        if (i % 2 === 0) {
+                            // Sound on
+                            oscillator.frequency.setValueAtTime(ringtone.freq1, time);
+                            gainNode.gain.setValueAtTime(0.3, time);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+                        }
+                        time += pattern[i];
+                    }
                     
                     oscillator.start();
+                    oscillator.stop(time);
                     
                     this.state.oscillator = oscillator;
                     
-                    // Stop after 0.1s and repeat
-                    setTimeout(() => {
-                        if (this.state.oscillator === oscillator) {
+                    // Calculate total pattern duration and repeat
+                    const totalDuration = pattern.reduce((a, b) => a + b, 0);
+                    
+                    this.state.ringtoneInterval = setTimeout(() => {
+                        if (this.state.audioContext && this.state.soundEnabled) {
                             this.playRingtone();
                         }
-                    }, 2000);
+                    }, totalDuration * 1000);
                     
                 } catch(e) {
                     console.log('Ringtone error:', e);
@@ -863,6 +944,10 @@
                         this.state.oscillator.stop();
                     } catch(e) {}
                     this.state.oscillator = null;
+                }
+                if (this.state.ringtoneInterval) {
+                    clearTimeout(this.state.ringtoneInterval);
+                    this.state.ringtoneInterval = null;
                 }
             },
             
@@ -883,7 +968,9 @@
                     
                     oscillator.start();
                     oscillator.stop(this.state.audioContext.currentTime + duration);
-                } catch(e) {}
+                } catch(e) {
+                    console.log('Beep error:', e);
+                }
             },
             
             // Initialize Peer.js
@@ -901,19 +988,23 @@
                             { urls: 'stun:stun1.l.google.com:19302' }
                         ]
                     },
-                    debug: 0 // Reduced logging for speed
+                    debug: 0
                 });
                 
                 this.state.peer.on('open', (id) => {
+                    console.log('✅ Peer connected:', id);
                     this.elements.yourId.textContent = id;
                     this.showToast('Connected ✓');
                 });
                 
                 this.state.peer.on('error', (err) => {
+                    console.error('Peer error:', err);
                     this.showToast('Connection error', 'error');
                 });
                 
                 this.state.peer.on('call', (call) => {
+                    console.log('📞 Incoming call from:', call.peer);
+                    
                     this.state.incomingCall = call;
                     this.elements.incomingName.textContent = call.peer;
                     this.showScreen('incoming');
@@ -923,6 +1014,7 @@
                     setTimeout(() => {
                         if (this.state.incomingCall === call) {
                             this.declineCall();
+                            this.showToast('Call timed out', 'error');
                         }
                     }, 30000);
                 });
@@ -933,68 +1025,43 @@
                 try {
                     this.showLoading(true);
                     
-                    const stream = await navigator.mediaDevices.getUserMedia({
+                    const constraints = {
                         video: {
                             width: { ideal: 640 },
                             height: { ideal: 480 },
-                            frameRate: { ideal: 30 }
+                            frameRate: { ideal: 24 },
+                            facingMode: 'user'
                         },
                         audio: {
                             echoCancellation: true,
                             noiseSuppression: true,
                             autoGainControl: true,
                             channelCount: 1,
-                            sampleRate: 48000,
-                            sampleSize: 16,
-                            latency: 0.01
+                            sampleRate: 48000
                         }
-                    });
+                    };
                     
-                    // Apply additional audio processing if supported
-                    if (typeof AudioContext !== 'undefined') {
-                        const audioContext = new AudioContext();
-                        const source = audioContext.createMediaStreamSource(stream);
-                        const destination = audioContext.createMediaStreamDestination();
-                        
-                        // Create noise suppressor
-                        const processor = audioContext.createScriptProcessor(1024, 1, 1);
-                        
-                        processor.onaudioprocess = (e) => {
-                            const input = e.inputBuffer.getChannelData(0);
-                            const output = e.outputBuffer.getChannelData(0);
-                            
-                            // Simple noise gate
-                            for (let i = 0; i < input.length; i++) {
-                                const sample = input[i];
-                                // Only pass samples above threshold
-                                output[i] = Math.abs(sample) > 0.02 ? sample : 0;
-                            }
-                        };
-                        
-                        source.connect(processor);
-                        processor.connect(destination);
-                        
-                        // Create new stream with processed audio
-                        const processedStream = new MediaStream([
-                            stream.getVideoTracks()[0],
-                            destination.stream.getAudioTracks()[0]
-                        ]);
-                        
-                        this.showLoading(false);
-                        return processedStream;
-                    }
+                    console.log('🎥 Requesting media with constraints:', constraints);
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    
+                    // Log available tracks
+                    console.log('✅ Media tracks:', 
+                        stream.getVideoTracks().length, 'video,',
+                        stream.getAudioTracks().length, 'audio'
+                    );
                     
                     this.showLoading(false);
                     return stream;
                     
                 } catch(err) {
                     this.showLoading(false);
+                    console.error('❌ Media error:', err);
                     this.showToast('Camera/mic access required', 'error');
                     throw err;
                 }
             },
             
-            // Start call
+            // Start call - FIXED VIDEO
             async startCall() {
                 const peerId = this.elements.remoteId.value.trim();
                 if (!peerId) {
@@ -1003,47 +1070,80 @@
                 }
                 
                 try {
+                    console.log('📞 Starting call to:', peerId);
                     this.playBeep(1200, 0.1);
-                    this.state.stream = await this.getMedia();
-                    this.elements.localVideo.srcObject = this.state.stream;
                     
+                    // Get media stream
+                    this.state.stream = await this.getMedia();
+                    
+                    // Set local video source
+                    this.elements.localVideo.srcObject = this.state.stream;
+                    console.log('📹 Local video set');
+                    
+                    // Start call
                     const call = this.state.peer.call(peerId, this.state.stream);
+                    
+                    // Setup call handlers
                     this.setupCall(call);
+                    
+                    // Show call screen
                     this.showScreen('call');
                     this.startTimer();
                     this.elements.callerName.textContent = peerId;
+                    this.elements.videoPlaceholder.style.display = 'block';
+                    
+                    this.showToast('Calling...');
                     
                 } catch(err) {
+                    console.error('❌ Start call error:', err);
                     this.showToast('Failed to start call', 'error');
                 }
             },
             
-            // Answer call
+            // Answer call - FIXED VIDEO
             async answerCall() {
                 if (!this.state.incomingCall) return;
                 
                 try {
+                    console.log('✅ Answering call from:', this.state.incomingCall.peer);
                     this.stopRingtone();
                     this.playBeep(1000, 0.2);
                     
+                    // Get media stream
                     this.state.stream = await this.getMedia();
-                    this.elements.localVideo.srcObject = this.state.stream;
                     
+                    // Set local video source
+                    this.elements.localVideo.srcObject = this.state.stream;
+                    console.log('📹 Local video set');
+                    
+                    // Answer the call
                     this.state.incomingCall.answer(this.state.stream);
+                    
+                    // Setup call handlers
                     this.setupCall(this.state.incomingCall);
+                    
+                    // Show call screen
                     this.showScreen('call');
                     this.startTimer();
                     this.elements.callerName.textContent = this.state.incomingCall.peer;
+                    this.elements.videoPlaceholder.style.display = 'block';
+                    
+                    // Clear incoming call reference
                     this.state.incomingCall = null;
                     
+                    this.showToast('Call connected');
+                    
                 } catch(err) {
+                    console.error('❌ Answer call error:', err);
                     this.showToast('Failed to answer', 'error');
+                    this.showScreen('dialer');
                 }
             },
             
             // Decline call
             declineCall() {
                 if (this.state.incomingCall) {
+                    console.log('❌ Declining call from:', this.state.incomingCall.peer);
                     this.playBeep(400, 0.1);
                     this.state.incomingCall.close();
                     this.state.incomingCall = null;
@@ -1052,25 +1152,44 @@
                 this.showScreen('dialer');
             },
             
-            // Setup call handlers
+            // Setup call handlers - FIXED VIDEO
             setupCall(call) {
+                console.log('🔗 Setting up call handlers');
                 this.state.call = call;
                 
-                call.on('stream', (stream) => {
-                    this.elements.remoteVideo.srcObject = stream;
+                call.on('stream', (remoteStream) => {
+                    console.log('📹 Remote stream received');
+                    
+                    // Set remote video source
+                    this.elements.remoteVideo.srcObject = remoteStream;
+                    this.elements.videoPlaceholder.style.display = 'none';
+                    
+                    // Enable audio by default
+                    this.elements.remoteVideo.muted = false;
+                    this.elements.remoteVideo.volume = 1.0;
+                    
+                    // Force video play
+                    this.elements.remoteVideo.play().catch(e => {
+                        console.log('Auto-play prevented, user interaction required');
+                    });
+                    
+                    this.showToast('Video connected');
                 });
                 
                 call.on('close', () => {
+                    console.log('📞 Call closed');
                     this.endCall();
                 });
                 
-                call.on('error', () => {
+                call.on('error', (err) => {
+                    console.error('📞 Call error:', err);
                     this.endCall();
                 });
             },
             
             // End call
             endCall() {
+                console.log('📞 Ending call');
                 this.playBeep(300, 0.1);
                 
                 if (this.state.call) {
@@ -1079,14 +1198,19 @@
                 }
                 
                 if (this.state.stream) {
-                    this.state.stream.getTracks().forEach(track => track.stop());
+                    this.state.stream.getTracks().forEach(track => {
+                        track.stop();
+                        console.log('🛑 Stopped track:', track.kind);
+                    });
                     this.state.stream = null;
                 }
                 
                 this.elements.localVideo.srcObject = null;
                 this.elements.remoteVideo.srcObject = null;
+                this.elements.videoPlaceholder.style.display = 'block';
                 this.stopTimer();
                 this.showScreen('dialer');
+                this.showToast('Call ended', 'error');
             },
             
             // Start call timer
@@ -1121,6 +1245,7 @@
                     '<i class="fas fa-volume-up"></i>' : 
                     '<i class="fas fa-volume-mute"></i>';
                 this.playBeep(this.state.isSpeakerOn ? 800 : 400, 0.1);
+                this.showToast(this.state.isSpeakerOn ? 'Speaker ON' : 'Speaker OFF');
             },
             
             // Toggle video
@@ -1135,6 +1260,7 @@
                             '<i class="fas fa-video"></i>' : 
                             '<i class="fas fa-video-slash"></i>';
                         this.playBeep(this.state.isVideoOn ? 1000 : 500, 0.1);
+                        this.showToast(this.state.isVideoOn ? 'Camera ON' : 'Camera OFF');
                     }
                 }
             },
@@ -1167,6 +1293,18 @@
                         this.elements.copyBtn.innerHTML = original;
                     }, 2000);
                 });
+            },
+            
+            // Change ringtone
+            changeRingtone() {
+                this.state.currentRingtone = this.elements.ringtoneSelect.value;
+                this.showToast('Ringtone: ' + this.elements.ringtoneSelect.selectedOptions[0].text);
+                
+                // If currently ringing, restart with new tone
+                if (document.getElementById('incomingScreen').classList.contains('active')) {
+                    this.stopRingtone();
+                    this.playRingtone();
+                }
             },
             
             // Show screen
@@ -1228,6 +1366,7 @@
                 // Incoming call
                 this.elements.answerBtn.addEventListener('click', () => this.answerCall());
                 this.elements.declineBtn.addEventListener('click', () => this.declineCall());
+                this.elements.ringtoneSelect.addEventListener('change', () => this.changeRingtone());
                 
                 // Help
                 this.elements.closeHelp.addEventListener('click', () => this.showScreen('home'));
@@ -1236,12 +1375,31 @@
                 this.elements.remoteId.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') this.startCall();
                 });
+                
+                // Force video play on user interaction
+                document.addEventListener('click', () => {
+                    if (this.elements.remoteVideo.srcObject) {
+                        this.elements.remoteVideo.play().catch(e => {});
+                    }
+                    if (this.elements.localVideo.srcObject) {
+                        this.elements.localVideo.play().catch(e => {});
+                    }
+                });
             }
         };
         
         // Initialize app when DOM loads
         document.addEventListener('DOMContentLoaded', () => {
             App.init();
+        });
+        
+        // Handle page visibility for audio context
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && App.state.audioContext) {
+                App.state.audioContext.suspend();
+            } else if (!document.hidden && App.state.audioContext) {
+                App.state.audioContext.resume();
+            }
         });
     </script>
 </body>
