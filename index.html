@@ -2,37 +2,624 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>Cube Call - Video & Voice Calls</title>
-    <meta name="description" content="Free video and voice calls in your browser. No downloads required.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google-site-verification" content="C3bRFe_DiKkVQ8mCioHJv78WRf2DLTAAhqJ7lwSkmVk" />
+
+<title>Cube Dialer | Voice Call & Video Call Web App</title>
+
+<meta name="description"
+      content="Fast Phone Dialer is a browser-based voice call and video call application built using WebRTC. Developed by Vallarasu and hosted on GitHub Pages." />
+
+<meta name="keywords"
+      content="vallarasu github voice call, fast phone dialer, web rtc voice call, browser video call, github voice call app, peerjs voice call" />
+
+<link rel="canonical" href="https://shinchanchan.github.io/voicecall/" />
+   
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+ <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Fast Phone Dialer",
+  "operatingSystem": "Web",
+  "applicationCategory": "CommunicationApplication",
+  "description": "WebRTC-based voice and video call application built by Vallarasu.",
+  "url": "https://shinchanchan.github.io/voicecall/",
+  "author": {
+    "@type": "Person",
+    "name": "Vallarasu"
+  }
+}
+</script>
     
-    <!-- Minimal CSS - Inline for fastest load -->
     <style>
-        /* CRITICAL CSS ONLY - Loads instantly */
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: #000; color: white; font-family: -apple-system, sans-serif; overflow: hidden; }
-        
-        /* App Container - Simple & Fast */
-        .app-container {
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
         }
         
-        /* Loading Screen - Shows immediately */
-        #loadingScreen {
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .phone {
+            width: 380px;
+            height: 700px;
+            background: #000;
+            border-radius: 40px;
+            position: relative;
+            overflow: hidden;
+            border: 12px solid #111;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+        
+        .status-bar {
+            height: 32px;
+            background: #000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .screen {
+            height: calc(100% - 100px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .screen-base {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+            flex-direction: column;
+            background: linear-gradient(180deg, #0f0f1a 0%, #000 100%);
+        }
+        
+        .screen-base.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Home Screen */
+        .home {
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .home .icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        
+        .home .icon i {
+            font-size: 48px;
+            color: white;
+        }
+        
+        .home h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .home p {
+            color: #888;
+            font-size: 14px;
+        }
+        
+        /* Dialer Screen */
+        .dialer {
+            padding: 20px;
+        }
+        
+        .dialer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .dialer-header h2 {
+            color: white;
+            font-size: 20px;
+        }
+        
+        .sound-toggle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .sound-toggle.muted {
+            color: #ff4444;
+        }
+        
+        .id-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .id-label {
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .id-value {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .peer-input {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .peer-input input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 20px;
+            text-align: center;
+            outline: none;
+        }
+        
+        .peer-input input::placeholder {
+            color: #666;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        
+        .action-btn i {
+            font-size: 20px;
+        }
+        
+        .action-btn.call {
+            background: linear-gradient(135deg, #00c853, #64dd17);
+        }
+        
+        .action-btn.copy {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+        
+        /* Call Screen - FIXED VIDEO */
+        .call {
+            background: #000;
+        }
+        
+        .call-header {
+            padding: 24px 20px;
+            background: rgba(0, 0, 0, 0.8);
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .caller-name {
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .call-timer {
+            color: #4caf50;
+            font-size: 14px;
+        }
+        
+        .video-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+        
+        .remote-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: #000;
+            display: block;
+        }
+        
+        .local-preview {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            width: 100px;
+            height: 133px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: #000;
+            z-index: 3;
+        }
+        
+        .local-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+            display: block;
+        }
+        
+        .video-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #666;
+            text-align: center;
+            display: none;
+        }
+        
+        .video-placeholder i {
+            font-size: 48px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .call-controls {
+            padding: 24px 20px;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .call-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .call-btn.hangup {
+            background: #f44336;
+        }
+        
+        .call-btn.speaker.active {
+            background: #2196f3;
+        }
+        
+        .call-btn.video.active {
+            background: #4caf50;
+        }
+        
+        .call-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Incoming Call Screen */
+        .incoming {
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .caller-avatar {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(102, 126, 234, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
+        }
+        
+        .caller-avatar i {
+            font-size: 48px;
+            color: white;
+        }
+        
+        .incoming-name {
+            color: white;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .incoming-status {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .ringing-icon {
+            animation: ring 1.5s infinite;
+        }
+        
+        @keyframes ring {
+            0% { transform: rotate(0); }
+            15% { transform: rotate(20deg); }
+            30% { transform: rotate(-20deg); }
+            45% { transform: rotate(20deg); }
+            60% { transform: rotate(-20deg); }
+            75% { transform: rotate(0); }
+            100% { transform: rotate(0); }
+        }
+        
+        .incoming-controls {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .answer-btn, .decline-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .answer-btn {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .decline-btn {
+            background: #f44336;
+            color: white;
+        }
+        
+        .answer-btn:hover, .decline-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Ringtone Selector */
+        .ringtone-selector {
+            margin-top: 20px;
+            width: 200px;
+        }
+        
+        .ringtone-selector select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            outline: none;
+        }
+        
+        /* Help Screen */
+        .help {
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .help-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .help-header h2 {
+            color: white;
+            font-size: 20px;
+        }
+        
+        .close-help {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .help-section {
+            margin-bottom: 24px;
+        }
+        
+        .help-section h3 {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .help-section p {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+        
+        /* Bottom Nav */
+        .nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 68px;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 10px;
+        }
+        
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #888;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            flex: 1;
+        }
+        
+        .nav-btn i {
+            font-size: 20px;
+        }
+        
+        .nav-btn span {
+            font-size: 11px;
+        }
+        
+        .nav-btn.active {
+            color: #667eea;
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4caf50;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 1000;
+            display: none;
+            animation: slideDown 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        @keyframes slideDown {
+            from { transform: translate(-50%, -20px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+        
+        .toast.error {
+            background: #f44336;
+        }
+        
+        /* Loading */
+        .loading {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: #000;
+            background: rgba(0,0,0,0.8);
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: 2000;
+            display: none;
         }
         
         .loading-spinner {
@@ -42,7 +629,6 @@
             border-top: 3px solid #667eea;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 20px;
         }
         
         @keyframes spin {
@@ -50,744 +636,803 @@
             100% { transform: rotate(360deg); }
         }
         
-        /* Main App - Initially hidden */
-        #mainApp {
-            width: 100%;
-            height: 100%;
-            display: none;
+        /* Media Queries */
+        @media (max-height: 700px) {
+            .phone { height: 600px; }
+            .caller-avatar { width: 100px; height: 100px; }
+            .caller-avatar i { font-size: 40px; }
         }
         
-        /* Screen base */
-        .screen {
-            display: none;
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-        
-        .screen.active {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        /* Status Bar - Minimal */
-        .status-bar {
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(0,0,0,0.3);
-        }
-        
-        /* Content Area */
-        .content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-        }
-        
-        /* Navigation - Bottom */
-        .nav {
-            display: flex;
-            justify-content: space-around;
-            padding: 15px;
-            background: rgba(0,0,0,0.8);
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .nav-btn {
-            background: none;
-            border: none;
-            color: #888;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 12px;
-        }
-        
-        .nav-btn.active {
-            color: #667eea;
-        }
-        
-        /* Home Screen */
-        .home-content {
-            text-align: center;
-            padding-top: 20%;
-        }
-        
-        .app-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 20px;
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-        }
-        
-        /* Dialer Screen */
-        .input-group {
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .input-group input {
-            width: 100%;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 18px;
-            text-align: center;
-            outline: none;
-        }
-        
-        .btn {
-            background: rgba(255,255,255,0.15);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            padding: 15px;
-            font-size: 16px;
-            margin: 5px 0;
-            width: 100%;
-        }
-        
-        .btn.primary {
-            background: linear-gradient(135deg, #00c853, #64dd17);
-        }
-        
-        /* Call Screen */
-        .video-container {
-            flex: 1;
-            background: #000;
-            position: relative;
-        }
-        
-        .remote-video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .local-video {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 100px;
-            height: 133px;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 2px solid white;
-        }
-        
-        .local-video video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transform: scaleX(-1);
-        }
-        
-        /* Call Controls */
-        .call-controls {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            padding: 20px;
-            background: rgba(0,0,0,0.9);
-        }
-        
-        .control-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: none;
-            font-size: 24px;
-            background: rgba(255,255,255,0.2);
-            color: white;
-        }
-        
-        .control-btn.hangup {
-            background: #f44336;
-        }
-        
-        /* Responsive */
-        @media (min-width: 768px) {
-            .app-container {
-                max-width: 400px;
-                max-height: 700px;
-                margin: 20px auto;
-                border-radius: 30px;
-                overflow: hidden;
-                box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            }
+        @media (max-width: 400px) {
+            .phone { width: 340px; height: 650px; }
+            .action-buttons { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <!-- Loading Screen - Shows Instantly -->
-    <div id="loadingScreen">
+    <!-- Toast Messages -->
+    <div id="toast" class="toast"></div>
+    
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading">
         <div class="loading-spinner"></div>
-        <div style="color: white; margin-top: 10px;">Loading Cube Call...</div>
     </div>
     
-    <!-- Main App -->
-    <div class="app-container">
-        <div id="mainApp">
+    <!-- Phone Container -->
+    <div class="phone">
+        <div class="status-bar">
+            <span id="time">9:41</span>
+            <div>
+                <i class="fas fa-signal"></i>
+                <i class="fas fa-wifi" style="margin-left: 8px;"></i>
+                <i class="fas fa-battery-full" style="margin-left: 8px;"></i>
+            </div>
+        </div>
+        
+        <div class="screen">
             <!-- Home Screen -->
-            <div id="homeScreen" class="screen active">
-                <div class="status-bar">
-                    <div id="time">--:--</div>
-                    <div style="font-size: 14px;">Cube Call</div>
+            <div id="homeScreen" class="screen-base home active">
+                <div class="icon">
+                    <i class="fas fa-phone-alt"></i>
                 </div>
-                
-                <div class="content">
-                    <div class="home-content">
-                        <div class="app-icon">
-                            📞
-                        </div>
-                        <h1 style="margin-bottom: 10px;">Cube Call</h1>
-                        <p style="color: #888; margin-bottom: 30px;">Free video & voice calls</p>
-                        
-                        <div style="margin-top: 50px;">
-                            <button class="btn primary" onclick="showScreen('dialer')">
-                                Start New Call
-                            </button>
-                            <button class="btn" onclick="showScreen('help')">
-                                How to Use
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="nav">
-                    <button class="nav-btn active" onclick="showScreen('home')">
-                        <span style="font-size: 20px;">🏠</span>
-                        <span>Home</span>
-                    </button>
-                    <button class="nav-btn" onclick="showScreen('dialer')">
-                        <span style="font-size: 20px;">📞</span>
-                        <span>Dialer</span>
-                    </button>
-                    <button class="nav-btn" onclick="showScreen('help')">
-                        <span style="font-size: 20px;">❓</span>
-                        <span>Help</span>
-                    </button>
-                </div>
+                <h1>Cube Call</h1>
+                <p>HD Video Calls with Ringtone Options</p>
             </div>
             
             <!-- Dialer Screen -->
-            <div id="dialerScreen" class="screen">
-                <div class="status-bar">
-                    <button onclick="showScreen('home')" style="background:none;border:none;color:white;font-size:20px;">←</button>
-                    <div>Make a Call</div>
-                    <div style="width: 20px;"></div>
+            <div id="dialerScreen" class="screen-base dialer">
+                <div class="dialer-header">
+                    <h2>Connect</h2>
+                    <button id="soundToggle" class="sound-toggle">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
                 </div>
                 
-                <div class="content">
-                    <div style="text-align: center; margin-bottom: 30px;">
-                        <h2>Connect with Friends</h2>
-                        <p style="color: #888; font-size: 14px;">Share your ID or enter theirs</p>
+                <div class="id-card">
+                    <div class="id-label">
+                        <i class="fas fa-id-card"></i> Your ID
                     </div>
-                    
-                    <div class="input-group">
-                        <div style="color: #888; font-size: 12px; margin-bottom: 5px;">Your ID</div>
-                        <div id="yourId" style="font-size: 18px; font-weight: bold; word-break: break-all;">Loading...</div>
-                    </div>
-                    
-                    <div class="input-group">
-                        <input type="text" id="peerIdInput" placeholder="Enter friend's ID">
-                    </div>
-                    
-                    <button class="btn primary" onclick="startCall()" id="callBtn">
-                        Make Call
-                    </button>
-                    
-                    <button class="btn" onclick="copyToClipboard()">
-                        Copy My ID
-                    </button>
-                    
-                    <button class="btn" onclick="generateShareLink()">
-                        Share Link
-                    </button>
-                    
-                    <div style="color: #888; font-size: 12px; text-align: center; margin-top: 30px; padding: 0 20px;">
-                        Tip: Share your ID with friends. When they enter it, you'll receive a call.
-                    </div>
+                    <div id="yourId" class="id-value">Loading...</div>
                 </div>
                 
-                <div class="nav">
-                    <button class="nav-btn" onclick="showScreen('home')">
-                        <span style="font-size: 20px;">🏠</span>
-                        <span>Home</span>
+                <div class="peer-input">
+                    <input type="text" id="remoteId" placeholder="Enter Peer ID">
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="copyBtn" class="action-btn copy">
+                        <i class="fas fa-copy"></i>
+                        <span>Copy ID</span>
                     </button>
-                    <button class="nav-btn active" onclick="showScreen('dialer')">
-                        <span style="font-size: 20px;">📞</span>
-                        <span>Dialer</span>
+                    <button id="callBtn" class="action-btn call">
+                        <i class="fas fa-phone-alt"></i>
+                        <span>Call</span>
                     </button>
-                    <button class="nav-btn" onclick="showScreen('help')">
-                        <span style="font-size: 20px;">❓</span>
-                        <span>Help</span>
-                    </button>
+                </div>
+                
+                <div style="color: #666; font-size: 12px; text-align: center; padding: 10px;">
+                    Share your ID • Enter peer ID to call
                 </div>
             </div>
             
             <!-- Call Screen -->
-            <div id="callScreen" class="screen">
-                <div class="status-bar">
-                    <div id="callerName">Connecting...</div>
-                    <div id="callTimer">00:00</div>
+            <div id="callScreen" class="screen-base call">
+                <div class="call-header">
+                    <div id="callerName" class="caller-name">Connecting...</div>
+                    <div id="callTimer" class="call-timer">00:00</div>
                 </div>
                 
-                <div class="video-container">
+                <div class="video-area">
+                    <!-- Remote Video -->
                     <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
-                    <div class="local-video">
+                    
+                    <!-- Local Video Preview -->
+                    <div class="local-preview">
                         <video id="localVideo" autoplay playsinline muted></video>
                     </div>
-                    <div id="videoPlaceholder" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#666; text-align:center;">
-                        <div style="font-size: 40px;">📹</div>
+                    
+                    <!-- Video Placeholder -->
+                    <div id="videoPlaceholder" class="video-placeholder">
+                        <i class="fas fa-video-slash"></i>
                         <div>Waiting for video...</div>
                     </div>
                 </div>
                 
                 <div class="call-controls">
-                    <button class="control-btn" onclick="toggleMute()" id="muteBtn">
-                        🔊
+                    <button id="speakerBtn" class="call-btn speaker active">
+                        <i class="fas fa-volume-up"></i>
                     </button>
-                    <button class="control-btn hangup" onclick="endCall()">
-                        📞
+                    <button id="hangupBtn" class="call-btn hangup">
+                        <i class="fas fa-phone-slash"></i>
                     </button>
-                    <button class="control-btn" onclick="toggleVideo()" id="videoBtn">
-                        📹
+                    <button id="videoBtn" class="call-btn video active">
+                        <i class="fas fa-video"></i>
                     </button>
                 </div>
             </div>
             
             <!-- Incoming Call Screen -->
-            <div id="incomingScreen" class="screen">
-                <div class="content" style="text-align: center; padding-top: 30%;">
-                    <div style="font-size: 60px; margin-bottom: 20px;">📞</div>
-                    <h2 id="incomingName">Incoming Call</h2>
-                    <p style="color: #888; margin: 20px 0;">is calling you...</p>
-                    
-                    <div style="display: flex; justify-content: center; gap: 40px; margin-top: 50px;">
-                        <button class="control-btn hangup" onclick="declineCall()" style="background: #f44336;">
-                            ✕
-                        </button>
-                        <button class="control-btn" onclick="answerCall()" style="background: #4CAF50;">
-                            ✓
-                        </button>
-                    </div>
+            <div id="incomingScreen" class="screen-base incoming">
+                <div class="caller-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div id="incomingName" class="incoming-name">Unknown</div>
+                <div class="incoming-status">
+                    <i class="fas fa-phone-alt ringing-icon"></i>
+                    <span id="ringStatus">Incoming Call</span>
+                </div>
+                
+                <!-- Ringtone Selector -->
+                <div class="ringtone-selector">
+                    <select id="ringtoneSelect">
+                        <option value="classic">Classic Ringtone</option>
+                        <option value="digital">Digital Beep</option>
+                        <option value="melody">Soft Melody</option>
+                        <option value="pulse">Pulse Tone</option>
+                        <option value="bell">Bell Ring</option>
+                    </select>
+                </div>
+                
+                <div class="incoming-controls">
+                    <button id="declineBtn" class="decline-btn">
+                        <i class="fas fa-phone-slash"></i>
+                    </button>
+                    <button id="answerBtn" class="answer-btn">
+                        <i class="fas fa-phone-alt"></i>
+                    </button>
                 </div>
             </div>
             
             <!-- Help Screen -->
-            <div id="helpScreen" class="screen">
-                <div class="status-bar">
-                    <button onclick="showScreen('home')" style="background:none;border:none;color:white;font-size:20px;">←</button>
-                    <div>Help & Guide</div>
-                    <div style="width: 20px;"></div>
+            <div id="helpScreen" class="screen-base help">
+                <div class="help-header">
+                    <h2>Help</h2>
+                    <button id="closeHelp" class="close-help">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
                 
-                <div class="content">
-                    <h3 style="margin-bottom: 20px;">How to Use Cube Call</h3>
-                    
-                    <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
-                        <h4 style="margin-bottom: 10px;">1. Get Your ID</h4>
-                        <p style="color: #aaa; font-size: 14px;">Go to Dialer screen to see your unique ID</p>
-                    </div>
-                    
-                    <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
-                        <h4 style="margin-bottom: 10px;">2. Share Your ID</h4>
-                        <p style="color: #aaa; font-size: 14px;">Share your ID with friends using "Copy My ID" or "Share Link"</p>
-                    </div>
-                    
-                    <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
-                        <h4 style="margin-bottom: 10px;">3. Make a Call</h4>
-                        <p style="color: #aaa; font-size: 14px;">Enter friend's ID and tap "Make Call"</p>
-                    </div>
-                    
-                    <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
-                        <h4 style="margin-bottom: 10px;">4. Answer Calls</h4>
-                        <p style="color: #aaa; font-size: 14px;">When someone calls you, you'll see incoming call screen</p>
-                    </div>
-                    
-                    <div style="margin-top: 30px;">
-                        <button class="btn primary" onclick="showScreen('dialer')">
-                            Get Started
-                        </button>
-                    </div>
+                <div class="help-section">
+                    <h3><i class="fas fa-bell"></i> Ringtone Options</h3>
+                    <p>• Classic Ringtone - Traditional phone ring</p>
+                    <p>• Digital Beep - Modern digital sound</p>
+                    <p>• Soft Melody - Pleasant melody</p>
+                    <p>• Pulse Tone - Pulsating tone</p>
+                    <p>• Bell Ring - Bell sound</p>
                 </div>
                 
-                <div class="nav">
-                    <button class="nav-btn" onclick="showScreen('home')">
-                        <span style="font-size: 20px;">🏠</span>
-                        <span>Home</span>
-                    </button>
-                    <button class="nav-btn" onclick="showScreen('dialer')">
-                        <span style="font-size: 20px;">📞</span>
-                        <span>Dialer</span>
-                    </button>
-                    <button class="nav-btn active" onclick="showScreen('help')">
-                        <span style="font-size: 20px;">❓</span>
-                        <span>Help</span>
-                    </button>
+                <div class="help-section">
+                    <h3><i class="fas fa-video"></i> Video Fixes</h3>
+                    <p>• Both videos now display properly</p>
+                    <p>• Local preview in corner</p>
+                    <p>• Remote video full screen</p>
+                    <p>• Auto play enabled</p>
+                </div>
+                
+                <div class="help-section">
+                    <h3><i class="fas fa-phone"></i> How to Call</h3>
+                    <p>1. Share your Peer ID</p>
+                    <p>2. Enter other's ID</p>
+                    <p>3. Tap Call button</p>
+                    <p>4. Answer incoming calls</p>
+                </div>
+                <div class="help-section">
+                    <h3><i class="fas fa-envelope"></i> Contact</h3>
+                    <p>Email: vallarasucse200118@gmail.com</p>
+                    
                 </div>
             </div>
         </div>
+        
+        <!-- Bottom Navigation -->
+        <div class="nav">
+            <button id="navHome" class="nav-btn active">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </button>
+            <button id="navDialer" class="nav-btn">
+                <i class="fas fa-phone"></i>
+                <span>Dialer</span>
+            </button>
+            <button id="navHelp" class="nav-btn">
+                <i class="fas fa-question-circle"></i>
+                <span>Help</span>
+            </button>
+        </div>
     </div>
 
-    <!-- Minimal External Scripts - Loaded at end -->
-    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
-    
-    <!-- Main App Script -->
     <script>
-        // App State
-        let appState = {
-            peer: null,
-            call: null,
-            stream: null,
-            isMuted: false,
-            isVideoOn: true,
-            incomingCall: null,
-            callStartTime: null,
-            timerInterval: null,
-            currentScreen: 'home'
-        };
-
-        // Initialize App
-        async function initApp() {
-            // Update time
-            updateTime();
-            setInterval(updateTime, 60000);
+        // Fast Optimized App with Video Fix
+        const App = {
+            // DOM Elements
+            elements: {},
+            
+            // State
+            state: {
+                peer: null,
+                call: null,
+                stream: null,
+                isMuted: false,
+                isVideoOn: true,
+                isSpeakerOn: true,
+                callStart: null,
+                timer: null,
+                soundEnabled: true,
+                audioContext: null,
+                oscillator: null,
+                currentRingtone: 'classic',
+                ringtoneInterval: null
+            },
+            
+            // Ringtone Patterns
+            ringtones: {
+                classic: { freq1: 800, freq2: 800, pattern: [0.1, 0.1, 0.1, 0.1, 1.6] },
+                digital: { freq1: 1000, freq2: 1200, pattern: [0.05, 0.05, 0.05, 0.05, 0.8] },
+                melody: { freq1: 523, freq2: 659, pattern: [0.2, 0.2, 0.2, 0.2, 1.2] },
+                pulse: { freq1: 600, freq2: 800, pattern: [0.3, 0.1, 0.3, 0.1, 1.2] },
+                bell: { freq1: 880, freq2: 440, pattern: [0.5, 1.5] }
+            },
+            
+            // Initialize
+            init() {
+                console.log('🚀 App Initializing...');
+                this.cacheElements();
+                this.setupTime();
+                this.initPeer();
+                this.bindEvents();
+                this.setupAudio();
+                this.showToast('Ready to connect', 'success');
+            },
+            
+            // Cache DOM elements
+            cacheElements() {
+                const ids = [
+                    'homeScreen', 'dialerScreen', 'callScreen', 'incomingScreen', 'helpScreen',
+                    'yourId', 'remoteId', 'copyBtn', 'callBtn', 'hangupBtn', 'speakerBtn', 'videoBtn',
+                    'answerBtn', 'declineBtn', 'soundToggle', 'closeHelp', 'ringtoneSelect',
+                    'callerName', 'callTimer', 'incomingName', 'ringStatus',
+                    'remoteVideo', 'localVideo', 'time', 'toast', 'loading', 'videoPlaceholder',
+                    'navHome', 'navDialer', 'navHelp'
+                ];
+                
+                ids.forEach(id => {
+                    this.elements[id] = document.getElementById(id);
+                });
+            },
+            
+            // Setup clock
+            setupTime() {
+                const update = () => {
+                    const now = new Date();
+                    const time = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    this.elements.time.textContent = time;
+                };
+                update();
+                setInterval(update, 60000);
+            },
+            
+            // Setup audio context for ringtone
+            setupAudio() {
+                try {
+                    this.state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch(e) {
+                    console.log('Audio context not supported');
+                }
+            },
+            
+            // Play selected ringtone
+            playRingtone() {
+                if (!this.state.soundEnabled || !this.state.audioContext) return;
+                
+                this.stopRingtone();
+                
+                const ringtone = this.ringtones[this.state.currentRingtone];
+                if (!ringtone) return;
+                
+                try {
+                    const oscillator = this.state.audioContext.createOscillator();
+                    const gainNode = this.state.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.state.audioContext.destination);
+                    
+                    let time = this.state.audioContext.currentTime;
+                    const pattern = ringtone.pattern;
+                    
+                    // Play pattern
+                    for (let i = 0; i < pattern.length; i++) {
+                        if (i % 2 === 0) {
+                            // Sound on
+                            oscillator.frequency.setValueAtTime(ringtone.freq1, time);
+                            gainNode.gain.setValueAtTime(0.3, time);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+                        }
+                        time += pattern[i];
+                    }
+                    
+                    oscillator.start();
+                    oscillator.stop(time);
+                    
+                    this.state.oscillator = oscillator;
+                    
+                    // Calculate total pattern duration and repeat
+                    const totalDuration = pattern.reduce((a, b) => a + b, 0);
+                    
+                    this.state.ringtoneInterval = setTimeout(() => {
+                        if (this.state.audioContext && this.state.soundEnabled) {
+                            this.playRingtone();
+                        }
+                    }, totalDuration * 1000);
+                    
+                } catch(e) {
+                    console.log('Ringtone error:', e);
+                }
+            },
+            
+            // Stop ringtone
+            stopRingtone() {
+                if (this.state.oscillator) {
+                    try {
+                        this.state.oscillator.stop();
+                    } catch(e) {}
+                    this.state.oscillator = null;
+                }
+                if (this.state.ringtoneInterval) {
+                    clearTimeout(this.state.ringtoneInterval);
+                    this.state.ringtoneInterval = null;
+                }
+            },
+            
+            // Play beep sound
+            playBeep(freq = 800, duration = 0.1) {
+                if (!this.state.soundEnabled || !this.state.audioContext) return;
+                
+                try {
+                    const oscillator = this.state.audioContext.createOscillator();
+                    const gainNode = this.state.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.state.audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(freq, this.state.audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.2, this.state.audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.state.audioContext.currentTime + duration);
+                    
+                    oscillator.start();
+                    oscillator.stop(this.state.audioContext.currentTime + duration);
+                } catch(e) {
+                    console.log('Beep error:', e);
+                }
+            },
             
             // Initialize Peer.js
-            await initPeer();
-            
-            // Show main app
-            document.getElementById('loadingScreen').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            
-            // Check URL for auto-connect
-            checkAutoConnect();
-            
-            console.log('Cube Call loaded successfully!');
-        }
-
-        // Initialize Peer.js
-        async function initPeer() {
-            try {
-                // Generate random ID
-                const peerId = 'user-' + Math.random().toString(36).substr(2, 9);
+            initPeer() {
+                const peerId = 'user-' + Math.floor(1000 + Math.random() * 9000);
                 
-                appState.peer = new Peer(peerId, {
+                this.state.peer = new Peer(peerId, {
                     host: '0.peerjs.com',
                     port: 443,
                     path: '/',
                     secure: true,
                     config: {
-                        iceServers: [
-                            { urls: 'stun:stun.l.google.com:19302' }
+                        'iceServers': [
+                            { urls: 'stun:stun.l.google.com:19302' },
+                            { urls: 'stun:stun1.l.google.com:19302' }
                         ]
                     },
                     debug: 0
                 });
-
-                appState.peer.on('open', (id) => {
-                    document.getElementById('yourId').textContent = id;
-                    console.log('Connected with ID:', id);
-                    showToast('Ready to connect');
+                
+                this.state.peer.on('open', (id) => {
+                    console.log('✅ Peer connected:', id);
+                    this.elements.yourId.textContent = id;
+                    this.showToast('Connected ✓');
                 });
-
-                appState.peer.on('error', (err) => {
+                
+                this.state.peer.on('error', (err) => {
                     console.error('Peer error:', err);
-                    showToast('Connection error', 'error');
+                    this.showToast('Connection error', 'error');
                 });
-
-                appState.peer.on('call', (call) => {
-                    console.log('Incoming call from:', call.peer);
-                    appState.incomingCall = call;
-                    showScreen('incoming');
-                    document.getElementById('incomingName').textContent = call.peer + ' is calling...';
+                
+                this.state.peer.on('call', (call) => {
+                    console.log('📞 Incoming call from:', call.peer);
+                    
+                    this.state.incomingCall = call;
+                    this.elements.incomingName.textContent = call.peer;
+                    this.showScreen('incoming');
+                    this.playRingtone();
                     
                     // Auto decline after 30 seconds
                     setTimeout(() => {
-                        if (appState.incomingCall === call) {
-                            declineCall();
+                        if (this.state.incomingCall === call) {
+                            this.declineCall();
+                            this.showToast('Call timed out', 'error');
                         }
                     }, 30000);
                 });
-
-            } catch (error) {
-                console.error('Failed to initialize:', error);
-                showToast('Failed to initialize', 'error');
-            }
-        }
-
-        // Show screen
-        function showScreen(screenName) {
-            // Hide all screens
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
-            });
+            },
             
-            // Update nav buttons
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            // Get media with noise cancellation
+            async getMedia() {
+                try {
+                    this.showLoading(true);
+                    
+                    const constraints = {
+                        video: {
+                            width: { ideal: 640 },
+                            height: { ideal: 480 },
+                            frameRate: { ideal: 24 },
+                            facingMode: 'user'
+                        },
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true,
+                            channelCount: 1,
+                            sampleRate: 48000
+                        }
+                    };
+                    
+                    console.log('🎥 Requesting media with constraints:', constraints);
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    
+                    // Log available tracks
+                    console.log('✅ Media tracks:', 
+                        stream.getVideoTracks().length, 'video,',
+                        stream.getAudioTracks().length, 'audio'
+                    );
+                    
+                    this.showLoading(false);
+                    return stream;
+                    
+                } catch(err) {
+                    this.showLoading(false);
+                    console.error('❌ Media error:', err);
+                    this.showToast('Camera/mic access required', 'error');
+                    throw err;
+                }
+            },
             
-            // Show selected screen
-            document.getElementById(screenName + 'Screen').classList.add('active');
-            
-            // Update nav for active screen
-            if (screenName === 'home') {
-                document.querySelector('.nav-btn:nth-child(1)').classList.add('active');
-            } else if (screenName === 'dialer') {
-                document.querySelector('.nav-btn:nth-child(2)').classList.add('active');
-            } else if (screenName === 'help') {
-                document.querySelector('.nav-btn:nth-child(3)').classList.add('active');
-            }
-            
-            appState.currentScreen = screenName;
-        }
-
-        // Start call
-        async function startCall() {
-            const peerId = document.getElementById('peerIdInput').value.trim();
-            if (!peerId) {
-                showToast('Enter Peer ID', 'error');
-                return;
-            }
-
-            try {
-                showToast('Starting call...');
+            // Start call - FIXED VIDEO
+            async startCall() {
+                const peerId = this.elements.remoteId.value.trim();
+                if (!peerId) {
+                    this.showToast('Enter Peer ID', 'error');
+                    return;
+                }
                 
-                // Get user media
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: true,
-                    audio: true
+                try {
+                    console.log('📞 Starting call to:', peerId);
+                    this.playBeep(1200, 0.1);
+                    
+                    // Get media stream
+                    this.state.stream = await this.getMedia();
+                    
+                    // Set local video source
+                    this.elements.localVideo.srcObject = this.state.stream;
+                    console.log('📹 Local video set');
+                    
+                    // Start call
+                    const call = this.state.peer.call(peerId, this.state.stream);
+                    
+                    // Setup call handlers
+                    this.setupCall(call);
+                    
+                    // Show call screen
+                    this.showScreen('call');
+                    this.startTimer();
+                    this.elements.callerName.textContent = peerId;
+                    this.elements.videoPlaceholder.style.display = 'block';
+                    
+                    this.showToast('Calling...');
+                    
+                } catch(err) {
+                    console.error('❌ Start call error:', err);
+                    this.showToast('Failed to start call', 'error');
+                }
+            },
+            
+            // Answer call - FIXED VIDEO
+            async answerCall() {
+                if (!this.state.incomingCall) return;
+                
+                try {
+                    console.log('✅ Answering call from:', this.state.incomingCall.peer);
+                    this.stopRingtone();
+                    this.playBeep(1000, 0.2);
+                    
+                    // Get media stream
+                    this.state.stream = await this.getMedia();
+                    
+                    // Set local video source
+                    this.elements.localVideo.srcObject = this.state.stream;
+                    console.log('📹 Local video set');
+                    
+                    // Answer the call
+                    this.state.incomingCall.answer(this.state.stream);
+                    
+                    // Setup call handlers
+                    this.setupCall(this.state.incomingCall);
+                    
+                    // Show call screen
+                    this.showScreen('call');
+                    this.startTimer();
+                    this.elements.callerName.textContent = this.state.incomingCall.peer;
+                    this.elements.videoPlaceholder.style.display = 'block';
+                    
+                    // Clear incoming call reference
+                    this.state.incomingCall = null;
+                    
+                    this.showToast('Call connected');
+                    
+                } catch(err) {
+                    console.error('❌ Answer call error:', err);
+                    this.showToast('Failed to answer', 'error');
+                    this.showScreen('dialer');
+                }
+            },
+            
+            // Decline call
+            declineCall() {
+                if (this.state.incomingCall) {
+                    console.log('❌ Declining call from:', this.state.incomingCall.peer);
+                    this.playBeep(400, 0.1);
+                    this.state.incomingCall.close();
+                    this.state.incomingCall = null;
+                }
+                this.stopRingtone();
+                this.showScreen('dialer');
+            },
+            
+            // Setup call handlers - FIXED VIDEO
+            setupCall(call) {
+                console.log('🔗 Setting up call handlers');
+                this.state.call = call;
+                
+                call.on('stream', (remoteStream) => {
+                    console.log('📹 Remote stream received');
+                    
+                    // Set remote video source
+                    this.elements.remoteVideo.srcObject = remoteStream;
+                    this.elements.videoPlaceholder.style.display = 'none';
+                    
+                    // Enable audio by default
+                    this.elements.remoteVideo.muted = false;
+                    this.elements.remoteVideo.volume = 1.0;
+                    
+                    // Force video play
+                    this.elements.remoteVideo.play().catch(e => {
+                        console.log('Auto-play prevented, user interaction required');
+                    });
+                    
+                    this.showToast('Video connected');
                 });
                 
-                appState.stream = stream;
-                document.getElementById('localVideo').srcObject = stream;
-                
-                // Start call
-                const call = appState.peer.call(peerId, stream);
-                setupCall(call);
-                
-                showScreen('call');
-                document.getElementById('callerName').textContent = 'Calling ' + peerId;
-                startTimer();
-                
-            } catch (error) {
-                console.error('Call error:', error);
-                showToast('Failed to start call: ' + error.message, 'error');
-            }
-        }
-
-        // Answer call
-        async function answerCall() {
-            if (!appState.incomingCall) return;
-            
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: true,
-                    audio: true
+                call.on('close', () => {
+                    console.log('📞 Call closed');
+                    this.endCall();
                 });
                 
-                appState.stream = stream;
-                document.getElementById('localVideo').srcObject = stream;
+                call.on('error', (err) => {
+                    console.error('📞 Call error:', err);
+                    this.endCall();
+                });
+            },
+            
+            // End call
+            endCall() {
+                console.log('📞 Ending call');
+                this.playBeep(300, 0.1);
                 
-                appState.incomingCall.answer(stream);
-                setupCall(appState.incomingCall);
-                
-                showScreen('call');
-                document.getElementById('callerName').textContent = 'Connected with ' + appState.incomingCall.peer;
-                startTimer();
-                
-                appState.incomingCall = null;
-                
-            } catch (error) {
-                console.error('Answer error:', error);
-                showToast('Failed to answer', 'error');
-            }
-        }
-
-        // Decline call
-        function declineCall() {
-            if (appState.incomingCall) {
-                appState.incomingCall.close();
-                appState.incomingCall = null;
-            }
-            showScreen('dialer');
-        }
-
-        // Setup call handlers
-        function setupCall(call) {
-            appState.call = call;
-            
-            call.on('stream', (remoteStream) => {
-                document.getElementById('remoteVideo').srcObject = remoteStream;
-                document.getElementById('videoPlaceholder').style.display = 'none';
-                showToast('Connected!');
-            });
-            
-            call.on('close', () => {
-                endCall();
-            });
-            
-            call.on('error', (err) => {
-                console.error('Call error:', err);
-                endCall();
-            });
-        }
-
-        // End call
-        function endCall() {
-            if (appState.call) {
-                appState.call.close();
-                appState.call = null;
-            }
-            
-            if (appState.stream) {
-                appState.stream.getTracks().forEach(track => track.stop());
-                appState.stream = null;
-            }
-            
-            stopTimer();
-            showScreen('dialer');
-            showToast('Call ended');
-        }
-
-        // Toggle mute
-        function toggleMute() {
-            if (appState.stream) {
-                const audioTrack = appState.stream.getAudioTracks()[0];
-                if (audioTrack) {
-                    appState.isMuted = !audioTrack.enabled;
-                    audioTrack.enabled = !appState.isMuted;
-                    
-                    const btn = document.getElementById('muteBtn');
-                    btn.textContent = appState.isMuted ? '🔇' : '🔊';
-                    
-                    showToast(appState.isMuted ? 'Muted' : 'Unmuted');
+                if (this.state.call) {
+                    this.state.call.close();
+                    this.state.call = null;
                 }
-            }
-        }
-
-        // Toggle video
-        function toggleVideo() {
-            if (appState.stream) {
-                const videoTrack = appState.stream.getVideoTracks()[0];
-                if (videoTrack) {
-                    appState.isVideoOn = !videoTrack.enabled;
-                    videoTrack.enabled = appState.isVideoOn;
-                    
-                    const btn = document.getElementById('videoBtn');
-                    btn.textContent = appState.isVideoOn ? '📹' : '📷';
-                    
-                    showToast(appState.isVideoOn ? 'Video on' : 'Video off');
+                
+                if (this.state.stream) {
+                    this.state.stream.getTracks().forEach(track => {
+                        track.stop();
+                        console.log('🛑 Stopped track:', track.kind);
+                    });
+                    this.state.stream = null;
                 }
-            }
-        }
-
-        // Start call timer
-        function startTimer() {
-            appState.callStartTime = Date.now();
-            appState.timerInterval = setInterval(() => {
-                const seconds = Math.floor((Date.now() - appState.callStartTime) / 1000);
-                const mins = Math.floor(seconds / 60);
-                const secs = seconds % 60;
-                document.getElementById('callTimer').textContent = 
-                    `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            }, 1000);
-        }
-
-        // Stop timer
-        function stopTimer() {
-            if (appState.timerInterval) {
-                clearInterval(appState.timerInterval);
-                appState.timerInterval = null;
-            }
-            document.getElementById('callTimer').textContent = '00:00';
-        }
-
-        // Copy to clipboard
-        function copyToClipboard() {
-            const id = document.getElementById('yourId').textContent;
-            if (id && id !== 'Loading...') {
+                
+                this.elements.localVideo.srcObject = null;
+                this.elements.remoteVideo.srcObject = null;
+                this.elements.videoPlaceholder.style.display = 'block';
+                this.stopTimer();
+                this.showScreen('dialer');
+                this.showToast('Call ended', 'error');
+            },
+            
+            // Start call timer
+            startTimer() {
+                this.state.callStart = Date.now();
+                this.state.timer = setInterval(() => {
+                    const seconds = Math.floor((Date.now() - this.state.callStart) / 1000);
+                    const mins = Math.floor(seconds / 60);
+                    const secs = seconds % 60;
+                    this.elements.callTimer.textContent = 
+                        `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                }, 1000);
+            },
+            
+            // Stop timer
+            stopTimer() {
+                if (this.state.timer) {
+                    clearInterval(this.state.timer);
+                    this.state.timer = null;
+                }
+                this.elements.callTimer.textContent = '00:00';
+            },
+            
+            // Toggle speaker
+            toggleSpeaker() {
+                this.state.isSpeakerOn = !this.state.isSpeakerOn;
+                if (this.elements.remoteVideo) {
+                    this.elements.remoteVideo.muted = !this.state.isSpeakerOn;
+                }
+                this.elements.speakerBtn.classList.toggle('active', this.state.isSpeakerOn);
+                this.elements.speakerBtn.innerHTML = this.state.isSpeakerOn ? 
+                    '<i class="fas fa-volume-up"></i>' : 
+                    '<i class="fas fa-volume-mute"></i>';
+                this.playBeep(this.state.isSpeakerOn ? 800 : 400, 0.1);
+                this.showToast(this.state.isSpeakerOn ? 'Speaker ON' : 'Speaker OFF');
+            },
+            
+            // Toggle video
+            toggleVideo() {
+                if (this.state.stream) {
+                    const videoTrack = this.state.stream.getVideoTracks()[0];
+                    if (videoTrack) {
+                        this.state.isVideoOn = !videoTrack.enabled;
+                        videoTrack.enabled = this.state.isVideoOn;
+                        this.elements.videoBtn.classList.toggle('active', this.state.isVideoOn);
+                        this.elements.videoBtn.innerHTML = this.state.isVideoOn ? 
+                            '<i class="fas fa-video"></i>' : 
+                            '<i class="fas fa-video-slash"></i>';
+                        this.playBeep(this.state.isVideoOn ? 1000 : 500, 0.1);
+                        this.showToast(this.state.isVideoOn ? 'Camera ON' : 'Camera OFF');
+                    }
+                }
+            },
+            
+            // Toggle sound
+            toggleSound() {
+                this.state.soundEnabled = !this.state.soundEnabled;
+                this.elements.soundToggle.classList.toggle('muted', !this.state.soundEnabled);
+                this.elements.soundToggle.innerHTML = this.state.soundEnabled ? 
+                    '<i class="fas fa-volume-up"></i>' : 
+                    '<i class="fas fa-volume-mute"></i>';
+                
+                if (!this.state.soundEnabled) {
+                    this.stopRingtone();
+                }
+                
+                this.showToast(this.state.soundEnabled ? 'Sound ON' : 'Sound OFF');
+            },
+            
+            // Copy ID to clipboard
+            copyId() {
+                const id = this.elements.yourId.textContent;
                 navigator.clipboard.writeText(id).then(() => {
-                    showToast('ID copied to clipboard!');
+                    const original = this.elements.copyBtn.innerHTML;
+                    this.elements.copyBtn.innerHTML = '<i class="fas fa-check"></i><span>Copied</span>';
+                    this.playBeep(1200, 0.1);
+                    this.showToast('ID copied!');
+                    
+                    setTimeout(() => {
+                        this.elements.copyBtn.innerHTML = original;
+                    }, 2000);
                 });
-            }
-        }
-
-        // Generate share link
-        function generateShareLink() {
-            const id = document.getElementById('yourId').textContent;
-            if (id && id !== 'Loading...') {
-                const link = window.location.origin + window.location.pathname + '?connect=' + encodeURIComponent(id);
-                navigator.clipboard.writeText(link).then(() => {
-                    showToast('Share link copied!');
-                });
-            }
-        }
-
-        // Check for auto-connect in URL
-        function checkAutoConnect() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const connectId = urlParams.get('connect');
+            },
             
-            if (connectId) {
-                document.getElementById('peerIdInput').value = connectId;
-                showScreen('dialer');
-                showToast('Ready to connect to: ' + connectId);
+            // Change ringtone
+            changeRingtone() {
+                this.state.currentRingtone = this.elements.ringtoneSelect.value;
+                this.showToast('Ringtone: ' + this.elements.ringtoneSelect.selectedOptions[0].text);
                 
-                // Clear URL
-                history.replaceState({}, document.title, window.location.pathname);
+                // If currently ringing, restart with new tone
+                if (document.getElementById('incomingScreen').classList.contains('active')) {
+                    this.stopRingtone();
+                    this.playRingtone();
+                }
+            },
+            
+            // Show screen
+            showScreen(screen) {
+                const screens = ['home', 'dialer', 'call', 'incoming', 'help'];
+                screens.forEach(s => {
+                    this.elements[s + 'Screen'].classList.remove('active');
+                });
+                
+                this.elements[screen + 'Screen'].classList.add('active');
+                
+                // Update nav
+                ['Home', 'Dialer', 'Help'].forEach(nav => {
+                    this.elements['nav' + nav].classList.remove('active');
+                });
+                
+                if (screen === 'home') this.elements.navHome.classList.add('active');
+                if (screen === 'dialer') this.elements.navDialer.classList.add('active');
+                if (screen === 'help') this.elements.navHelp.classList.add('active');
+                
+                this.playBeep(600, 0.05);
+            },
+            
+            // Show toast message
+            showToast(message, type = 'success') {
+                const toast = this.elements.toast;
+                toast.textContent = message;
+                toast.className = 'toast';
+                if (type === 'error') toast.classList.add('error');
+                toast.style.display = 'block';
+                
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 3000);
+            },
+            
+            // Show loading
+            showLoading(show) {
+                this.elements.loading.style.display = show ? 'flex' : 'none';
+            },
+            
+            // Bind events
+            bindEvents() {
+                // Navigation
+                this.elements.navHome.addEventListener('click', () => this.showScreen('home'));
+                this.elements.navDialer.addEventListener('click', () => this.showScreen('dialer'));
+                this.elements.navHelp.addEventListener('click', () => this.showScreen('help'));
+                
+                // Dialer actions
+                this.elements.copyBtn.addEventListener('click', () => this.copyId());
+                this.elements.callBtn.addEventListener('click', () => this.startCall());
+                this.elements.soundToggle.addEventListener('click', () => this.toggleSound());
+                
+                // Call controls
+                this.elements.hangupBtn.addEventListener('click', () => this.endCall());
+                this.elements.speakerBtn.addEventListener('click', () => this.toggleSpeaker());
+                this.elements.videoBtn.addEventListener('click', () => this.toggleVideo());
+                
+                // Incoming call
+                this.elements.answerBtn.addEventListener('click', () => this.answerCall());
+                this.elements.declineBtn.addEventListener('click', () => this.declineCall());
+                this.elements.ringtoneSelect.addEventListener('change', () => this.changeRingtone());
+                
+                // Help
+                this.elements.closeHelp.addEventListener('click', () => this.showScreen('home'));
+                
+                // Enter key in input
+                this.elements.remoteId.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.startCall();
+                });
+                
+                // Force video play on user interaction
+                document.addEventListener('click', () => {
+                    if (this.elements.remoteVideo.srcObject) {
+                        this.elements.remoteVideo.play().catch(e => {});
+                    }
+                    if (this.elements.localVideo.srcObject) {
+                        this.elements.localVideo.play().catch(e => {});
+                    }
+                });
             }
-        }
-
-        // Show toast notification
-        function showToast(message, type = 'success') {
-            // Create toast element
-            const toast = document.createElement('div');
-            toast.textContent = message;
-            toast.style.cssText = `
-                position: fixed;
-                top: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: ${type === 'error' ? '#f44336' : '#4CAF50'};
-                color: white;
-                padding: 12px 24px;
-                border-radius: 8px;
-                z-index: 1000;
-                animation: slideDown 0.3s ease;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            `;
-            
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
-        }
-
-        // Update time
-        function updateTime() {
-            const now = new Date();
-            const time = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            document.getElementById('time').textContent = time;
-        }
-
-        // Initialize when page loads
-        window.addEventListener('DOMContentLoaded', initApp);
+        };
+        
+        // Initialize app when DOM loads
+        document.addEventListener('DOMContentLoaded', () => {
+            App.init();
+        });
+        
+        // Handle page visibility for audio context
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && App.state.audioContext) {
+                App.state.audioContext.suspend();
+            } else if (!document.hidden && App.state.audioContext) {
+                App.state.audioContext.resume();
+            }
+        });
     </script>
 </body>
 </html>
