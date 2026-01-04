@@ -1,54 +1,179 @@
-Live Link: https://shinchanchan.github.io/voicecall/
 
-🚀 How to Use (Simple Steps):
-Open the link in your browser (works on phone, tablet, or computer)
 
-Click "Dialer" at the bottom
+# 📞 Cube Voice Call – Peer-to-Peer Video Calling App
 
-Copy your Peer ID (click "Copy ID" button)
+**Cube Voice Call** is a lightweight, fast, and secure **peer-to-peer voice & video calling web application** built using **WebRTC and PeerJS**.
+Make **free video calls directly between browsers** — no login, no signup, no server storage.
 
-Share your ID with friend via WhatsApp/Message
+🌐 **Live Demo:**
+👉 [https://shinchanchan.github.io/voicecall/](https://shinchanchan.github.io/voicecall/)
 
-Enter friend's ID in the input box
+---
 
-Click green Call button to connect
+## 🛡️ Badges
 
-Allow camera/microphone when asked
+[![Hosted on GitHub Pages](https://img.shields.io/badge/Hosted%20on-GitHub%20Pages-blue?logo=github)](https://shinchanchan.github.io/voicecall/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Powered by WebRTC](https://img.shields.io/badge/Powered%20by-WebRTC-orange)](https://webrtc.org/)
+[![PeerJS](https://img.shields.io/badge/Powered%20by-PeerJS-blue)](https://peerjs.com/)
 
-Answer calls when someone calls you
+---
 
-✨ Main Features:
-✅ Free Video Calls - No login, no payment
-✅ Works Anywhere - Phone, laptop, tablet
-✅ Clear Audio - Noise cancellation
-✅ Multiple Ringtones - Choose your favorite
-✅ Simple Interface - Like a real phone
-✅ Fast Connection - Connect in seconds
-✅ Privacy Safe - No data stored
+## 🚀 How to Use (Simple Steps)
 
-📞 During Call:
-Blue button - Speaker on/off
+1. **Open the App**
 
-Green button - Camera on/off
+   * Visit 👉 [https://shinchanchan.github.io/voicecall/](https://shinchanchan.github.io/voicecall/)
+   * Works on **mobile, tablet, and desktop**
 
-Red button - End call
+2. **Open Dialer**
 
-Small window - Your self-view
+   * Click **“Dialer”** button at the bottom
 
-Big screen - Friend's video
+3. **Copy Your Peer ID**
 
-🔧 Tips:
-Refresh page if connection fails
+   * Click **“Copy ID”**
+   * Share it with your friend via WhatsApp / SMS / Email
 
-Click anywhere if video doesn't show
+4. **Make a Call**
 
-Allow permissions for camera/mic
+   * Enter your friend’s Peer ID
+   * Click the **🟢 Green Call button**
 
-Use headphones for better sound
+5. **Allow Permissions**
 
-Good internet needed for best quality
+   * Allow **camera & microphone**
 
-📧 Need Help or Custom Project?
-Contact: vallarasucse200118@gmail.com
-Services: Web Apps, Mobile Apps, Video Call Solutions, Custom Software
+6. **Answer Incoming Calls**
 
+   * Click **Answer** when someone calls you
+
+---
+
+## ✨ Features
+
+* 📞 **Free Voice & Video Calls**
+* 🔒 **No Login / No Signup**
+* 🌍 **Works Anywhere** (Phone, Laptop, Tablet)
+* 🎧 **Clear Audio with Noise Handling**
+* 🔔 **Multiple Ringtones**
+* 📱 **Phone-Like Simple UI**
+* ⚡ **Fast Peer Connection**
+* 🛡️ **Privacy Friendly – No Data Stored**
+* 🧑‍🤝‍🧑 **One-to-One P2P Calls**
+
+---
+
+## 📞 Call Controls
+
+| Button        | Function            |
+| ------------- | ------------------- |
+| 🔵 Blue       | Speaker On / Off    |
+| 🟢 Green      | Camera On / Off     |
+| 🔴 Red        | End Call            |
+| 🪟 Small View | Your camera preview |
+| 🖥️ Big View  | Friend’s video      |
+
+---
+
+## 🧠 How It Works
+
+```
+User A Browser  ── WebRTC (Direct Call) ──► User B Browser
+       │
+       └── PeerJS Server (ID discovery only)
+```
+
+* PeerJS helps users discover each other
+* WebRTC creates **secure direct connection**
+* Audio & video stream **peer-to-peer**
+* No media stored on any server
+
+---
+
+## 🌐 Browser Support
+
+| Browser         | Status     |
+| --------------- | ---------- |
+| Chrome          | ✅ Best     |
+| Firefox         | ✅          |
+| Edge            | ✅          |
+| Safari          | ⚠️ Limited |
+| Mobile Browsers | ✅          |
+
+---
+
+## 🔧 Tips & Troubleshooting
+
+* 🔄 Refresh page if connection fails
+* 🎥 Click anywhere if video doesn’t appear
+* 🎤 Allow camera & microphone permissions
+* 🎧 Use headphones for better audio
+* 📶 Stable internet gives best quality
+
+---
+
+## 🛠️ Tech Stack
+
+| Technology   | Purpose             |
+| ------------ | ------------------- |
+| HTML5        | UI Structure        |
+| CSS3         | Styling             |
+| JavaScript   | Logic               |
+| WebRTC       | Audio & Video Calls |
+| PeerJS       | WebRTC Signaling    |
+| GitHub Pages | Hosting             |
+
+---
+
+## 🔒 Privacy & Security
+
+* ❌ No user data stored
+* ❌ No call recordings
+* ❌ No tracking
+* ✅ Encrypted WebRTC streams
+* ✅ Direct browser-to-browser call
+
+---
+
+## 📞 Contact & Custom Projects
+
+📧 **Email:** [vallarasucse200118@gmail.com](mailto:vallarasucse200118@gmail.com)
+
+### 💼 Services Offered
+
+* Web Applications
+* Mobile Applications
+* Video Call & WebRTC Solutions
+* Custom Software Development
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License**
+Free for personal & commercial use.
+
+---
+
+## ⭐ Support the Project
+
+If you like this project:
+
+* ⭐ Star the repository
+* 🔁 Share with friends
+* 🐛 Report issues
+* 💡 Suggest new features
+
+---
+
+<div align="center">
+
+**Made with ❤️ by Vallarasucse200118@gmail.com**
+
+📞 *Simple. Fast. Secure Video Calling.*
+
+</div>
+
+
+Just tell me 👍
