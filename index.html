@@ -13,19 +13,19 @@
 <meta name="keywords"
       content="vallarasu github voice call, fast phone dialer, web rtc voice call, browser video call, github voice call app, peerjs voice call" />
 
-<link rel="canonical" href="https://shinchanchan.github.io/voicecall/" />
+<link rel="canonical" href="https://shinchanchan.github.io/voicecall/ " />
    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js "></script>
  <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
+  "@context": "https://schema.org ",
   "@type": "SoftwareApplication",
   "name": "Fast Phone Dialer",
   "operatingSystem": "Web",
   "applicationCategory": "CommunicationApplication",
   "description": "WebRTC-based voice and video call application built by Vallarasu.",
-  "url": "https://shinchanchan.github.io/voicecall/",
+  "url": "https://shinchanchan.github.io/voicecall/ ",
   "author": {
     "@type": "Person",
     "name": "Vallarasu"
@@ -262,7 +262,7 @@
             opacity: 0.9;
         }
         
-        /* Call Screen - FIXED VIDEO */
+        /* Call Screen - FIXED VIDEO & AUDIO */
         .call {
             background: #000;
         }
@@ -300,6 +300,15 @@
             object-fit: cover;
             background: #000;
             display: block;
+        }
+        
+        /* Hidden audio element for reliable audio playback */
+        .remote-audio {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
         }
         
         .local-preview {
@@ -374,6 +383,10 @@
         
         .call-btn.video.active {
             background: #4caf50;
+        }
+        
+        .call-btn.mic.active {
+            background: #ff9800;
         }
         
         .call-btn:hover {
@@ -726,6 +739,9 @@
                     <!-- Remote Video -->
                     <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
                     
+                    <!-- Hidden Audio Element for Remote Audio - FIXES AUDIO ISSUE -->
+                    <audio id="remoteAudio" class="remote-audio" autoplay></audio>
+                    
                     <!-- Local Video Preview -->
                     <div class="local-preview">
                         <video id="localVideo" autoplay playsinline muted></video>
@@ -739,6 +755,9 @@
                 </div>
                 
                 <div class="call-controls">
+                    <button id="micBtn" class="call-btn mic active">
+                        <i class="fas fa-microphone"></i>
+                    </button>
                     <button id="speakerBtn" class="call-btn speaker active">
                         <i class="fas fa-volume-up"></i>
                     </button>
@@ -816,10 +835,18 @@
                     <p>3. Tap Call button</p>
                     <p>4. Answer incoming calls</p>
                 </div>
+                
+                <div class="help-section">
+                    <h3><i class="fas fa-volume-up"></i> Audio Fix</h3>
+                    <p>• Added separate audio element for remote stream</p>
+                    <p>• Both sides can now hear each other clearly</p>
+                    <p>• Added microphone mute button</p>
+                    <p>• Speaker toggle works for both audio and video calls</p>
+                </div>
+                
                 <div class="help-section">
                     <h3><i class="fas fa-envelope"></i> Contact</h3>
                     <p>Email: vallarasucse200118@gmail.com</p>
-                    
                 </div>
             </div>
         </div>
@@ -842,7 +869,7 @@
     </div>
 
     <script>
-        // Fast Optimized App with Video Fix
+        // Fast Optimized App with Video & Audio Fix
         const App = {
             // DOM Elements
             elements: {},
@@ -855,13 +882,15 @@
                 isMuted: false,
                 isVideoOn: true,
                 isSpeakerOn: true,
+                isMicOn: true,
                 callStart: null,
                 timer: null,
                 soundEnabled: true,
                 audioContext: null,
                 oscillator: null,
                 currentRingtone: 'classic',
-                ringtoneInterval: null
+                ringtoneInterval: null,
+                incomingCall: null
             },
             
             // Ringtone Patterns
@@ -888,10 +917,10 @@
             cacheElements() {
                 const ids = [
                     'homeScreen', 'dialerScreen', 'callScreen', 'incomingScreen', 'helpScreen',
-                    'yourId', 'remoteId', 'copyBtn', 'callBtn', 'hangupBtn', 'speakerBtn', 'videoBtn',
+                    'yourId', 'remoteId', 'copyBtn', 'callBtn', 'hangupBtn', 'speakerBtn', 'videoBtn', 'micBtn',
                     'answerBtn', 'declineBtn', 'soundToggle', 'closeHelp', 'ringtoneSelect',
                     'callerName', 'callTimer', 'incomingName', 'ringStatus',
-                    'remoteVideo', 'localVideo', 'time', 'toast', 'loading', 'videoPlaceholder',
+                    'remoteVideo', 'localVideo', 'remoteAudio', 'time', 'toast', 'loading', 'videoPlaceholder',
                     'navHome', 'navDialer', 'navHelp'
                 ];
                 
@@ -1093,7 +1122,7 @@
                 }
             },
             
-            // Start call - FIXED VIDEO
+            // Start call - FIXED AUDIO & VIDEO
             async startCall() {
                 const peerId = this.elements.remoteId.value.trim();
                 if (!peerId) {
@@ -1132,7 +1161,7 @@
                 }
             },
             
-            // Answer call - FIXED VIDEO
+            // Answer call - FIXED AUDIO & VIDEO
             async answerCall() {
                 if (!this.state.incomingCall) return;
                 
@@ -1184,28 +1213,39 @@
                 this.showScreen('dialer');
             },
             
-            // Setup call handlers - FIXED VIDEO
+            // Setup call handlers - FIXED AUDIO & VIDEO
             setupCall(call) {
                 console.log('🔗 Setting up call handlers');
                 this.state.call = call;
                 
                 call.on('stream', (remoteStream) => {
                     console.log('📹 Remote stream received');
+                    console.log('🎵 Remote audio tracks:', remoteStream.getAudioTracks().length);
+                    console.log('📹 Remote video tracks:', remoteStream.getVideoTracks().length);
                     
                     // Set remote video source
                     this.elements.remoteVideo.srcObject = remoteStream;
-                    this.elements.videoPlaceholder.style.display = 'none';
                     
-                    // Enable audio by default
-                    this.elements.remoteVideo.muted = false;
-                    this.elements.remoteVideo.volume = 1.0;
+                    // FIX: Also set remote audio to separate audio element for reliable playback
+                    this.elements.remoteAudio.srcObject = remoteStream;
+                    
+                    // Ensure audio is not muted and volume is up
+                    this.elements.remoteAudio.muted = false;
+                    this.elements.remoteAudio.volume = 1.0;
+                    
+                    this.elements.videoPlaceholder.style.display = 'none';
                     
                     // Force video play
                     this.elements.remoteVideo.play().catch(e => {
-                        console.log('Auto-play prevented, user interaction required');
+                        console.log('Video auto-play prevented:', e);
                     });
                     
-                    this.showToast('Video connected');
+                    // Force audio play
+                    this.elements.remoteAudio.play().catch(e => {
+                        console.log('Audio auto-play prevented:', e);
+                    });
+                    
+                    this.showToast('Connected - Audio & Video');
                 });
                 
                 call.on('close', () => {
@@ -1237,9 +1277,12 @@
                     this.state.stream = null;
                 }
                 
+                // Clear all media elements
                 this.elements.localVideo.srcObject = null;
                 this.elements.remoteVideo.srcObject = null;
+                this.elements.remoteAudio.srcObject = null;
                 this.elements.videoPlaceholder.style.display = 'block';
+                
                 this.stopTimer();
                 this.showScreen('dialer');
                 this.showToast('Call ended', 'error');
@@ -1266,18 +1309,40 @@
                 this.elements.callTimer.textContent = '00:00';
             },
             
-            // Toggle speaker
+            // Toggle speaker (remote audio)
             toggleSpeaker() {
                 this.state.isSpeakerOn = !this.state.isSpeakerOn;
-                if (this.elements.remoteVideo) {
-                    this.elements.remoteVideo.muted = !this.state.isSpeakerOn;
-                }
+                
+                // Toggle both video and audio elements
+                this.elements.remoteVideo.muted = !this.state.isSpeakerOn;
+                this.elements.remoteAudio.muted = !this.state.isSpeakerOn;
+                
                 this.elements.speakerBtn.classList.toggle('active', this.state.isSpeakerOn);
                 this.elements.speakerBtn.innerHTML = this.state.isSpeakerOn ? 
                     '<i class="fas fa-volume-up"></i>' : 
                     '<i class="fas fa-volume-mute"></i>';
+                
                 this.playBeep(this.state.isSpeakerOn ? 800 : 400, 0.1);
                 this.showToast(this.state.isSpeakerOn ? 'Speaker ON' : 'Speaker OFF');
+            },
+            
+            // Toggle microphone (local audio)
+            toggleMic() {
+                if (this.state.stream) {
+                    const audioTrack = this.state.stream.getAudioTracks()[0];
+                    if (audioTrack) {
+                        this.state.isMicOn = !audioTrack.enabled;
+                        audioTrack.enabled = this.state.isMicOn;
+                        
+                        this.elements.micBtn.classList.toggle('active', this.state.isMicOn);
+                        this.elements.micBtn.innerHTML = this.state.isMicOn ? 
+                            '<i class="fas fa-microphone"></i>' : 
+                            '<i class="fas fa-microphone-slash"></i>';
+                        
+                        this.playBeep(this.state.isMicOn ? 1000 : 500, 0.1);
+                        this.showToast(this.state.isMicOn ? 'Microphone ON' : 'Microphone OFF');
+                    }
+                }
             },
             
             // Toggle video
@@ -1394,6 +1459,7 @@
                 this.elements.hangupBtn.addEventListener('click', () => this.endCall());
                 this.elements.speakerBtn.addEventListener('click', () => this.toggleSpeaker());
                 this.elements.videoBtn.addEventListener('click', () => this.toggleVideo());
+                this.elements.micBtn.addEventListener('click', () => this.toggleMic());
                 
                 // Incoming call
                 this.elements.answerBtn.addEventListener('click', () => this.answerCall());
@@ -1408,15 +1474,18 @@
                     if (e.key === 'Enter') this.startCall();
                 });
                 
-                // Force video play on user interaction
+                // Force video/audio play on user interaction (browser policy fix)
                 document.addEventListener('click', () => {
                     if (this.elements.remoteVideo.srcObject) {
                         this.elements.remoteVideo.play().catch(e => {});
                     }
+                    if (this.elements.remoteAudio.srcObject) {
+                        this.elements.remoteAudio.play().catch(e => {});
+                    }
                     if (this.elements.localVideo.srcObject) {
                         this.elements.localVideo.play().catch(e => {});
                     }
-                });
+                }, { once: false });
             }
         };
         
