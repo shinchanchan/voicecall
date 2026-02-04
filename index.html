@@ -2,43 +2,52 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="google-site-verification" content="C3bRFe_DiKkVQ8mCioHJv78WRf2DLTAAhqJ7lwSkmVk" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="google-site-verification" content="C3bRFe_DiKkVQ8mCioHJv78WRf2DLTAAhqJ7lwSkmVk" />
 
-<title>Cube Dialer | Voice Call & Video Call Web App</title>
+    <title>Cube Dialer | Voice Call & Video Call Web App</title>
 
-<meta name="description"
-      content="Fast Phone Dialer is a browser-based voice call and video call application built using WebRTC. Developed by Vallarasu and hosted on GitHub Pages." />
-
-<meta name="keywords"
-      content="vallarasu github voice call, fast phone dialer, web rtc voice call, browser video call, github voice call app, peerjs voice call" />
-
-<link rel="canonical" href="https://shinchanchan.github.io/voicecall/ " />
+    <meta name="description" content="Fast Phone Dialer is a browser-based voice call and video call application built using WebRTC. Developed by Vallarasu and hosted on GitHub Pages." />
+    <meta name="keywords" content="vallarasu github voice call, fast phone dialer, web rtc voice call, browser video call, github voice call app, peerjs voice call" />
+    <link rel="canonical" href="https://shinchanchan.github.io/voicecall/" />
    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
-    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js "></script>
- <script type="application/ld+json">
-{
-  "@context": "https://schema.org ",
-  "@type": "SoftwareApplication",
-  "name": "Fast Phone Dialer",
-  "operatingSystem": "Web",
-  "applicationCategory": "CommunicationApplication",
-  "description": "WebRTC-based voice and video call application built by Vallarasu.",
-  "url": "https://shinchanchan.github.io/voicecall/ ",
-  "author": {
-    "@type": "Person",
-    "name": "Vallarasu"
-  }
-}
-</script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Fast Phone Dialer",
+      "operatingSystem": "Web",
+      "applicationCategory": "CommunicationApplication",
+      "description": "WebRTC-based voice and video call application built by Vallarasu.",
+      "url": "https://shinchanchan.github.io/voicecall/",
+      "author": {
+        "@type": "Person",
+        "name": "Vallarasu"
+      }
+    }
+    </script>
     
     <style>
+        /* PREVENT PULL-TO-REFRESH - Apply to html and body */
+        html, body {
+            overscroll-behavior-y: none;
+            overscroll-behavior-x: none;
+            overflow: hidden;
+            touch-action: pan-x pan-y;
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', system-ui, sans-serif;
+            /* Prevent text selection which can cause unwanted behaviors */
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
@@ -49,6 +58,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            /* Prevent bounce effects */
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
         }
         
         .phone {
@@ -60,6 +75,8 @@
             overflow: hidden;
             border: 12px solid #111;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            /* Prevent scrolling within the phone container */
+            touch-action: none;
         }
         
         .status-bar {
@@ -80,6 +97,8 @@
             height: calc(100% - 100px);
             position: relative;
             overflow: hidden;
+            /* Prevent scroll chaining */
+            overscroll-behavior: none;
         }
         
         .screen-base {
@@ -91,6 +110,9 @@
             display: none;
             flex-direction: column;
             background: linear-gradient(180deg, #0f0f1a 0%, #000 100%);
+            /* Prevent scrolling on all screens */
+            overflow: hidden;
+            touch-action: none;
         }
         
         .screen-base.active {
@@ -145,6 +167,9 @@
         /* Dialer Screen */
         .dialer {
             padding: 20px;
+            /* Allow vertical scrolling only in dialer if needed, but prevent refresh */
+            overflow-y: auto;
+            overscroll-behavior-y: contain;
         }
         
         .dialer-header {
@@ -217,6 +242,9 @@
             font-size: 20px;
             text-align: center;
             outline: none;
+            /* Allow text selection in input */
+            -webkit-user-select: text;
+            user-select: text;
         }
         
         .peer-input input::placeholder {
@@ -507,6 +535,7 @@
         .help {
             padding: 20px;
             overflow-y: auto;
+            overscroll-behavior-y: contain;
         }
         
         .help-header {
@@ -649,6 +678,44 @@
             100% { transform: rotate(360deg); }
         }
         
+        /* Refresh Prevention Overlay - Shows when user tries to refresh */
+        .refresh-blocker {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .refresh-blocker.active {
+            display: flex;
+        }
+        
+        .refresh-blocker i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: #f44336;
+        }
+        
+        .refresh-blocker h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        
+        .refresh-blocker p {
+            font-size: 14px;
+            color: #aaa;
+        }
+        
         /* Media Queries */
         @media (max-height: 700px) {
             .phone { height: 600px; }
@@ -663,6 +730,13 @@
     </style>
 </head>
 <body>
+    <!-- Refresh Blocker Overlay -->
+    <div id="refreshBlocker" class="refresh-blocker">
+        <i class="fas fa-exclamation-triangle"></i>
+        <h3>Call in Progress</h3>
+        <p>Please end the call before leaving this page</p>
+    </div>
+
     <!-- Toast Messages -->
     <div id="toast" class="toast"></div>
     
@@ -672,7 +746,7 @@
     </div>
     
     <!-- Phone Container -->
-    <div class="phone">
+    <div class="phone" id="phoneContainer">
         <div class="status-bar">
             <span id="time">9:41</span>
             <div>
@@ -843,6 +917,14 @@
                     <p>• Added microphone mute button</p>
                     <p>• Speaker toggle works for both audio and video calls</p>
                 </div>
+
+                <div class="help-section">
+                    <h3><i class="fas fa-shield-alt"></i> Refresh Protection</h3>
+                    <p>• Pull-to-refresh disabled</p>
+                    <p>• Page leave confirmation during calls</p>
+                    <p>• Swipe gestures blocked</p>
+                    <p>• Overscroll behavior controlled</p>
+                </div>
                 
                 <div class="help-section">
                     <h3><i class="fas fa-envelope"></i> Contact</h3>
@@ -869,7 +951,7 @@
     </div>
 
     <script>
-        // Fast Optimized App with Video & Audio Fix
+        // Fast Optimized App with Video, Audio & Refresh Protection
         const App = {
             // DOM Elements
             elements: {},
@@ -890,7 +972,8 @@
                 oscillator: null,
                 currentRingtone: 'classic',
                 ringtoneInterval: null,
-                incomingCall: null
+                incomingCall: null,
+                isInCall: false
             },
             
             // Ringtone Patterns
@@ -910,6 +993,7 @@
                 this.initPeer();
                 this.bindEvents();
                 this.setupAudio();
+                this.setupRefreshPrevention(); // NEW: Setup refresh prevention
                 this.showToast('Ready to connect', 'success');
             },
             
@@ -921,7 +1005,7 @@
                     'answerBtn', 'declineBtn', 'soundToggle', 'closeHelp', 'ringtoneSelect',
                     'callerName', 'callTimer', 'incomingName', 'ringStatus',
                     'remoteVideo', 'localVideo', 'remoteAudio', 'time', 'toast', 'loading', 'videoPlaceholder',
-                    'navHome', 'navDialer', 'navHelp'
+                    'navHome', 'navDialer', 'navHelp', 'refreshBlocker', 'phoneContainer'
                 ];
                 
                 ids.forEach(id => {
@@ -946,6 +1030,148 @@
                     this.state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 } catch(e) {
                     console.log('Audio context not supported');
+                }
+            },
+            
+            // Setup Refresh Prevention - NEW METHOD
+            setupRefreshPrevention() {
+                // 1. Prevent pull-to-refresh on mobile browsers
+                this.preventPullToRefresh();
+                
+                // 2. Prevent page leave during active calls
+                this.preventPageLeave();
+                
+                // 3. Prevent zoom gestures that might trigger refresh
+                this.preventZoomRefresh();
+                
+                // 4. Handle visibility change (when app goes to background)
+                this.handleVisibilityChange();
+            },
+            
+            // Prevent Pull-to-Refresh (CSS + JavaScript approach)
+            preventPullToRefresh() {
+                let startY = 0;
+                let startX = 0;
+                
+                // Touch start - record initial position
+                document.addEventListener('touchstart', (e) => {
+                    startY = e.touches[0].clientY;
+                    startX = e.touches[0].clientX;
+                }, { passive: true });
+                
+                // Touch move - prevent if pulling down from top
+                document.addEventListener('touchmove', (e) => {
+                    const y = e.touches[0].clientY;
+                    const x = e.touches[0].clientX;
+                    const scrollTop = document.scrollingElement.scrollTop;
+                    
+                    // If at top of page and pulling down, prevent default
+                    if (scrollTop === 0 && y > startY) {
+                        e.preventDefault();
+                    }
+                    
+                    // Prevent horizontal swipe refresh (some browsers)
+                    if (Math.abs(x - startX) > Math.abs(y - startY)) {
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+                
+                // Prevent wheel scroll from triggering refresh (desktop)
+                document.addEventListener('wheel', (e) => {
+                    if (document.scrollingElement.scrollTop === 0 && e.deltaY < 0) {
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+            },
+            
+            // Prevent page leave during active calls
+            preventPageLeave() {
+                // Before unload - show confirmation dialog
+                window.addEventListener('beforeunload', (e) => {
+                    if (this.state.isInCall || this.state.call || this.state.incomingCall) {
+                        e.preventDefault();
+                        e.returnValue = 'You have an active call. Are you sure you want to leave?';
+                        return e.returnValue;
+                    }
+                });
+                
+                // Handle back button (Android)
+                window.addEventListener('popstate', (e) => {
+                    if (this.state.isInCall || this.state.call) {
+                        history.pushState(null, null, window.location.href);
+                        this.showToast('Please end the call first', 'error');
+                    }
+                });
+                
+                // Push initial state to prevent back button exit
+                history.pushState(null, null, window.location.href);
+            },
+            
+            // Prevent zoom double-tap refresh
+            preventZoomRefresh() {
+                let lastTouchEnd = 0;
+                document.addEventListener('touchend', (e) => {
+                    const now = Date.now();
+                    if (now - lastTouchEnd <= 300) {
+                        e.preventDefault();
+                    }
+                    lastTouchEnd = now;
+                }, { passive: false });
+                
+                // Prevent double-tap zoom
+                document.addEventListener('touchstart', (e) => {
+                    if (e.touches.length > 1) {
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+            },
+            
+            // Handle visibility change (app background/foreground)
+            handleVisibilityChange() {
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        // App went to background
+                        console.log('App in background');
+                        if (this.state.audioContext) {
+                            this.state.audioContext.suspend();
+                        }
+                    } else {
+                        // App came to foreground
+                        console.log('App in foreground');
+                        if (this.state.audioContext) {
+                            this.state.audioContext.resume();
+                        }
+                        // Re-acquire wake lock if in call
+                        if (this.state.isInCall) {
+                            this.requestWakeLock();
+                        }
+                    }
+                });
+            },
+            
+            // Request screen wake lock (prevent screen off during call)
+            async requestWakeLock() {
+                try {
+                    if ('wakeLock' in navigator) {
+                        const wakeLock = await navigator.wakeLock.request('screen');
+                        console.log('Screen wake lock acquired');
+                        
+                        wakeLock.addEventListener('release', () => {
+                            console.log('Screen wake lock released');
+                        });
+                        
+                        this.state.wakeLock = wakeLock;
+                    }
+                } catch (err) {
+                    console.log('Wake lock error:', err);
+                }
+            },
+            
+            // Release wake lock
+            releaseWakeLock() {
+                if (this.state.wakeLock) {
+                    this.state.wakeLock.release();
+                    this.state.wakeLock = null;
                 }
             },
             
@@ -1153,6 +1379,10 @@
                     this.elements.callerName.textContent = peerId;
                     this.elements.videoPlaceholder.style.display = 'block';
                     
+                    // Mark as in call
+                    this.state.isInCall = true;
+                    this.requestWakeLock(); // Keep screen on
+                    
                     this.showToast('Calling...');
                     
                 } catch(err) {
@@ -1188,6 +1418,10 @@
                     this.startTimer();
                     this.elements.callerName.textContent = this.state.incomingCall.peer;
                     this.elements.videoPlaceholder.style.display = 'block';
+                    
+                    // Mark as in call
+                    this.state.isInCall = true;
+                    this.requestWakeLock(); // Keep screen on
                     
                     // Clear incoming call reference
                     this.state.incomingCall = null;
@@ -1263,6 +1497,10 @@
             endCall() {
                 console.log('📞 Ending call');
                 this.playBeep(300, 0.1);
+                
+                // Mark as not in call
+                this.state.isInCall = false;
+                this.releaseWakeLock(); // Release screen lock
                 
                 if (this.state.call) {
                     this.state.call.close();
