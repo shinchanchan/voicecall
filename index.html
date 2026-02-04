@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -286,42 +285,9 @@
             background: rgba(255, 255, 255, 0.15);
         }
         
-        .action-btn.share {
-            background: linear-gradient(135deg, #2196f3, #21cbf3);
-        }
-        
         .action-btn:hover {
             transform: translateY(-2px);
             opacity: 0.9;
-        }
-        
-        /* Share Link Section */
-        .share-section {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .share-label {
-            color: #888;
-            font-size: 12px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .share-link {
-            color: #667eea;
-            font-size: 12px;
-            word-break: break-all;
-            margin-bottom: 12px;
-            padding: 8px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 6px;
-            font-family: 'Courier New', monospace;
         }
         
         /* Call Screen - FIXED VIDEO & AUDIO */
@@ -750,27 +716,6 @@
             color: #aaa;
         }
         
-        /* Auto-connect notification */
-        .auto-connect-banner {
-            position: absolute;
-            top: 40px;
-            left: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 14px;
-            z-index: 100;
-            display: none;
-            animation: slideDown 0.3s ease;
-        }
-        
-        .auto-connect-banner.active {
-            display: block;
-        }
-        
         /* Media Queries */
         @media (max-height: 700px) {
             .phone { height: 600px; }
@@ -783,7 +728,6 @@
             .action-buttons { grid-template-columns: 1fr; }
         }
     </style>
-<base target="_blank">
 </head>
 <body>
     <!-- Refresh Blocker Overlay -->
@@ -803,11 +747,6 @@
     
     <!-- Phone Container -->
     <div class="phone" id="phoneContainer">
-        <!-- Auto Connect Banner -->
-        <div id="autoConnectBanner" class="auto-connect-banner">
-            <i class="fas fa-link"></i> Auto-connecting to peer...
-        </div>
-
         <div class="status-bar">
             <span id="time">9:41</span>
             <div>
@@ -843,24 +782,6 @@
                     <div id="yourId" class="id-value">Loading...</div>
                 </div>
                 
-                <!-- NEW: Share Link Section -->
-                <div class="share-section">
-                    <div class="share-label">
-                        <i class="fas fa-share-alt"></i> Share Your Link
-                    </div>
-                    <div id="shareLink" class="share-link">Generating...</div>
-                    <div class="action-buttons" style="margin-top: 10px; margin-bottom: 0;">
-                        <button id="copyLinkBtn" class="action-btn copy">
-                            <i class="fas fa-copy"></i>
-                            <span>Copy Link</span>
-                        </button>
-                        <button id="shareBtn" class="action-btn share">
-                            <i class="fas fa-share"></i>
-                            <span>Share</span>
-                        </button>
-                    </div>
-                </div>
-                
                 <div class="peer-input">
                     <input type="text" id="remoteId" placeholder="Enter Peer ID">
                 </div>
@@ -877,7 +798,7 @@
                 </div>
                 
                 <div style="color: #666; font-size: 12px; text-align: center; padding: 10px;">
-                    Share your link • Others can call you directly
+                    Share your ID • Enter peer ID to call
                 </div>
             </div>
             
@@ -983,9 +904,9 @@
                 
                 <div class="help-section">
                     <h3><i class="fas fa-phone"></i> How to Call</h3>
-                    <p>1. Share your Peer ID or Link</p>
-                    <p>2. Others click link to auto-connect</p>
-                    <p>3. Or enter ID manually and tap Call</p>
+                    <p>1. Share your Peer ID</p>
+                    <p>2. Enter other's ID</p>
+                    <p>3. Tap Call button</p>
                     <p>4. Answer incoming calls</p>
                 </div>
                 
@@ -1003,14 +924,6 @@
                     <p>• Page leave confirmation during calls</p>
                     <p>• Swipe gestures blocked</p>
                     <p>• Overscroll behavior controlled</p>
-                </div>
-
-                <div class="help-section">
-                    <h3><i class="fas fa-link"></i> Share Link Feature</h3>
-                    <p>• Generate shareable link with your Peer ID</p>
-                    <p>• Others can click to auto-connect</p>
-                    <p>• Works with URL parameter: ?call=PEER_ID</p>
-                    <p>• Native share support on mobile</p>
                 </div>
                 
                 <div class="help-section">
@@ -1038,7 +951,7 @@
     </div>
 
     <script>
-        // Fast Optimized App with Video, Audio, Refresh Protection & Share Link
+        // Fast Optimized App with Video, Audio & Refresh Protection
         const App = {
             // DOM Elements
             elements: {},
@@ -1060,9 +973,7 @@
                 currentRingtone: 'classic',
                 ringtoneInterval: null,
                 incomingCall: null,
-                isInCall: false,
-                autoConnectPeer: null,
-                isPlayingRingtone: false
+                isInCall: false
             },
             
             // Ringtone Patterns
@@ -1079,29 +990,11 @@
                 console.log('🚀 App Initializing...');
                 this.cacheElements();
                 this.setupTime();
-                this.checkUrlParams(); // Check for auto-connect parameter
                 this.initPeer();
                 this.bindEvents();
                 this.setupAudio();
-                this.setupRefreshPrevention();
+                this.setupRefreshPrevention(); // NEW: Setup refresh prevention
                 this.showToast('Ready to connect', 'success');
-            },
-            
-            // Check URL parameters for auto-connect
-            checkUrlParams() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const callPeerId = urlParams.get('call');
-                
-                if (callPeerId) {
-                    console.log('🔗 Auto-connect peer ID found:', callPeerId);
-                    this.state.autoConnectPeer = callPeerId;
-                    // Show banner notification
-                    setTimeout(() => {
-                        this.elements.autoConnectBanner.classList.add('active');
-                        this.elements.autoConnectBanner.innerHTML = 
-                            `<i class="fas fa-link"></i> Connecting to ${callPeerId}...`;
-                    }, 1000);
-                }
             },
             
             // Cache DOM elements
@@ -1112,8 +1005,7 @@
                     'answerBtn', 'declineBtn', 'soundToggle', 'closeHelp', 'ringtoneSelect',
                     'callerName', 'callTimer', 'incomingName', 'ringStatus',
                     'remoteVideo', 'localVideo', 'remoteAudio', 'time', 'toast', 'loading', 'videoPlaceholder',
-                    'navHome', 'navDialer', 'navHelp', 'refreshBlocker', 'phoneContainer',
-                    'shareLink', 'copyLinkBtn', 'shareBtn', 'autoConnectBanner'
+                    'navHome', 'navDialer', 'navHelp', 'refreshBlocker', 'phoneContainer'
                 ];
                 
                 ids.forEach(id => {
@@ -1141,38 +1033,50 @@
                 }
             },
             
-            // Setup Refresh Prevention
+            // Setup Refresh Prevention - NEW METHOD
             setupRefreshPrevention() {
+                // 1. Prevent pull-to-refresh on mobile browsers
                 this.preventPullToRefresh();
+                
+                // 2. Prevent page leave during active calls
                 this.preventPageLeave();
+                
+                // 3. Prevent zoom gestures that might trigger refresh
                 this.preventZoomRefresh();
+                
+                // 4. Handle visibility change (when app goes to background)
                 this.handleVisibilityChange();
             },
             
-            // Prevent Pull-to-Refresh
+            // Prevent Pull-to-Refresh (CSS + JavaScript approach)
             preventPullToRefresh() {
                 let startY = 0;
                 let startX = 0;
                 
+                // Touch start - record initial position
                 document.addEventListener('touchstart', (e) => {
                     startY = e.touches[0].clientY;
                     startX = e.touches[0].clientX;
                 }, { passive: true });
                 
+                // Touch move - prevent if pulling down from top
                 document.addEventListener('touchmove', (e) => {
                     const y = e.touches[0].clientY;
                     const x = e.touches[0].clientX;
                     const scrollTop = document.scrollingElement.scrollTop;
                     
+                    // If at top of page and pulling down, prevent default
                     if (scrollTop === 0 && y > startY) {
                         e.preventDefault();
                     }
                     
+                    // Prevent horizontal swipe refresh (some browsers)
                     if (Math.abs(x - startX) > Math.abs(y - startY)) {
                         e.preventDefault();
                     }
                 }, { passive: false });
                 
+                // Prevent wheel scroll from triggering refresh (desktop)
                 document.addEventListener('wheel', (e) => {
                     if (document.scrollingElement.scrollTop === 0 && e.deltaY < 0) {
                         e.preventDefault();
@@ -1182,6 +1086,7 @@
             
             // Prevent page leave during active calls
             preventPageLeave() {
+                // Before unload - show confirmation dialog
                 window.addEventListener('beforeunload', (e) => {
                     if (this.state.isInCall || this.state.call || this.state.incomingCall) {
                         e.preventDefault();
@@ -1190,6 +1095,7 @@
                     }
                 });
                 
+                // Handle back button (Android)
                 window.addEventListener('popstate', (e) => {
                     if (this.state.isInCall || this.state.call) {
                         history.pushState(null, null, window.location.href);
@@ -1197,6 +1103,7 @@
                     }
                 });
                 
+                // Push initial state to prevent back button exit
                 history.pushState(null, null, window.location.href);
             },
             
@@ -1211,6 +1118,7 @@
                     lastTouchEnd = now;
                 }, { passive: false });
                 
+                // Prevent double-tap zoom
                 document.addEventListener('touchstart', (e) => {
                     if (e.touches.length > 1) {
                         e.preventDefault();
@@ -1218,19 +1126,22 @@
                 }, { passive: false });
             },
             
-            // Handle visibility change
+            // Handle visibility change (app background/foreground)
             handleVisibilityChange() {
                 document.addEventListener('visibilitychange', () => {
                     if (document.hidden) {
+                        // App went to background
                         console.log('App in background');
                         if (this.state.audioContext) {
                             this.state.audioContext.suspend();
                         }
                     } else {
+                        // App came to foreground
                         console.log('App in foreground');
                         if (this.state.audioContext) {
                             this.state.audioContext.resume();
                         }
+                        // Re-acquire wake lock if in call
                         if (this.state.isInCall) {
                             this.requestWakeLock();
                         }
@@ -1238,7 +1149,7 @@
                 });
             },
             
-            // Request screen wake lock
+            // Request screen wake lock (prevent screen off during call)
             async requestWakeLock() {
                 try {
                     if ('wakeLock' in navigator) {
@@ -1264,75 +1175,66 @@
                 }
             },
             
-            // Play selected ringtone - FIXED: Now stops properly when answered
+            // Play selected ringtone
             playRingtone() {
-                if (!this.state.soundEnabled || !this.state.audioContext || this.state.isPlayingRingtone) return;
+                if (!this.state.soundEnabled || !this.state.audioContext) return;
                 
-                this.state.isPlayingRingtone = true;
+                this.stopRingtone();
+                
                 const ringtone = this.ringtones[this.state.currentRingtone];
                 if (!ringtone) return;
                 
-                const playPattern = () => {
-                    // Check if we should stop (call answered or declined)
-                    if (!this.state.isPlayingRingtone) {
-                        console.log('🛑 Ringtone stopped (call handled)');
-                        return;
+                try {
+                    const oscillator = this.state.audioContext.createOscillator();
+                    const gainNode = this.state.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.state.audioContext.destination);
+                    
+                    let time = this.state.audioContext.currentTime;
+                    const pattern = ringtone.pattern;
+                    
+                    // Play pattern
+                    for (let i = 0; i < pattern.length; i++) {
+                        if (i % 2 === 0) {
+                            // Sound on
+                            oscillator.frequency.setValueAtTime(ringtone.freq1, time);
+                            gainNode.gain.setValueAtTime(0.3, time);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+                        }
+                        time += pattern[i];
                     }
                     
-                    try {
-                        const oscillator = this.state.audioContext.createOscillator();
-                        const gainNode = this.state.audioContext.createGain();
-                        
-                        oscillator.connect(gainNode);
-                        gainNode.connect(this.state.audioContext.destination);
-                        
-                        let time = this.state.audioContext.currentTime;
-                        const pattern = ringtone.pattern;
-                        
-                        // Play pattern
-                        for (let i = 0; i < pattern.length; i++) {
-                            if (i % 2 === 0) {
-                                oscillator.frequency.setValueAtTime(ringtone.freq1, time);
-                                gainNode.gain.setValueAtTime(0.3, time);
-                                gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
-                            }
-                            time += pattern[i];
+                    oscillator.start();
+                    oscillator.stop(time);
+                    
+                    this.state.oscillator = oscillator;
+                    
+                    // Calculate total pattern duration and repeat
+                    const totalDuration = pattern.reduce((a, b) => a + b, 0);
+                    
+                    this.state.ringtoneInterval = setTimeout(() => {
+                        if (this.state.audioContext && this.state.soundEnabled) {
+                            this.playRingtone();
                         }
-                        
-                        oscillator.start();
-                        oscillator.stop(time);
-                        
-                        // Schedule next pattern if still ringing
-                        const totalDuration = pattern.reduce((a, b) => a + b, 0);
-                        this.state.ringtoneTimeout = setTimeout(() => {
-                            if (this.state.isPlayingRingtone) {
-                                playPattern();
-                            }
-                        }, totalDuration * 1000);
-                        
-                    } catch(e) {
-                        console.log('Ringtone error:', e);
-                    }
-                };
-                
-                playPattern();
+                    }, totalDuration * 1000);
+                    
+                } catch(e) {
+                    console.log('Ringtone error:', e);
+                }
             },
             
-            // Stop ringtone - FIXED: Properly stops the ringing
+            // Stop ringtone
             stopRingtone() {
-                console.log('🔇 Stopping ringtone');
-                this.state.isPlayingRingtone = false;
-                
-                if (this.state.ringtoneTimeout) {
-                    clearTimeout(this.state.ringtoneTimeout);
-                    this.state.ringtoneTimeout = null;
-                }
-                
                 if (this.state.oscillator) {
                     try {
                         this.state.oscillator.stop();
                     } catch(e) {}
                     this.state.oscillator = null;
+                }
+                if (this.state.ringtoneInterval) {
+                    clearTimeout(this.state.ringtoneInterval);
+                    this.state.ringtoneInterval = null;
                 }
             },
             
@@ -1379,15 +1281,7 @@
                 this.state.peer.on('open', (id) => {
                     console.log('✅ Peer connected:', id);
                     this.elements.yourId.textContent = id;
-                    this.updateShareLink(id); // Update share link with peer ID
                     this.showToast('Connected ✓');
-                    
-                    // Check if we need to auto-connect
-                    if (this.state.autoConnectPeer) {
-                        setTimeout(() => {
-                            this.performAutoConnect();
-                        }, 1500); // Wait a bit for peer to be fully ready
-                    }
                 });
                 
                 this.state.peer.on('error', (err) => {
@@ -1398,14 +1292,9 @@
                 this.state.peer.on('call', (call) => {
                     console.log('📞 Incoming call from:', call.peer);
                     
-                    // Stop any existing ringtone first
-                    this.stopRingtone();
-                    
                     this.state.incomingCall = call;
                     this.elements.incomingName.textContent = call.peer;
                     this.showScreen('incoming');
-                    
-                    // Start playing ringtone
                     this.playRingtone();
                     
                     // Auto decline after 30 seconds
@@ -1416,64 +1305,6 @@
                         }
                     }, 30000);
                 });
-            },
-            
-            // NEW: Update share link with peer ID
-            updateShareLink(peerId) {
-                const baseUrl = window.location.origin + window.location.pathname;
-                const shareUrl = `${baseUrl}?call=${peerId}`;
-                this.elements.shareLink.textContent = shareUrl;
-            },
-            
-            // NEW: Copy share link to clipboard
-            copyShareLink() {
-                const link = this.elements.shareLink.textContent;
-                navigator.clipboard.writeText(link).then(() => {
-                    this.playBeep(1200, 0.1);
-                    this.showToast('Share link copied!');
-                }).catch(() => {
-                    this.showToast('Failed to copy link', 'error');
-                });
-            },
-            
-            // NEW: Native share functionality
-            async shareLink() {
-                const link = this.elements.shareLink.textContent;
-                const shareData = {
-                    title: 'Cube Call - Video Call',
-                    text: 'Call me on Cube Call!',
-                    url: link
-                };
-                
-                try {
-                    if (navigator.share) {
-                        await navigator.share(shareData);
-                        this.showToast('Share dialog opened');
-                    } else {
-                        // Fallback to copy
-                        this.copyShareLink();
-                    }
-                } catch (err) {
-                    console.log('Share canceled or failed:', err);
-                }
-            },
-            
-            // NEW: Perform auto-connect from URL parameter
-            async performAutoConnect() {
-                const peerId = this.state.autoConnectPeer;
-                if (!peerId || !this.state.peer) return;
-                
-                console.log('🚀 Auto-connecting to:', peerId);
-                this.elements.remoteId.value = peerId;
-                
-                // Small delay to ensure UI is ready
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
-                // Start the call
-                await this.startCall();
-                
-                // Hide banner
-                this.elements.autoConnectBanner.classList.remove('active');
             },
             
             // Get media with noise cancellation
@@ -1500,6 +1331,7 @@
                     console.log('🎥 Requesting media with constraints:', constraints);
                     const stream = await navigator.mediaDevices.getUserMedia(constraints);
                     
+                    // Log available tracks
                     console.log('✅ Media tracks:', 
                         stream.getVideoTracks().length, 'video,',
                         stream.getAudioTracks().length, 'audio'
@@ -1516,7 +1348,7 @@
                 }
             },
             
-            // Start call
+            // Start call - FIXED AUDIO & VIDEO
             async startCall() {
                 const peerId = this.elements.remoteId.value.trim();
                 if (!peerId) {
@@ -1528,20 +1360,28 @@
                     console.log('📞 Starting call to:', peerId);
                     this.playBeep(1200, 0.1);
                     
+                    // Get media stream
                     this.state.stream = await this.getMedia();
+                    
+                    // Set local video source
                     this.elements.localVideo.srcObject = this.state.stream;
                     console.log('📹 Local video set');
                     
+                    // Start call
                     const call = this.state.peer.call(peerId, this.state.stream);
+                    
+                    // Setup call handlers
                     this.setupCall(call);
                     
+                    // Show call screen
                     this.showScreen('call');
                     this.startTimer();
                     this.elements.callerName.textContent = peerId;
                     this.elements.videoPlaceholder.style.display = 'block';
                     
+                    // Mark as in call
                     this.state.isInCall = true;
-                    this.requestWakeLock();
+                    this.requestWakeLock(); // Keep screen on
                     
                     this.showToast('Calling...');
                     
@@ -1551,18 +1391,19 @@
                 }
             },
             
-            // Answer call - FIXED: Stops ringtone immediately
+            // Answer call - FIXED AUDIO & VIDEO
             async answerCall() {
                 if (!this.state.incomingCall) return;
                 
-                // CRITICAL: Stop ringtone FIRST before anything else
-                this.stopRingtone();
-                
                 try {
                     console.log('✅ Answering call from:', this.state.incomingCall.peer);
+                    this.stopRingtone();
                     this.playBeep(1000, 0.2);
                     
+                    // Get media stream
                     this.state.stream = await this.getMedia();
+                    
+                    // Set local video source
                     this.elements.localVideo.srcObject = this.state.stream;
                     console.log('📹 Local video set');
                     
@@ -1580,7 +1421,7 @@
                     
                     // Mark as in call
                     this.state.isInCall = true;
-                    this.requestWakeLock();
+                    this.requestWakeLock(); // Keep screen on
                     
                     // Clear incoming call reference
                     this.state.incomingCall = null;
@@ -1594,22 +1435,19 @@
                 }
             },
             
-            // Decline call - FIXED: Stops ringtone
+            // Decline call
             declineCall() {
-                // Stop ringtone immediately
-                this.stopRingtone();
-                
                 if (this.state.incomingCall) {
                     console.log('❌ Declining call from:', this.state.incomingCall.peer);
                     this.playBeep(400, 0.1);
                     this.state.incomingCall.close();
                     this.state.incomingCall = null;
                 }
-                
+                this.stopRingtone();
                 this.showScreen('dialer');
             },
             
-            // Setup call handlers
+            // Setup call handlers - FIXED AUDIO & VIDEO
             setupCall(call) {
                 console.log('🔗 Setting up call handlers');
                 this.state.call = call;
@@ -1619,18 +1457,24 @@
                     console.log('🎵 Remote audio tracks:', remoteStream.getAudioTracks().length);
                     console.log('📹 Remote video tracks:', remoteStream.getVideoTracks().length);
                     
+                    // Set remote video source
                     this.elements.remoteVideo.srcObject = remoteStream;
+                    
+                    // FIX: Also set remote audio to separate audio element for reliable playback
                     this.elements.remoteAudio.srcObject = remoteStream;
                     
+                    // Ensure audio is not muted and volume is up
                     this.elements.remoteAudio.muted = false;
                     this.elements.remoteAudio.volume = 1.0;
                     
                     this.elements.videoPlaceholder.style.display = 'none';
                     
+                    // Force video play
                     this.elements.remoteVideo.play().catch(e => {
                         console.log('Video auto-play prevented:', e);
                     });
                     
+                    // Force audio play
                     this.elements.remoteAudio.play().catch(e => {
                         console.log('Audio auto-play prevented:', e);
                     });
@@ -1654,11 +1498,9 @@
                 console.log('📞 Ending call');
                 this.playBeep(300, 0.1);
                 
-                // Stop ringtone if playing
-                this.stopRingtone();
-                
+                // Mark as not in call
                 this.state.isInCall = false;
-                this.releaseWakeLock();
+                this.releaseWakeLock(); // Release screen lock
                 
                 if (this.state.call) {
                     this.state.call.close();
@@ -1673,6 +1515,7 @@
                     this.state.stream = null;
                 }
                 
+                // Clear all media elements
                 this.elements.localVideo.srcObject = null;
                 this.elements.remoteVideo.srcObject = null;
                 this.elements.remoteAudio.srcObject = null;
@@ -1704,9 +1547,11 @@
                 this.elements.callTimer.textContent = '00:00';
             },
             
-            // Toggle speaker
+            // Toggle speaker (remote audio)
             toggleSpeaker() {
                 this.state.isSpeakerOn = !this.state.isSpeakerOn;
+                
+                // Toggle both video and audio elements
                 this.elements.remoteVideo.muted = !this.state.isSpeakerOn;
                 this.elements.remoteAudio.muted = !this.state.isSpeakerOn;
                 
@@ -1719,7 +1564,7 @@
                 this.showToast(this.state.isSpeakerOn ? 'Speaker ON' : 'Speaker OFF');
             },
             
-            // Toggle microphone
+            // Toggle microphone (local audio)
             toggleMic() {
                 if (this.state.stream) {
                     const audioTrack = this.state.stream.getAudioTracks()[0];
@@ -1791,9 +1636,9 @@
                 this.showToast('Ringtone: ' + this.elements.ringtoneSelect.selectedOptions[0].text);
                 
                 // If currently ringing, restart with new tone
-                if (this.state.isPlayingRingtone) {
+                if (document.getElementById('incomingScreen').classList.contains('active')) {
                     this.stopRingtone();
-                    setTimeout(() => this.playRingtone(), 100);
+                    this.playRingtone();
                 }
             },
             
@@ -1806,6 +1651,7 @@
                 
                 this.elements[screen + 'Screen'].classList.add('active');
                 
+                // Update nav
                 ['Home', 'Dialer', 'Help'].forEach(nav => {
                     this.elements['nav' + nav].classList.remove('active');
                 });
@@ -1847,10 +1693,6 @@
                 this.elements.callBtn.addEventListener('click', () => this.startCall());
                 this.elements.soundToggle.addEventListener('click', () => this.toggleSound());
                 
-                // NEW: Share link buttons
-                this.elements.copyLinkBtn.addEventListener('click', () => this.copyShareLink());
-                this.elements.shareBtn.addEventListener('click', () => this.shareLink());
-                
                 // Call controls
                 this.elements.hangupBtn.addEventListener('click', () => this.endCall());
                 this.elements.speakerBtn.addEventListener('click', () => this.toggleSpeaker());
@@ -1870,7 +1712,7 @@
                     if (e.key === 'Enter') this.startCall();
                 });
                 
-                // Force video/audio play on user interaction
+                // Force video/audio play on user interaction (browser policy fix)
                 document.addEventListener('click', () => {
                     if (this.elements.remoteVideo.srcObject) {
                         this.elements.remoteVideo.play().catch(e => {});
