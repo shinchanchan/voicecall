@@ -9,17 +9,17 @@
 
     <meta name="description" content="Cube Dialer is a browser-based voice call and video call application built using WebRTC with screen sharing." />
     <meta name="keywords" content="voice call, video call, screen share, web rtc, browser call, peerjs" />
-    <link rel="canonical" href="https://shinchanchan.github.io/voicecall/" />
+    <link rel="canonical" href="https://shinchanchan.github.io/voicecall/ " />
    
     <!-- Tailwind CSS & DaisyUI -->
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css " rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com "></script>
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
     
     <!-- PeerJS -->
-    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js "></script>
     
     <script>
         tailwind.config = {
@@ -755,10 +755,16 @@
         .incoming-action-btn {
             cursor: pointer;
             transition: all 0.2s ease;
+            pointer-events: auto !important;
+            touch-action: manipulation;
         }
         
         .incoming-action-btn:active {
             transform: scale(0.95);
+        }
+        
+        .incoming-action-btn * {
+            pointer-events: none;
         }
     </style>
 </head>
@@ -845,7 +851,7 @@
                 <div class="call-controls"><button id="micBtn" class="control-btn active" onclick="App.toggleMic()"><i class="fas fa-microphone"></i></button><button id="speakerBtn" class="control-btn active" onclick="App.toggleSpeaker()"><i class="fas fa-volume-up"></i></button><button id="videoToggleBtn" class="control-btn active" onclick="App.toggleVideoMode()"><i class="fas fa-desktop"></i></button><button class="control-btn hangup" onclick="App.endCall()"><i class="fas fa-phone-slash"></i></button><button id="videoBtn" class="control-btn active" onclick="App.toggleVideo()"><i class="fas fa-video"></i></button><button id="flipBtn" class="control-btn" onclick="App.flipCamera()"><i class="fas fa-sync-alt"></i></button></div>
             </div>
             
-            <!-- INCOMING CALL SCREEN - FIXED BUTTONS -->
+            <!-- INCOMING CALL SCREEN -->
             <div id="incomingScreen" class="screen">
                 <div class="flex-1 flex flex-col items-center justify-center p-8 relative">
                     <div class="absolute inset-0 bg-gradient-to-b from-primary/20 via-transparent to-secondary/20"></div>
@@ -875,12 +881,12 @@
                         </select>
                     </div>
                     
-                    <div class="flex items-center gap-8 sm:gap-10">
-                        <button id="declineCallBtn" class="btn btn-circle btn-lg sm:btn-xl btn-error ripple-btn shadow-lg shadow-error/30 incoming-action-btn">
+                    <div class="flex items-center gap-8 sm:gap-10" style="position: relative; z-index: 50;">
+                        <button id="declineCallBtn" type="button" class="btn btn-circle btn-lg sm:btn-xl btn-error shadow-lg shadow-error/30 incoming-action-btn">
                             <i class="fas fa-phone-slash text-xl sm:text-2xl"></i>
                         </button>
                         
-                        <button id="answerCallBtn" class="btn btn-circle btn-lg sm:btn-xl btn-success ripple-btn call-pulse shadow-lg shadow-success/30 incoming-action-btn">
+                        <button id="answerCallBtn" type="button" class="btn btn-circle btn-lg sm:btn-xl btn-success call-pulse shadow-lg shadow-success/30 incoming-action-btn">
                             <i class="fas fa-phone-alt text-xl sm:text-2xl"></i>
                         </button>
                     </div>
@@ -899,7 +905,7 @@
     </div>
 
     <script>
-        // Cube Dialer App v3.2 - FULLY FIXED Incoming Call Buttons
+        // Cube Dialer App v3.2 - Fixed Incoming Call Buttons
         const App = {
             elements: {},
             state: {
@@ -939,18 +945,27 @@
                 ids.forEach(id => this.elements[id] = document.getElementById(id));
             },
             setupIncomingButtons() {
-                // Direct DOM element binding - most reliable method
+                // Use addEventListener for more reliable binding
                 const answerBtn = document.getElementById('answerCallBtn');
                 const declineBtn = document.getElementById('declineCallBtn');
                 
                 if(answerBtn) {
-                    // Remove any existing listeners
+                    // Remove any existing listeners first
                     const newAnswerBtn = answerBtn.cloneNode(true);
                     answerBtn.parentNode.replaceChild(newAnswerBtn, answerBtn);
-                    newAnswerBtn.onclick = (e) => {
+                    
+                    // Use addEventListener with capture phase for better reliability
+                    newAnswerBtn.addEventListener('click', (e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         console.log('Answer button clicked');
+                        this.answerCall();
+                    }, true);
+                    
+                    // Also set onclick as fallback
+                    newAnswerBtn.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                         this.answerCall();
                     };
                 }
@@ -958,10 +973,17 @@
                 if(declineBtn) {
                     const newDeclineBtn = declineBtn.cloneNode(true);
                     declineBtn.parentNode.replaceChild(newDeclineBtn, declineBtn);
-                    newDeclineBtn.onclick = (e) => {
+                    
+                    newDeclineBtn.addEventListener('click', (e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         console.log('Decline button clicked');
+                        this.declineCall();
+                    }, true);
+                    
+                    newDeclineBtn.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                         this.declineCall();
                     };
                 }
