@@ -742,6 +742,37 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
+        
+        .incoming-buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .answer-btn, .decline-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        
+        .answer-btn {
+            background: #22c55e;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+        }
+        
+        .decline-btn {
+            background: #ef4444;
+        }
+        
+        .answer-btn:active, .decline-btn:active {
+            transform: scale(0.95);
+        }
     </style>
 <base target="_blank">
 </head>
@@ -828,9 +859,46 @@
                 <div class="call-controls"><button id="micBtn" class="control-btn active" onclick="App.toggleMic()"><i class="fas fa-microphone"></i></button><button id="speakerBtn" class="control-btn active" onclick="App.toggleSpeaker()"><i class="fas fa-volume-up"></i></button><button id="videoToggleBtn" class="control-btn active" onclick="App.toggleVideoMode()"><i class="fas fa-desktop"></i></button><button class="control-btn hangup" onclick="App.endCall()"><i class="fas fa-phone-slash"></i></button><button id="videoBtn" class="control-btn active" onclick="App.toggleVideo()"><i class="fas fa-video"></i></button><button id="flipBtn" class="control-btn" onclick="App.flipCamera()"><i class="fas fa-sync-alt"></i></button></div>
             </div>
             
-            <!-- INCOMING CALL SCREEN -->
+            <!-- INCOMING CALL SCREEN - FIXED BUTTONS -->
             <div id="incomingScreen" class="screen">
-                <div class="flex-1 flex flex-col items-center justify-center p-8 relative"><div class="absolute inset-0 bg-gradient-to-b from-primary/20 via-transparent to-secondary/20"></div><div class="relative mb-8"><div class="w-28 h-28 sm:w-36 sm:h-36 gradient-bg rounded-full flex items-center justify-center avatar-pulse"><i class="fas fa-user text-4xl sm:text-5xl text-white"></i></div><div class="absolute -bottom-2 left-1/2 -translate-x-1/2 glass rounded-full px-4 py-1"><span class="text-xs text-white/70 flex items-center gap-1"><i class="fas fa-phone-alt animate-ring text-success"></i>Incoming</span></div></div><h2 id="incomingName" class="text-2xl sm:text-3xl font-bold text-white mb-2">Unknown</h2><p class="text-white/50 mb-6 sm:mb-8">is calling you...</p><div class="w-full max-w-xs mb-6 sm:mb-10"><label class="text-white/50 text-sm mb-2 block">Ringtone</label><select id="ringtoneSelect" onchange="App.changeRingtone()" class="select select-bordered w-full bg-white/5 border-white/10 text-white text-sm"><option value="classic" selected>Classic Ringtone</option><option value="digital">Digital Beep</option><option value="melody">Soft Melody</option><option value="pulse">Pulse Tone</option><option value="bell">Bell Ring</option></select></div><div class="flex items-center gap-8 sm:gap-10"><button onclick="App.declineCall()" class="btn btn-circle btn-lg sm:btn-xl btn-error ripple-btn shadow-lg shadow-error/30"><i class="fas fa-phone-slash text-xl sm:text-2xl"></i></button><button onclick="App.answerCall()" class="btn btn-circle btn-lg sm:btn-xl btn-success ripple-btn call-pulse shadow-lg shadow-success/30"><i class="fas fa-phone-alt text-xl sm:text-2xl"></i></button></div></div>
+                <div class="flex-1 flex flex-col items-center justify-center p-8 relative">
+                    <div class="absolute inset-0 bg-gradient-to-b from-primary/20 via-transparent to-secondary/20"></div>
+                    <div class="relative mb-8">
+                        <div class="w-28 h-28 sm:w-36 sm:h-36 gradient-bg rounded-full flex items-center justify-center avatar-pulse">
+                            <i class="fas fa-user text-4xl sm:text-5xl text-white"></i>
+                        </div>
+                        <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 glass rounded-full px-4 py-1">
+                            <span class="text-xs text-white/70 flex items-center gap-1">
+                                <i class="fas fa-phone-alt animate-ring text-success"></i>
+                                Incoming
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <h2 id="incomingName" class="text-2xl sm:text-3xl font-bold text-white mb-2">Unknown</h2>
+                    <p class="text-white/50 mb-6 sm:mb-8">is calling you...</p>
+                    
+                    <div class="w-full max-w-xs mb-6 sm:mb-10">
+                        <label class="text-white/50 text-sm mb-2 block">Ringtone</label>
+                        <select id="ringtoneSelect" onchange="App.changeRingtone()" class="select select-bordered w-full bg-white/5 border-white/10 text-white text-sm">
+                            <option value="classic" selected>Classic Ringtone</option>
+                            <option value="digital">Digital Beep</option>
+                            <option value="melody">Soft Melody</option>
+                            <option value="pulse">Pulse Tone</option>
+                            <option value="bell">Bell Ring</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex items-center gap-8 sm:gap-10">
+                        <button id="declineCallBtn" class="btn btn-circle btn-lg sm:btn-xl btn-error ripple-btn shadow-lg shadow-error/30">
+                            <i class="fas fa-phone-slash text-xl sm:text-2xl"></i>
+                        </button>
+                        
+                        <button id="answerCallBtn" class="btn btn-circle btn-lg sm:btn-xl btn-success ripple-btn call-pulse shadow-lg shadow-success/30">
+                            <i class="fas fa-phone-alt text-xl sm:text-2xl"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
             
             <!-- HELP SCREEN -->
@@ -841,7 +909,7 @@
     </div>
 
     <script>
-        // Cube Dialer App v3.2 - Manual Refresh Only - Clean Status Bar
+        // Cube Dialer App v3.2 - Fixed Incoming Call Buttons
         const App = {
             elements: {},
             state: {
@@ -851,7 +919,7 @@
                 soundEnabled: true, audioContext: null, oscillator: null, currentRingtone: 'classic',
                 ringtoneInterval: null, incomingCall: null, isInCall: false, currentFacingMode: 'user',
                 isConnected: false, reconnectAttempts: 0, maxReconnectAttempts: 5, peerId: null,
-                wakeLock: null, refreshPending: false
+                wakeLock: null
             },
             ringtones: {
                 classic: { freq1: 800, freq2: 800, pattern: [0.1, 0.1, 0.1, 0.1, 1.6] },
@@ -868,78 +936,54 @@
                 this.createParticles();
                 this.initPeer();
                 this.bindEvents();
+                this.setupIncomingButtons();
                 if(this.elements.ringtoneSelect) this.elements.ringtoneSelect.value = 'classic';
                 document.getElementById('stayOnCallBtn').onclick = () => this.cancelRefresh();
                 document.getElementById('leaveCallBtn').onclick = () => this.confirmRefresh();
                 
-                // Setup sound toggle in status bar
                 const soundIcon = document.getElementById('soundToggleIcon');
-                if(soundIcon) {
-                    soundIcon.onclick = () => this.toggleSound();
-                }
+                if(soundIcon) soundIcon.onclick = () => this.toggleSound();
             },
             cacheElements() {
                 const ids = ['homeScreen','dialerScreen','callScreen','incomingScreen','helpScreen','yourId','remoteId','callerName','callTimer','incomingName','remoteVideo','localVideo','remoteAudio','screenVideo','localPreview','screenPreview','screenShareIndicator','videoModeIndicator','videoModeText','micBtn','speakerBtn','videoBtn','videoToggleBtn','flipBtn','time','toast','loading','videoPlaceholder','navHome','navDialer','navHelp','ringtoneSelect','connectionStatus','connectionText','peerStatus','callBtn','reconnectBtn','refreshDialog'];
                 ids.forEach(id => this.elements[id] = document.getElementById(id));
+            },
+            setupIncomingButtons() {
+                const answerBtn = document.getElementById('answerCallBtn');
+                const declineBtn = document.getElementById('declineCallBtn');
+                if(answerBtn) answerBtn.onclick = () => this.answerCall();
+                if(declineBtn) declineBtn.onclick = () => this.declineCall();
             },
             createParticles() { const c=document.getElementById('particles'); if(!c)return; for(let i=0;i<15;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDelay=Math.random()*6+'s';c.appendChild(p);} },
             setupTime() { const u=()=>{if(this.elements.time) this.elements.time.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}; u(); setInterval(u,60000); },
             setupAudio() { try { this.state.audioContext = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} },
             setupManualRefresh() {
                 const refreshBtn = document.getElementById('manualRefreshBtn');
-                if(refreshBtn) {
-                    refreshBtn.onclick = () => {
-                        if(this.state.isInCall || this.state.call) {
-                            this.showRefreshDialog();
-                        } else {
-                            location.reload();
-                        }
-                    };
-                }
-                
-                window.addEventListener('beforeunload', (e) => {
-                    if(this.state.isInCall || this.state.call || this.state.incomingCall) {
-                        e.preventDefault();
-                        e.returnValue = 'You have an active call. Are you sure you want to leave?';
-                        return e.returnValue;
-                    }
-                });
+                if(refreshBtn) refreshBtn.onclick = () => { if(this.state.isInCall || this.state.call) this.showRefreshDialog(); else location.reload(); };
+                window.addEventListener('beforeunload', (e) => { if(this.state.isInCall || this.state.call || this.state.incomingCall) { e.preventDefault(); e.returnValue = 'Active call in progress. Leave?'; return e.returnValue; } });
             },
             showRefreshDialog() { if(this.elements.refreshDialog) this.elements.refreshDialog.classList.add('show'); },
             hideRefreshDialog() { if(this.elements.refreshDialog) this.elements.refreshDialog.classList.remove('show'); },
-            confirmRefresh() { 
-                this.hideRefreshDialog(); 
-                if(this.state.call) this.state.call.close(); 
-                if(this.state.stream) this.state.stream.getTracks().forEach(t=>t.stop());
-                if(this.state.screenStream) this.state.screenStream.getTracks().forEach(t=>t.stop());
-                location.reload(); 
-            },
+            confirmRefresh() { this.hideRefreshDialog(); if(this.state.call) this.state.call.close(); if(this.state.stream) this.state.stream.getTracks().forEach(t=>t.stop()); if(this.state.screenStream) this.state.screenStream.getTracks().forEach(t=>t.stop()); location.reload(); },
             cancelRefresh() { this.hideRefreshDialog(); this.showToast('Refresh cancelled'); },
             initPeer() {
                 this.state.peerId = 'cube-' + Math.floor(100000 + Math.random() * 900000);
                 this.showConnectionStatus('connecting', 'Connecting...');
                 this.state.peer = new Peer(this.state.peerId, { host: '0.peerjs.com', port: 443, path: '/', secure: true, config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }, debug: 0 });
                 this.state.peer.on('open', (id) => { this.state.isConnected=true; this.state.reconnectAttempts=0; this.elements.yourId.textContent=id; this.updatePeerStatus('connected'); this.hideConnectionStatus(); this.showToast('Connected'); if(this.elements.callBtn) this.elements.callBtn.disabled=false; if(this.elements.reconnectBtn) this.elements.reconnectBtn.classList.add('hidden'); });
-                this.state.peer.on('call', (call) => { this.state.incomingCall = call; this.elements.incomingName.textContent = call.peer; this.showScreen('incoming'); this.playRingtone(); setTimeout(()=>{ if(this.state.incomingCall === call) this.declineCall(); },30000); });
+                this.state.peer.on('call', (call) => { 
+                    console.log('📞 Incoming call from:', call.peer);
+                    this.state.incomingCall = call; 
+                    this.elements.incomingName.textContent = call.peer; 
+                    this.showScreen('incoming'); 
+                    this.playRingtone(); 
+                    setTimeout(()=>{ if(this.state.incomingCall === call) this.declineCall(); },30000); 
+                });
                 this.state.peer.on('error', (err) => { if(err.type === 'peer-unavailable') this.showToast('Peer not found', 'error'); else if(err.type === 'disconnected') this.handleDisconnection(); else this.showToast('Error: '+err.type, 'error'); });
                 this.state.peer.on('disconnected', () => this.handleDisconnection());
             },
-            handleDisconnection() { 
-                this.state.isConnected=false; 
-                this.updatePeerStatus('disconnected'); 
-                this.showConnectionStatus('error','Disconnected'); 
-                if(this.elements.reconnectBtn) this.elements.reconnectBtn.classList.remove('hidden'); 
-                if(this.elements.callBtn) this.elements.callBtn.disabled=true;
-                this.showToast('Connection lost. Click Reconnect to try again.', 'error');
-            },
-            reconnectPeer() { 
-                if(this.state.peer) this.state.peer.destroy(); 
-                this.state.peer=null; 
-                this.state.isConnected=false; 
-                this.state.peerId='cube-'+Math.floor(100000+Math.random()*900000); 
-                setTimeout(()=>this.initPeer(),500); 
-                this.showToast('Reconnecting...');
-            },
+            handleDisconnection() { this.state.isConnected=false; this.updatePeerStatus('disconnected'); this.showConnectionStatus('error','Disconnected'); if(this.elements.reconnectBtn) this.elements.reconnectBtn.classList.remove('hidden'); if(this.elements.callBtn) this.elements.callBtn.disabled=true; this.showToast('Connection lost. Click Reconnect to try again.', 'error'); },
+            reconnectPeer() { if(this.state.peer) this.state.peer.destroy(); this.state.peer=null; this.state.isConnected=false; this.state.peerId='cube-'+Math.floor(100000+Math.random()*900000); setTimeout(()=>this.initPeer(),500); this.showToast('Reconnecting...'); },
             updatePeerStatus(s) { let el=this.elements.peerStatus; if(!el)return; if(s==='connected'){el.className='ml-auto text-xs px-2 py-0.5 rounded-full bg-success/20 text-success';el.innerHTML='<i class="fas fa-circle text-[8px]"></i> Connected';}else if(s==='disconnected'){el.className='ml-auto text-xs px-2 py-0.5 rounded-full bg-error/20 text-error';el.innerHTML='<i class="fas fa-circle text-[8px]"></i> Disconnected';}else{el.className='ml-auto text-xs px-2 py-0.5 rounded-full bg-warning/20 text-warning';el.innerHTML='<i class="fas fa-circle text-[8px]"></i> Connecting';} },
             showConnectionStatus(t,m){ let s=this.elements.connectionStatus, tx=this.elements.connectionText; if(s&&tx){s.className=`connection-status ${t} show`;tx.textContent=m;if(t==='connected')setTimeout(()=>this.hideConnectionStatus(),2000);} },
             hideConnectionStatus(){ let s=this.elements.connectionStatus; if(s)s.classList.remove('show'); },
@@ -949,8 +993,40 @@
             async getMedia(facing='user'){ this.showLoading(true); try{ let s=await navigator.mediaDevices.getUserMedia({ video:{width:{ideal:640},height:{ideal:480},facingMode:facing}, audio:{echoCancellation:true,noiseSuppression:true} }); this.showLoading(false); return s; }catch(e){ this.showLoading(false); this.showToast('Camera/mic access denied','error'); throw e; } },
             async getScreenMedia(){ this.showLoading(true); try{ let s=await navigator.mediaDevices.getDisplayMedia({ video:{cursor:'always'}, audio:true }); s.getVideoTracks()[0].onended=()=>this.stopScreenShare(); this.showLoading(false); return s; }catch(e){ this.showLoading(false); this.showToast('Screen share cancelled','error'); throw e; } },
             async startCall(){ if(!this.state.isConnected){this.showToast('Not connected','error');return;} let peerId=this.elements.remoteId.value.trim(); if(!peerId){this.showToast('Enter Peer ID','error');return;} if(peerId===this.state.peerId){this.showToast('Cannot call yourself','error');return;} try{ this.playBeep(1200,0.1); this.state.stream=await this.getMedia(this.state.currentFacingMode); this.state.originalStream=this.state.stream; this.elements.localVideo.srcObject=this.state.stream; let call=this.state.peer.call(peerId,this.state.stream); if(!call)throw new Error('Call failed'); this.setupCall(call); this.showScreen('call'); this.startTimer(); this.elements.callerName.textContent=peerId; this.elements.videoPlaceholder.style.display='none'; this.state.isInCall=true; this.state.videoMode='camera'; this.updateVideoModeUI(); this.requestWakeLock(); this.showToast('Calling...'); }catch(err){ this.showToast(err.message,'error'); if(this.state.stream){this.state.stream.getTracks().forEach(t=>t.stop());this.state.stream=null;} } },
-            async answerCall(){ if(!this.state.incomingCall)return; this.stopRingtone(); this.playBeep(1000,0.2); try{ this.state.stream=await this.getMedia(this.state.currentFacingMode); this.state.originalStream=this.state.stream; this.elements.localVideo.srcObject=this.state.stream; this.state.incomingCall.answer(this.state.stream); this.setupCall(this.state.incomingCall); this.showScreen('call'); this.startTimer(); this.elements.callerName.textContent=this.state.incomingCall.peer; this.state.isInCall=true; this.state.videoMode='camera'; this.updateVideoModeUI(); this.requestWakeLock(); this.state.incomingCall=null; this.showToast('Call connected'); }catch(e){ this.showToast('Answer failed','error'); this.showScreen('dialer'); } },
-            declineCall(){ if(this.state.incomingCall){ this.playBeep(400,0.1); try{this.state.incomingCall.close();}catch(e){} this.state.incomingCall=null; } this.stopRingtone(); this.showScreen('dialer'); },
+            async answerCall(){ 
+                if(!this.state.incomingCall) return; 
+                this.stopRingtone(); 
+                this.playBeep(1000,0.2); 
+                try{ 
+                    this.state.stream = await this.getMedia(this.state.currentFacingMode); 
+                    this.state.originalStream = this.state.stream; 
+                    this.elements.localVideo.srcObject = this.state.stream; 
+                    this.state.incomingCall.answer(this.state.stream); 
+                    this.setupCall(this.state.incomingCall); 
+                    this.showScreen('call'); 
+                    this.startTimer(); 
+                    this.elements.callerName.textContent = this.state.incomingCall.peer; 
+                    this.state.isInCall = true; 
+                    this.state.videoMode = 'camera'; 
+                    this.updateVideoModeUI(); 
+                    this.requestWakeLock(); 
+                    this.state.incomingCall = null; 
+                    this.showToast('Call connected'); 
+                } catch(e){ 
+                    this.showToast('Answer failed: ' + e.message, 'error'); 
+                    this.showScreen('dialer'); 
+                } 
+            },
+            declineCall(){ 
+                if(this.state.incomingCall){ 
+                    this.playBeep(400,0.1); 
+                    try{this.state.incomingCall.close();}catch(e){} 
+                    this.state.incomingCall=null; 
+                } 
+                this.stopRingtone(); 
+                this.showScreen('dialer'); 
+                this.showToast('Call declined'); 
+            },
             setupCall(call){ this.state.call=call; call.on('stream',(remoteStream)=>{ this.elements.remoteVideo.srcObject=remoteStream; this.elements.remoteAudio.srcObject=remoteStream; this.elements.remoteAudio.muted=false; this.elements.videoPlaceholder.style.display='none'; this.elements.remoteVideo.play().catch(e=>{}); this.elements.remoteAudio.play().catch(e=>{}); }); call.on('close',()=>this.endCall()); call.on('error',()=>this.endCall()); },
             async toggleVideoMode(){ if(!this.state.isInCall)return; if(this.state.videoMode==='camera'){ try{ this.state.screenStream=await this.getScreenMedia(); let screenTrack=this.state.screenStream.getVideoTracks()[0]; let sender=this.state.call?.peerConnection?.getSenders().find(s=>s.track&&s.track.kind==='video'); if(sender) await sender.replaceTrack(screenTrack); this.elements.screenVideo.srcObject=this.state.screenStream; this.elements.screenPreview.style.display='block'; this.elements.screenShareIndicator.style.display='flex'; this.state.videoMode='screen'; this.updateVideoModeUI(); this.showToast('Screen sharing'); }catch(e){ this.showToast('Screen share failed','error'); } } else { this.stopScreenShare(); } },
             async stopScreenShare(){ if(this.state.screenStream){ this.state.screenStream.getTracks().forEach(t=>t.stop()); this.state.screenStream=null; } if(this.state.originalStream){ let camTrack=this.state.originalStream.getVideoTracks()[0]; let sender=this.state.call?.peerConnection?.getSenders().find(s=>s.track&&s.track.kind==='video'); if(sender&&camTrack) await sender.replaceTrack(camTrack); } this.elements.screenPreview.style.display='none'; this.elements.screenShareIndicator.style.display='none'; this.elements.screenVideo.srcObject=null; this.state.videoMode='camera'; this.updateVideoModeUI(); this.showToast('Camera restored'); },
@@ -962,19 +1038,7 @@
             toggleSpeaker(){ this.state.isSpeakerOn=!this.state.isSpeakerOn; this.elements.remoteVideo.muted=!this.state.isSpeakerOn; this.elements.remoteAudio.muted=!this.state.isSpeakerOn; let btn=this.elements.speakerBtn; if(this.state.isSpeakerOn){ btn.classList.add('active'); btn.style.background='#6366f1'; btn.innerHTML='<i class="fas fa-volume-up"></i>'; } else { btn.classList.remove('active'); btn.style.background='rgba(255,255,255,0.15)'; btn.innerHTML='<i class="fas fa-volume-mute"></i>'; } this.playBeep(this.state.isSpeakerOn?800:400,0.1); this.showToast(this.state.isSpeakerOn?'Speaker ON':'Speaker OFF'); },
             toggleMic(){ if(this.state.stream){ let audioTrack=this.state.stream.getAudioTracks()[0]; if(audioTrack){ this.state.isMicOn=!audioTrack.enabled; audioTrack.enabled=this.state.isMicOn; let btn=this.elements.micBtn; if(this.state.isMicOn){ btn.classList.add('active'); btn.style.background='#6366f1'; btn.innerHTML='<i class="fas fa-microphone"></i>'; } else { btn.classList.remove('active'); btn.style.background='rgba(255,255,255,0.15)'; btn.innerHTML='<i class="fas fa-microphone-slash"></i>'; } this.playBeep(this.state.isMicOn?1000:500,0.1); this.showToast(this.state.isMicOn?'Microphone ON':'Microphone OFF'); } } },
             toggleVideo(){ if(this.state.stream&&this.state.videoMode==='camera'){ let videoTrack=this.state.stream.getVideoTracks()[0]; if(videoTrack){ this.state.isVideoOn=!videoTrack.enabled; videoTrack.enabled=this.state.isVideoOn; let btn=this.elements.videoBtn; if(this.state.isVideoOn){ btn.classList.add('active'); btn.style.background='#6366f1'; btn.innerHTML='<i class="fas fa-video"></i>'; } else { btn.classList.remove('active'); btn.style.background='rgba(255,255,255,0.15)'; btn.innerHTML='<i class="fas fa-video-slash"></i>'; } this.playBeep(this.state.isVideoOn?1000:500,0.1); this.showToast(this.state.isVideoOn?'Camera ON':'Camera OFF'); } } },
-            toggleSound(){ 
-                this.state.soundEnabled=!this.state.soundEnabled; 
-                const soundIcon = document.getElementById('soundToggleIcon');
-                if(soundIcon) {
-                    if(this.state.soundEnabled) {
-                        soundIcon.className = 'fas fa-volume-up text-primary text-sm sound-toggle-icon';
-                    } else {
-                        soundIcon.className = 'fas fa-volume-mute text-error text-sm sound-toggle-icon';
-                    }
-                }
-                if(!this.state.soundEnabled) this.stopRingtone(); 
-                this.showToast(this.state.soundEnabled?'Sound ON':'Sound OFF'); 
-            },
+            toggleSound(){ this.state.soundEnabled=!this.state.soundEnabled; const soundIcon = document.getElementById('soundToggleIcon'); if(soundIcon) { if(this.state.soundEnabled) soundIcon.className = 'fas fa-volume-up text-primary text-sm sound-toggle-icon'; else soundIcon.className = 'fas fa-volume-mute text-error text-sm sound-toggle-icon'; } if(!this.state.soundEnabled) this.stopRingtone(); this.showToast(this.state.soundEnabled?'Sound ON':'Sound OFF'); },
             copyId(){ let id=this.elements.yourId.textContent; if(id==='Loading...'){this.showToast('Wait for connection','error');return;} navigator.clipboard.writeText(id); this.playBeep(1200,0.1); this.showToast('ID copied!'); },
             async shareId(){ let id=this.elements.yourId.textContent; if(id==='Loading...'){this.showToast('Wait for connection','error');return;} if(navigator.share) await navigator.share({title:'Cube Dialer',text:`Call me! ID: ${id}`,url:window.location.href}); else await navigator.clipboard.writeText(`Call me on Cube Dialer! ID: ${id}`); this.showToast('Shared!'); },
             changeRingtone(){ this.state.currentRingtone=this.elements.ringtoneSelect.value; this.showToast('Ringtone updated'); if(document.getElementById('incomingScreen').classList.contains('active')){ this.stopRingtone(); this.playRingtone(); } },
