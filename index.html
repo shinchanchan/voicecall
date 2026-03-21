@@ -560,11 +560,6 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }
         
-        .ripple-btn {
-            position: relative;
-            overflow: hidden;
-        }
-        
         .video-placeholder {
             position: absolute;
             inset: 0;
@@ -574,24 +569,6 @@
             justify-content: center;
             color: rgba(255,255,255,0.3);
             background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
-        }
-        
-        .video-placeholder i {
-            font-size: 64px;
-            margin-bottom: 16px;
-        }
-        
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: rgba(99, 102, 241, 0.3);
-            border-radius: 2px;
         }
         
         .main-container {
@@ -644,458 +621,238 @@
             gap: 6px;
             z-index: 15;
         }
+        
+        .refresh-icon {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-left: 8px;
+        }
+        
+        .refresh-icon:hover {
+            background: rgba(99, 102, 241, 0.4);
+            transform: rotate(90deg);
+        }
+        
+        .refresh-icon:active {
+            transform: rotate(180deg) scale(0.95);
+        }
+        
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .refresh-dialog {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .refresh-dialog.show {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .refresh-dialog-content {
+            background: rgba(15, 15, 26, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 32px;
+            max-width: 320px;
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .refresh-dialog.show .refresh-dialog-content {
+            transform: scale(1);
+        }
+        
+        .refresh-dialog-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+        
+        .refresh-dialog-icon i {
+            font-size: 28px;
+            color: white;
+        }
+        
+        .refresh-dialog h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .refresh-dialog p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+        
+        .refresh-dialog-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .refresh-dialog-buttons button {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-refresh-stay {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .btn-refresh-leave {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .sound-toggle-icon {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
     </style>
 <base target="_blank">
 </head>
 <body class="text-white">
-    <!-- Floating Particles -->
     <div id="particles" class="fixed inset-0 pointer-events-none overflow-hidden"></div>
-    
-    <!-- Connection Status -->
     <div id="connectionStatus" class="connection-status connecting">
         <span class="loading loading-spinner loading-xs"></span>
         <span id="connectionText">Connecting to server...</span>
     </div>
-    
-    <!-- Toast -->
     <div id="toast" class="toast-custom glass text-white">
         <i class="fas fa-check-circle text-success"></i>
         <span id="toastMessage">Success</span>
     </div>
-    
-    <!-- Loading -->
     <div id="loading" class="loading-overlay">
         <div class="flex flex-col items-center gap-4">
             <span class="loading loading-spinner loading-lg text-primary"></span>
             <p class="text-white/70 text-sm">Connecting...</p>
         </div>
     </div>
+    <div id="refreshDialog" class="refresh-dialog">
+        <div class="refresh-dialog-content">
+            <div class="refresh-dialog-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <h3>Refresh this page?</h3>
+            <p>If you have an active call, it will be ended. Are you sure you want to refresh?</p>
+            <div class="refresh-dialog-buttons">
+                <button class="btn-refresh-stay" id="stayOnCallBtn">Cancel</button>
+                <button class="btn-refresh-leave" id="leaveCallBtn">Refresh</button>
+            </div>
+        </div>
+    </div>
     
-    <!-- Main Container -->
     <div class="main-container">
-        
-        <!-- Status Bar -->
         <div class="status-bar glass-strong">
             <span id="time">9:41</span>
-            <div class="flex items-center gap-2">
-                <i class="fas fa-signal text-xs"></i>
-                <i class="fas fa-wifi text-xs"></i>
-                <i class="fas fa-battery-full text-xs"></i>
+            <div class="status-right">
+                <i id="soundToggleIcon" class="fas fa-volume-up text-primary text-sm sound-toggle-icon" style="cursor: pointer;"></i>
+                <div id="manualRefreshBtn" class="refresh-icon" title="Refresh Page">
+                    <i class="fas fa-sync-alt text-white text-xs"></i>
+                </div>
             </div>
         </div>
         
-        <!-- Screen Container -->
         <div class="relative flex-1 h-[calc(100%-124px)] overflow-hidden">
-            
             <!-- HOME SCREEN -->
             <div id="homeScreen" class="screen active">
                 <div class="flex-1 flex flex-col items-center justify-center p-8 relative">
                     <div class="absolute top-20 left-10 w-32 h-32 bg-primary/20 rounded-full blur-3xl"></div>
                     <div class="absolute bottom-32 right-10 w-40 h-40 bg-secondary/20 rounded-full blur-3xl"></div>
-                    
                     <div class="relative mb-8">
-                        <div class="w-32 h-32 gradient-bg rounded-3xl flex items-center justify-center shadow-2xl animate-glow">
-                            <i class="fas fa-cube text-5xl text-white"></i>
-                        </div>
-                        <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-success rounded-full flex items-center justify-center shadow-lg">
-                            <i class="fas fa-phone text-white text-sm"></i>
-                        </div>
+                        <div class="w-32 h-32 gradient-bg rounded-3xl flex items-center justify-center shadow-2xl animate-glow"><i class="fas fa-cube text-5xl text-white"></i></div>
+                        <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-success rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-phone text-white text-sm"></i></div>
                     </div>
-                    
                     <h1 class="text-4xl font-bold gradient-text mb-2">Cube Dialer</h1>
                     <p class="text-white/50 text-center mb-8">HD Voice, Video & Screen Share</p>
-                    
-                    <div class="sound-wave mb-8">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                    
+                    <div class="sound-wave mb-8"><span></span><span></span><span></span><span></span><span></span></div>
                     <div class="grid grid-cols-3 gap-3 w-full max-w-xs">
-                        <div class="glass rounded-2xl p-3 text-center card-hover">
-                            <i class="fas fa-video text-primary text-xl mb-1"></i>
-                            <p class="text-xs text-white/60">Video</p>
-                        </div>
-                        <div class="glass rounded-2xl p-3 text-center card-hover">
-                            <i class="fas fa-microphone text-secondary text-xl mb-1"></i>
-                            <p class="text-xs text-white/60">Voice</p>
-                        </div>
-                        <div class="glass rounded-2xl p-3 text-center card-hover">
-                            <i class="fas fa-desktop text-accent text-xl mb-1"></i>
-                            <p class="text-xs text-white/60">Screen</p>
-                        </div>
+                        <div class="glass rounded-2xl p-3 text-center card-hover"><i class="fas fa-video text-primary text-xl mb-1"></i><p class="text-xs text-white/60">Video</p></div>
+                        <div class="glass rounded-2xl p-3 text-center card-hover"><i class="fas fa-microphone text-secondary text-xl mb-1"></i><p class="text-xs text-white/60">Voice</p></div>
+                        <div class="glass rounded-2xl p-3 text-center card-hover"><i class="fas fa-desktop text-accent text-xl mb-1"></i><p class="text-xs text-white/60">Screen</p></div>
                     </div>
-                    
-                    <button onclick="App.showScreen('dialer')" class="mt-8 btn btn-primary btn-lg rounded-full px-8 ripple-btn shadow-lg shadow-primary/30">
-                        <i class="fas fa-rocket mr-2"></i>
-                        Get Started
-                    </button>
+                    <button onclick="App.showScreen('dialer')" class="mt-8 btn btn-primary btn-lg rounded-full px-8 ripple-btn shadow-lg shadow-primary/30"><i class="fas fa-rocket mr-2"></i>Get Started</button>
                 </div>
             </div>
             
             <!-- DIALER SCREEN -->
             <div id="dialerScreen" class="screen">
                 <div class="flex-1 flex flex-col p-5 overflow-y-auto">
-                    <div class="flex justify-between items-center mb-6">
-                        <div>
-                            <h2 class="text-2xl font-bold">Connect</h2>
-                            <p class="text-white/50 text-sm">Start a new call</p>
-                        </div>
-                        <button id="soundToggle" class="btn btn-circle btn-ghost btn-sm ripple-btn" onclick="App.toggleSound()">
-                            <i class="fas fa-volume-up text-primary"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="glass rounded-2xl p-5 mb-5 card-hover">
-                        <div class="flex items-center gap-2 mb-3">
-                            <i class="fas fa-id-card text-primary"></i>
-                            <span class="text-white/60 text-sm">Your Peer ID</span>
-                            <span id="peerStatus" class="ml-auto text-xs px-2 py-0.5 rounded-full bg-warning/20 text-warning">
-                                <i class="fas fa-circle text-[8px]"></i> Connecting
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <code id="yourId" class="text-lg font-mono text-white">Loading...</code>
-                            <div class="flex gap-2">
-                                <button class="btn btn-circle btn-ghost btn-xs" onclick="App.copyId()" title="Copy ID">
-                                    <i class="fas fa-copy text-white/60"></i>
-                                </button>
-                                <button class="btn btn-circle btn-ghost btn-xs" onclick="App.shareId()" title="Share ID">
-                                    <i class="fas fa-share-alt text-white/60"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="glass rounded-2xl p-1 mb-5">
-                        <div class="flex items-center px-4">
-                            <i class="fas fa-user-plus text-white/40 mr-3"></i>
-                            <input 
-                                type="text" 
-                                id="remoteId" 
-                                placeholder="Enter Peer ID to call..." 
-                                class="input input-ghost w-full bg-transparent border-none text-lg placeholder:text-white/30 focus:outline-none"
-                            >
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4 mb-5">
-                        <button onclick="App.copyId()" class="btn btn-outline btn-lg rounded-xl h-20 ripple-btn border-white/10 hover:bg-white/5 hover:border-primary/50">
-                            <div class="flex flex-col items-center gap-2">
-                                <i class="fas fa-copy text-xl"></i>
-                                <span class="text-sm">Copy ID</span>
-                            </div>
-                        </button>
-                        <button id="callBtn" onclick="App.startCall()" class="btn btn-success btn-lg rounded-xl h-20 ripple-btn call-pulse" disabled>
-                            <div class="flex flex-col items-center gap-2">
-                                <i class="fas fa-phone-alt text-xl"></i>
-                                <span class="text-sm">Call Now</span>
-                            </div>
-                        </button>
-                    </div>
-                    
-                    <div class="flex-1">
-                        <h3 class="text-white/60 text-sm mb-3 flex items-center gap-2">
-                            <i class="fas fa-history"></i>
-                            Recent Activity
-                        </h3>
-                        <div class="space-y-2">
-                            <div class="glass rounded-xl p-4 flex items-center justify-between opacity-50">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-                                        <i class="fas fa-user text-white/40"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-medium">No recent calls</p>
-                                        <p class="text-xs text-white/40">Start your first call</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4 p-4 rounded-xl bg-primary/10 border border-primary/20">
-                        <div class="flex items-start gap-3">
-                            <i class="fas fa-lightbulb text-primary mt-0.5"></i>
-                            <div>
-                                <p class="text-sm font-medium text-primary">Pro Tip</p>
-                                <p class="text-xs text-white/60">Share your ID with friends to receive calls!</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Reconnect Button -->
-                    <button id="reconnectBtn" onclick="App.reconnectPeer()" class="mt-4 btn btn-warning btn-sm w-full hidden">
-                        <i class="fas fa-sync-alt mr-2"></i>
-                        Reconnect to Server
-                    </button>
+                    <div class="flex justify-between items-center mb-6"><div><h2 class="text-2xl font-bold">Connect</h2><p class="text-white/50 text-sm">Start a new call</p></div></div>
+                    <div class="glass rounded-2xl p-5 mb-5 card-hover"><div class="flex items-center gap-2 mb-3"><i class="fas fa-id-card text-primary"></i><span class="text-white/60 text-sm">Your Peer ID</span><span id="peerStatus" class="ml-auto text-xs px-2 py-0.5 rounded-full bg-warning/20 text-warning"><i class="fas fa-circle text-[8px]"></i> Connecting</span></div><div class="flex items-center justify-between"><code id="yourId" class="text-lg font-mono text-white">Loading...</code><div class="flex gap-2"><button class="btn btn-circle btn-ghost btn-xs" onclick="App.copyId()" title="Copy ID"><i class="fas fa-copy text-white/60"></i></button><button class="btn btn-circle btn-ghost btn-xs" onclick="App.shareId()" title="Share ID"><i class="fas fa-share-alt text-white/60"></i></button></div></div></div>
+                    <div class="glass rounded-2xl p-1 mb-5"><div class="flex items-center px-4"><i class="fas fa-user-plus text-white/40 mr-3"></i><input type="text" id="remoteId" placeholder="Enter Peer ID to call..." class="input input-ghost w-full bg-transparent border-none text-lg placeholder:text-white/30 focus:outline-none"></div></div>
+                    <div class="grid grid-cols-2 gap-4 mb-5"><button onclick="App.copyId()" class="btn btn-outline btn-lg rounded-xl h-20 ripple-btn border-white/10 hover:bg-white/5 hover:border-primary/50"><div class="flex flex-col items-center gap-2"><i class="fas fa-copy text-xl"></i><span class="text-sm">Copy ID</span></div></button><button id="callBtn" onclick="App.startCall()" class="btn btn-success btn-lg rounded-xl h-20 ripple-btn call-pulse" disabled><div class="flex flex-col items-center gap-2"><i class="fas fa-phone-alt text-xl"></i><span class="text-sm">Call Now</span></div></button></div>
+                    <div class="flex-1"><h3 class="text-white/60 text-sm mb-3 flex items-center gap-2"><i class="fas fa-history"></i>Recent Activity</h3><div class="space-y-2"><div class="glass rounded-xl p-4 flex items-center justify-between opacity-50"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><i class="fas fa-user text-white/40"></i></div><div><p class="text-sm font-medium">No recent calls</p><p class="text-xs text-white/40">Start your first call</p></div></div></div></div></div>
+                    <div class="mt-4 p-4 rounded-xl bg-primary/10 border border-primary/20"><div class="flex items-start gap-3"><i class="fas fa-lightbulb text-primary mt-0.5"></i><div><p class="text-sm font-medium text-primary">Pro Tip</p><p class="text-xs text-white/60">Share your ID with friends to receive calls!</p></div></div></div>
+                    <button id="reconnectBtn" onclick="App.reconnectPeer()" class="mt-4 btn btn-warning btn-sm w-full hidden"><i class="fas fa-sync-alt mr-2"></i>Reconnect to Server</button>
                 </div>
             </div>
             
             <!-- CALL SCREEN -->
             <div id="callScreen" class="screen bg-black">
-                <!-- Call Header -->
-                <div class="absolute top-0 left-0 right-0 z-20 p-5 pt-12 bg-gradient-to-b from-black/80 to-transparent">
-                    <div class="text-center">
-                        <h2 id="callerName" class="text-xl sm:text-2xl font-bold text-white mb-1">Connecting...</h2>
-                        <div class="flex items-center justify-center gap-2">
-                            <span class="w-2 h-2 bg-success rounded-full animate-pulse"></span>
-                            <span id="callTimer" class="text-success font-mono">00:00</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Screen Share Indicator -->
-                <div id="screenShareIndicator" class="screen-share-indicator" style="display: none;">
-                    <i class="fas fa-desktop"></i>
-                    <span>Sharing Screen</span>
-                </div>
-                
-                <!-- Video Mode Indicator -->
-                <div id="videoModeIndicator" class="video-mode-indicator">
-                    <i class="fas fa-video"></i>
-                    <span id="videoModeText">Camera</span>
-                </div>
-                
-                <!-- Video Area -->
-                <div class="video-container">
-                    <!-- Remote Video -->
-                    <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
-                    
-                    <!-- Hidden Audio -->
-                    <audio id="remoteAudio" autoplay></audio>
-                    
-                    <!-- Local Preview (Camera) -->
-                    <div id="localPreview" class="local-preview">
-                        <video id="localVideo" autoplay playsinline muted></video>
-                    </div>
-                    
-                    <!-- Screen Share Preview -->
-                    <div id="screenPreview" class="screen-preview" style="display: none;">
-                        <video id="screenVideo" autoplay playsinline muted></video>
-                    </div>
-                    
-                    <!-- Video Placeholder -->
-                    <div id="videoPlaceholder" class="video-placeholder">
-                        <i class="fas fa-video-slash"></i>
-                        <p class="text-sm mt-2">Waiting for video...</p>
-                    </div>
-                </div>
-                
-                <!-- Call Controls -->
-                <div class="call-controls">
-                    <!-- Mic -->
-                    <button id="micBtn" class="control-btn active" onclick="App.toggleMic()" title="Microphone">
-                        <i class="fas fa-microphone"></i>
-                    </button>
-                    
-                    <!-- Speaker -->
-                    <button id="speakerBtn" class="control-btn active" onclick="App.toggleSpeaker()" title="Speaker">
-                        <i class="fas fa-volume-up"></i>
-                    </button>
-                    
-                    <!-- Video Toggle (Camera/Screen) -->
-                    <button id="videoToggleBtn"  style="display: none" class="control-btn active" onclick="App.toggleVideoMode()" title="Switch to Screen Share">
-                        <i class="fas fa-desktop"></i>
-                    </button>
-                    
-                    <!-- Hangup -->
-                    <button class="control-btn hangup" onclick="App.endCall()" title="End Call">
-                        <i class="fas fa-phone-slash"></i>
-                    </button>
-                    
-                    <!-- Video On/Off -->
-                    <button id="videoBtn" class="control-btn active" onclick="App.toggleVideo()" title="Camera On/Off">
-                        <i class="fas fa-video"></i>
-                    </button>
-                    
-                    <!-- Flip Camera -->
-                    <button id="flipBtn" style="display: none" class="control-btn" onclick="App.flipCamera()" title="Flip Camera">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                </div>
+                <div class="absolute top-0 left-0 right-0 z-20 p-5 pt-12 bg-gradient-to-b from-black/80 to-transparent"><div class="text-center"><h2 id="callerName" class="text-xl sm:text-2xl font-bold text-white mb-1">Connecting...</h2><div class="flex items-center justify-center gap-2"><span class="w-2 h-2 bg-success rounded-full animate-pulse"></span><span id="callTimer" class="text-success font-mono">00:00</span></div></div></div>
+                <div id="screenShareIndicator" class="screen-share-indicator" style="display: none;"><i class="fas fa-desktop"></i><span>Sharing Screen</span></div>
+                <div id="videoModeIndicator" class="video-mode-indicator"><i class="fas fa-video"></i><span id="videoModeText">Camera</span></div>
+                <div class="video-container"><video id="remoteVideo" class="remote-video" autoplay playsinline></video><audio id="remoteAudio" autoplay></audio><div id="localPreview" class="local-preview"><video id="localVideo" autoplay playsinline muted></video></div><div id="screenPreview" class="screen-preview" style="display: none;"><video id="screenVideo" autoplay playsinline muted></video></div><div id="videoPlaceholder" class="video-placeholder"><i class="fas fa-video-slash"></i><p class="text-sm mt-2">Waiting for video...</p></div></div>
+                <div class="call-controls"><button id="micBtn" class="control-btn active" onclick="App.toggleMic()"><i class="fas fa-microphone"></i></button><button id="speakerBtn" class="control-btn active" onclick="App.toggleSpeaker()"><i class="fas fa-volume-up"></i></button><button id="videoToggleBtn" class="control-btn active" onclick="App.toggleVideoMode()"><i class="fas fa-desktop"></i></button><button class="control-btn hangup" onclick="App.endCall()"><i class="fas fa-phone-slash"></i></button><button id="videoBtn" class="control-btn active" onclick="App.toggleVideo()"><i class="fas fa-video"></i></button><button id="flipBtn" class="control-btn" onclick="App.flipCamera()"><i class="fas fa-sync-alt"></i></button></div>
             </div>
             
             <!-- INCOMING CALL SCREEN -->
             <div id="incomingScreen" class="screen">
-                <div class="flex-1 flex flex-col items-center justify-center p-8 relative">
-                    <div class="absolute inset-0 bg-gradient-to-b from-primary/20 via-transparent to-secondary/20"></div>
-                    
-                    <div class="relative mb-8">
-                        <div class="w-28 h-28 sm:w-36 sm:h-36 gradient-bg rounded-full flex items-center justify-center avatar-pulse">
-                            <i class="fas fa-user text-4xl sm:text-5xl text-white"></i>
-                        </div>
-                        <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 glass rounded-full px-4 py-1">
-                            <span class="text-xs text-white/70 flex items-center gap-1">
-                                <i class="fas fa-phone-alt animate-ring text-success"></i>
-                                Incoming
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <h2 id="incomingName" class="text-2xl sm:text-3xl font-bold text-white mb-2">Unknown</h2>
-                    <p class="text-white/50 mb-6 sm:mb-8">is calling you...</p>
-                    
-                    <div class="w-full max-w-xs mb-6 sm:mb-10">
-                        <label class="text-white/50 text-sm mb-2 block">Ringtone</label>
-                        <select id="ringtoneSelect" onchange="App.changeRingtone()" class="select select-bordered w-full bg-white/5 border-white/10 text-white text-sm">
-                            <option value="classic" selected>Classic Ringtone</option>
-                            <option value="digital">Digital Beep</option>
-                            <option value="melody">Soft Melody</option>
-                            <option value="pulse">Pulse Tone</option>
-                            <option value="bell">Bell Ring</option>
-                        </select>
-                    </div>
-                    
-                    <div class="flex items-center gap-8 sm:gap-10">
-                        <button onclick="App.declineCall()" class="btn btn-circle btn-lg sm:btn-xl btn-error ripple-btn shadow-lg shadow-error/30">
-                            <i class="fas fa-phone-slash text-xl sm:text-2xl"></i>
-                        </button>
-                        
-                        <button onclick="App.answerCall()" class="btn btn-circle btn-lg sm:btn-xl btn-success ripple-btn call-pulse shadow-lg shadow-success/30">
-                            <i class="fas fa-phone-alt text-xl sm:text-2xl"></i>
-                        </button>
-                    </div>
-                </div>
+                <div class="flex-1 flex flex-col items-center justify-center p-8 relative"><div class="absolute inset-0 bg-gradient-to-b from-primary/20 via-transparent to-secondary/20"></div><div class="relative mb-8"><div class="w-28 h-28 sm:w-36 sm:h-36 gradient-bg rounded-full flex items-center justify-center avatar-pulse"><i class="fas fa-user text-4xl sm:text-5xl text-white"></i></div><div class="absolute -bottom-2 left-1/2 -translate-x-1/2 glass rounded-full px-4 py-1"><span class="text-xs text-white/70 flex items-center gap-1"><i class="fas fa-phone-alt animate-ring text-success"></i>Incoming</span></div></div><h2 id="incomingName" class="text-2xl sm:text-3xl font-bold text-white mb-2">Unknown</h2><p class="text-white/50 mb-6 sm:mb-8">is calling you...</p><div class="w-full max-w-xs mb-6 sm:mb-10"><label class="text-white/50 text-sm mb-2 block">Ringtone</label><select id="ringtoneSelect" onchange="App.changeRingtone()" class="select select-bordered w-full bg-white/5 border-white/10 text-white text-sm"><option value="classic" selected>Classic Ringtone</option><option value="digital">Digital Beep</option><option value="melody">Soft Melody</option><option value="pulse">Pulse Tone</option><option value="bell">Bell Ring</option></select></div><div class="flex items-center gap-8 sm:gap-10"><button onclick="App.declineCall()" class="btn btn-circle btn-lg sm:btn-xl btn-error ripple-btn shadow-lg shadow-error/30"><i class="fas fa-phone-slash text-xl sm:text-2xl"></i></button><button onclick="App.answerCall()" class="btn btn-circle btn-lg sm:btn-xl btn-success ripple-btn call-pulse shadow-lg shadow-success/30"><i class="fas fa-phone-alt text-xl sm:text-2xl"></i></button></div></div>
             </div>
             
             <!-- HELP SCREEN -->
-            <div id="helpScreen" class="screen">
-                <div class="flex-1 flex flex-col p-5 overflow-y-auto">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-2xl font-bold">Help & Info</h2>
-                        <button onclick="App.showScreen('home')" class="btn btn-circle btn-ghost btn-sm ripple-btn">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="space-y-4">
-                        <div class="glass rounded-2xl p-5 card-hover">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                                    <i class="fas fa-phone text-primary"></i>
-                                </div>
-                                <h3 class="font-semibold">How to Call</h3>
-                            </div>
-                            <ol class="text-sm text-white/60 space-y-2 ml-2">
-                                <li class="flex items-start gap-2">
-                                    <span class="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary flex-shrink-0">1</span>
-                                    Wait for "Connected" status
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <span class="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary flex-shrink-0">2</span>
-                                    Share your Peer ID with friends
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <span class="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary flex-shrink-0">3</span>
-                                    Enter their ID and tap Call
-                                </li>
-                            </ol>
-                        </div>
-                        
-                        <div class="glass rounded-2xl p-5 card-hover">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
-                                    <i class="fas fa-desktop text-accent"></i>
-                                </div>
-                                <h3 class="font-semibold">Screen Sharing</h3>
-                            </div>
-                            <p class="text-sm text-white/60">During a call, tap the desktop icon to switch between camera and screen share.</p>
-                        </div>
-                        
-                        <div class="glass rounded-2xl p-5 card-hover">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-10 h-10 rounded-xl bg-warning/20 flex items-center justify-center">
-                                    <i class="fas fa-exclamation-triangle text-warning"></i>
-                                </div>
-                                <h3 class="font-semibold">Connection Issues?</h3>
-                            </div>
-                            <p class="text-sm text-white/60">If you see "Disconnected", tap the Reconnect button or refresh the page.</p>
-                        </div>
-                        
-                        <div class="glass rounded-2xl p-5 card-hover">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-10 h-10 rounded-xl bg-success/20 flex items-center justify-center">
-                                    <i class="fas fa-star text-success"></i>
-                                </div>
-                                <h3 class="font-semibold">Features</h3>
-                            </div>
-                            <div class="space-y-2 text-sm text-white/60">
-                                <p class="flex items-center gap-2">
-                                    <i class="fas fa-check text-success text-xs"></i>
-                                    HD Video & Audio Quality
-                                </p>
-                                <p class="flex items-center gap-2">
-                                    <i class="fas fa-check text-success text-xs"></i>
-                                    Screen Sharing
-                                </p>
-                                <p class="flex items-center gap-2">
-                                    <i class="fas fa-check text-success text-xs"></i>
-                                    Auto-reconnect on disconnect
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-6 text-center">
-                        <p class="text-xs text-white/30">Cube Dialer v3.1</p>
-                    </div>
-                </div>
-            </div>
+            <div id="helpScreen" class="screen"><div class="flex-1 flex flex-col p-5 overflow-y-auto"><div class="flex items-center justify-between mb-6"><h2 class="text-2xl font-bold">Help & Info</h2><button onclick="App.showScreen('home')" class="btn btn-circle btn-ghost btn-sm ripple-btn"><i class="fas fa-times"></i></button></div><div class="space-y-4"><div class="glass rounded-2xl p-5 card-hover"><div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center"><i class="fas fa-phone text-primary"></i></div><h3 class="font-semibold">How to Call</h3></div><ol class="text-sm text-white/60 space-y-2 ml-2"><li class="flex items-start gap-2"><span class="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary flex-shrink-0">1</span>Wait for "Connected" status</li><li class="flex items-start gap-2"><span class="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary flex-shrink-0">2</span>Share your Peer ID with friends</li><li class="flex items-start gap-2"><span class="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary flex-shrink-0">3</span>Enter their ID and tap Call</li></ol></div><div class="glass rounded-2xl p-5 card-hover"><div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center"><i class="fas fa-desktop text-accent"></i></div><h3 class="font-semibold">Screen Sharing</h3></div><p class="text-sm text-white/60">During a call, tap the desktop icon to switch between camera and screen share.</p></div><div class="glass rounded-2xl p-5 card-hover"><div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-xl bg-warning/20 flex items-center justify-center"><i class="fas fa-exclamation-triangle text-warning"></i></div><h3 class="font-semibold">Connection Issues?</h3></div><p class="text-sm text-white/60">If you see "Disconnected", tap the Reconnect button.</p></div><div class="glass rounded-2xl p-5 card-hover"><div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-xl bg-success/20 flex items-center justify-center"><i class="fas fa-star text-success"></i></div><h3 class="font-semibold">Features</h3></div><div class="space-y-2 text-sm text-white/60"><p class="flex items-center gap-2"><i class="fas fa-check text-success text-xs"></i>HD Video & Audio Quality</p><p class="flex items-center gap-2"><i class="fas fa-check text-success text-xs"></i>Screen Sharing</p><p class="flex items-center gap-2"><i class="fas fa-check text-success text-xs"></i>Manual Refresh Only</p></div></div></div><div class="mt-6 text-center"><p class="text-xs text-white/30">Cube Dialer v3.2</p></div></div></div>
         </div>
         
-        <!-- Bottom Navigation -->
-        <div class="bottom-nav">
-            <button id="navHome" class="nav-item active" onclick="App.showScreen('home')">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </button>
-            <button id="navDialer" class="nav-item" onclick="App.showScreen('dialer')">
-                <i class="fas fa-phone-alt"></i>
-                <span>Dialer</span>
-            </button>
-            <button id="navHelp" class="nav-item" onclick="App.showScreen('help')">
-                <i class="fas fa-question-circle"></i>
-                <span>Help</span>
-            </button>
-        </div>
+        <div class="bottom-nav"><button id="navHome" class="nav-item active" onclick="App.showScreen('home')"><i class="fas fa-home"></i><span>Home</span></button><button id="navDialer" class="nav-item" onclick="App.showScreen('dialer')"><i class="fas fa-phone-alt"></i><span>Dialer</span></button><button id="navHelp" class="nav-item" onclick="App.showScreen('help')"><i class="fas fa-question-circle"></i><span>Help</span></button></div>
     </div>
 
     <script>
-        // Cube Dialer App v3.1 - With Connection Error Fixes
+        // Cube Dialer App v3.2 - Manual Refresh Only - Clean Status Bar
         const App = {
             elements: {},
-            
             state: {
-                peer: null,
-                call: null,
-                stream: null,
-                screenStream: null,
-                isMuted: false,
-                isVideoOn: true,
-                isSpeakerOn: true,
-                isMicOn: true,
-                isScreenSharing: false,
-                videoMode: 'camera',
-                callStart: null,
-                timer: null,
-                soundEnabled: true,
-                audioContext: null,
-                oscillator: null,
-                currentRingtone: 'classic',
-                ringtoneInterval: null,
-                incomingCall: null,
-                isInCall: false,
-                currentFacingMode: 'user',
-                originalStream: null,
-                isConnected: false,
-                reconnectAttempts: 0,
-                maxReconnectAttempts: 5,
-                peerId: null,
+                peer: null, call: null, stream: null, screenStream: null, originalStream: null,
+                isMuted: false, isVideoOn: true, isSpeakerOn: true, isMicOn: true,
+                isScreenSharing: false, videoMode: 'camera', callStart: null, timer: null,
+                soundEnabled: true, audioContext: null, oscillator: null, currentRingtone: 'classic',
+                ringtoneInterval: null, incomingCall: null, isInCall: false, currentFacingMode: 'user',
+                isConnected: false, reconnectAttempts: 0, maxReconnectAttempts: 5, peerId: null,
+                wakeLock: null, refreshPending: false
             },
-            
             ringtones: {
                 classic: { freq1: 800, freq2: 800, pattern: [0.1, 0.1, 0.1, 0.1, 1.6] },
                 digital: { freq1: 1000, freq2: 1200, pattern: [0.05, 0.05, 0.05, 0.05, 0.8] },
@@ -1103,1095 +860,131 @@
                 pulse: { freq1: 600, freq2: 800, pattern: [0.3, 0.1, 0.3, 0.1, 1.2] },
                 bell: { freq1: 880, freq2: 440, pattern: [0.5, 1.5] }
             },
-            
             init() {
-                console.log('🚀 Cube Dialer v3.1 Initializing...');
                 this.cacheElements();
                 this.setupTime();
                 this.setupAudio();
-                this.setupRefreshPrevention();
+                this.setupManualRefresh();
                 this.createParticles();
                 this.initPeer();
                 this.bindEvents();
+                if(this.elements.ringtoneSelect) this.elements.ringtoneSelect.value = 'classic';
+                document.getElementById('stayOnCallBtn').onclick = () => this.cancelRefresh();
+                document.getElementById('leaveCallBtn').onclick = () => this.confirmRefresh();
                 
-                this.state.currentRingtone = 'classic';
-                if (this.elements.ringtoneSelect) {
-                    this.elements.ringtoneSelect.value = 'classic';
+                // Setup sound toggle in status bar
+                const soundIcon = document.getElementById('soundToggleIcon');
+                if(soundIcon) {
+                    soundIcon.onclick = () => this.toggleSound();
                 }
             },
-            
             cacheElements() {
-                const ids = [
-                    'homeScreen', 'dialerScreen', 'callScreen', 'incomingScreen', 'helpScreen',
-                    'yourId', 'remoteId', 'callerName', 'callTimer', 'incomingName',
-                    'remoteVideo', 'localVideo', 'remoteAudio', 'screenVideo',
-                    'localPreview', 'screenPreview', 'screenShareIndicator', 'videoModeIndicator', 'videoModeText',
-                    'micBtn', 'speakerBtn', 'videoBtn', 'videoToggleBtn', 'flipBtn',
-                    'time', 'toast', 'loading', 'videoPlaceholder',
-                    'navHome', 'navDialer', 'navHelp', 'soundToggle', 'ringtoneSelect',
-                    'connectionStatus', 'connectionText', 'peerStatus', 'callBtn', 'reconnectBtn'
-                ];
-                
-                ids.forEach(id => {
-                    this.elements[id] = document.getElementById(id);
-                });
+                const ids = ['homeScreen','dialerScreen','callScreen','incomingScreen','helpScreen','yourId','remoteId','callerName','callTimer','incomingName','remoteVideo','localVideo','remoteAudio','screenVideo','localPreview','screenPreview','screenShareIndicator','videoModeIndicator','videoModeText','micBtn','speakerBtn','videoBtn','videoToggleBtn','flipBtn','time','toast','loading','videoPlaceholder','navHome','navDialer','navHelp','ringtoneSelect','connectionStatus','connectionText','peerStatus','callBtn','reconnectBtn','refreshDialog'];
+                ids.forEach(id => this.elements[id] = document.getElementById(id));
             },
-            
-            createParticles() {
-                const container = document.getElementById('particles');
-                if (!container) return;
-                for (let i = 0; i < 15; i++) {
-                    const particle = document.createElement('div');
-                    particle.className = 'particle';
-                    particle.style.left = Math.random() * 100 + '%';
-                    particle.style.animationDelay = Math.random() * 6 + 's';
-                    particle.style.animationDuration = (6 + Math.random() * 4) + 's';
-                    container.appendChild(particle);
+            createParticles() { const c=document.getElementById('particles'); if(!c)return; for(let i=0;i<15;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDelay=Math.random()*6+'s';c.appendChild(p);} },
+            setupTime() { const u=()=>{if(this.elements.time) this.elements.time.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}; u(); setInterval(u,60000); },
+            setupAudio() { try { this.state.audioContext = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} },
+            setupManualRefresh() {
+                const refreshBtn = document.getElementById('manualRefreshBtn');
+                if(refreshBtn) {
+                    refreshBtn.onclick = () => {
+                        if(this.state.isInCall || this.state.call) {
+                            this.showRefreshDialog();
+                        } else {
+                            location.reload();
+                        }
+                    };
                 }
-            },
-            
-            setupTime() {
-                const update = () => {
-                    const now = new Date();
-                    const time = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    if (this.elements.time) {
-                        this.elements.time.textContent = time;
-                    }
-                };
-                update();
-                setInterval(update, 60000);
-            },
-            
-            setupAudio() {
-                try {
-                    this.state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                } catch(e) {
-                    console.log('Audio context not supported');
-                }
-            },
-            
-            setupRefreshPrevention() {
-                let startY = 0;
-                let startX = 0;
-                
-                document.addEventListener('touchstart', (e) => {
-                    startY = e.touches[0].clientY;
-                    startX = e.touches[0].clientX;
-                }, { passive: true });
-                
-                document.addEventListener('touchmove', (e) => {
-                    const y = e.touches[0].clientY;
-                    const x = e.touches[0].clientX;
-                    const scrollTop = document.scrollingElement.scrollTop;
-                    
-                    if (scrollTop === 0 && y > startY) {
-                        e.preventDefault();
-                    }
-                    
-                    if (Math.abs(x - startX) > Math.abs(y - startY)) {
-                        e.preventDefault();
-                    }
-                }, { passive: false });
-                
-                document.addEventListener('wheel', (e) => {
-                    if (document.scrollingElement.scrollTop === 0 && e.deltaY < 0) {
-                        e.preventDefault();
-                    }
-                }, { passive: false });
                 
                 window.addEventListener('beforeunload', (e) => {
-                    if (this.state.isInCall || this.state.call || this.state.incomingCall) {
+                    if(this.state.isInCall || this.state.call || this.state.incomingCall) {
                         e.preventDefault();
                         e.returnValue = 'You have an active call. Are you sure you want to leave?';
                         return e.returnValue;
                     }
                 });
-                
-                window.addEventListener('popstate', (e) => {
-                    if (this.state.isInCall || this.state.call) {
-                        history.pushState(null, null, window.location.href);
-                        this.showToast('Please end the call first', 'error');
-                    }
-                });
-                
-                history.pushState(null, null, window.location.href);
-                
-                let lastTouchEnd = 0;
-                document.addEventListener('touchend', (e) => {
-                    const now = Date.now();
-                    if (now - lastTouchEnd <= 300) {
-                        e.preventDefault();
-                    }
-                    lastTouchEnd = now;
-                }, { passive: false });
-                
-                document.addEventListener('touchstart', (e) => {
-                    if (e.touches.length > 1) {
-                        e.preventDefault();
-                    }
-                }, { passive: false });
             },
-            
-            // Initialize Peer with better error handling
+            showRefreshDialog() { if(this.elements.refreshDialog) this.elements.refreshDialog.classList.add('show'); },
+            hideRefreshDialog() { if(this.elements.refreshDialog) this.elements.refreshDialog.classList.remove('show'); },
+            confirmRefresh() { 
+                this.hideRefreshDialog(); 
+                if(this.state.call) this.state.call.close(); 
+                if(this.state.stream) this.state.stream.getTracks().forEach(t=>t.stop());
+                if(this.state.screenStream) this.state.screenStream.getTracks().forEach(t=>t.stop());
+                location.reload(); 
+            },
+            cancelRefresh() { this.hideRefreshDialog(); this.showToast('Refresh cancelled'); },
             initPeer() {
-                // Generate a persistent peer ID
                 this.state.peerId = 'cube-' + Math.floor(100000 + Math.random() * 900000);
-                
-                this.showConnectionStatus('connecting', 'Connecting to server...');
-                
-                try {
-                    this.state.peer = new Peer(this.state.peerId, {
-                        host: '0.peerjs.com',
-                        port: 443,
-                        path: '/',
-                        secure: true,
-                        config: {
-                            'iceServers': [
-                                { urls: 'stun:stun.l.google.com:19302' },
-                                { urls: 'stun:stun1.l.google.com:19302' },
-                                { urls: 'stun:stun2.l.google.com:19302' }
-                            ]
-                        },
-                        debug: 1
-                    });
-                    
-                    this.setupPeerEvents();
-                    
-                } catch (err) {
-                    console.error('❌ Peer initialization error:', err);
-                    this.handleConnectionError();
-                }
+                this.showConnectionStatus('connecting', 'Connecting...');
+                this.state.peer = new Peer(this.state.peerId, { host: '0.peerjs.com', port: 443, path: '/', secure: true, config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }, debug: 0 });
+                this.state.peer.on('open', (id) => { this.state.isConnected=true; this.state.reconnectAttempts=0; this.elements.yourId.textContent=id; this.updatePeerStatus('connected'); this.hideConnectionStatus(); this.showToast('Connected'); if(this.elements.callBtn) this.elements.callBtn.disabled=false; if(this.elements.reconnectBtn) this.elements.reconnectBtn.classList.add('hidden'); });
+                this.state.peer.on('call', (call) => { this.state.incomingCall = call; this.elements.incomingName.textContent = call.peer; this.showScreen('incoming'); this.playRingtone(); setTimeout(()=>{ if(this.state.incomingCall === call) this.declineCall(); },30000); });
+                this.state.peer.on('error', (err) => { if(err.type === 'peer-unavailable') this.showToast('Peer not found', 'error'); else if(err.type === 'disconnected') this.handleDisconnection(); else this.showToast('Error: '+err.type, 'error'); });
+                this.state.peer.on('disconnected', () => this.handleDisconnection());
             },
-            
-            setupPeerEvents() {
-                if (!this.state.peer) return;
-                
-                // Peer opened successfully
-                this.state.peer.on('open', (id) => {
-                    console.log('✅ Peer connected:', id);
-                    this.state.isConnected = true;
-                    this.state.reconnectAttempts = 0;
-                    
-                    if (this.elements.yourId) {
-                        this.elements.yourId.textContent = id;
-                    }
-                    
-                    this.updatePeerStatus('connected');
-                    this.hideConnectionStatus();
-                    this.showToast('Connected to server ✓');
-                    
-                    // Enable call button
-                    if (this.elements.callBtn) {
-                        this.elements.callBtn.disabled = false;
-                    }
-                    
-                    // Hide reconnect button
-                    if (this.elements.reconnectBtn) {
-                        this.elements.reconnectBtn.classList.add('hidden');
-                    }
-                });
-                
-                // Handle incoming calls
-                this.state.peer.on('call', (call) => {
-                    console.log('📞 Incoming call from:', call.peer);
-                    
-                    if (!call || typeof call !== 'object') {
-                        console.error('❌ Invalid call object received');
-                        return;
-                    }
-                    
-                    this.state.incomingCall = call;
-                    if (this.elements.incomingName) {
-                        this.elements.incomingName.textContent = call.peer;
-                    }
-                    this.showScreen('incoming');
-                    this.playRingtone();
-                    
-                    // Auto decline after 30 seconds
-                    setTimeout(() => {
-                        if (this.state.incomingCall === call) {
-                            this.declineCall();
-                            this.showToast('Call timed out', 'error');
-                        }
-                    }, 30000);
-                });
-                
-                // Handle connection errors
-                this.state.peer.on('error', (err) => {
-                    console.error('❌ Peer error:', err.type, err.message);
-                    
-                    // Don't show error for these non-critical errors
-                    const nonCriticalErrors = ['disconnected', 'socket-error', 'network'];
-                    
-                    if (err.type === 'unavailable-id') {
-                        this.showToast('ID already in use, generating new one...', 'error');
-                        setTimeout(() => this.reconnectPeer(), 1000);
-                    } else if (err.type === 'peer-unavailable') {
-                        this.showToast('Peer not found. Check the ID and try again.', 'error');
-                        this.showLoading(false);
-                    } else if (err.type === 'disconnected') {
-                        this.handleDisconnection();
-                    } else if (!nonCriticalErrors.includes(err.type)) {
-                        this.showToast('Connection error: ' + err.type, 'error');
-                    }
-                });
-                
-                // Handle disconnection
-                this.state.peer.on('disconnected', () => {
-                    console.log('⚠️ Peer disconnected from server');
-                    this.handleDisconnection();
-                });
-                
-                // Handle close
-                this.state.peer.on('close', () => {
-                    console.log('🔌 Peer connection closed');
-                    this.handleDisconnection();
-                });
+            handleDisconnection() { 
+                this.state.isConnected=false; 
+                this.updatePeerStatus('disconnected'); 
+                this.showConnectionStatus('error','Disconnected'); 
+                if(this.elements.reconnectBtn) this.elements.reconnectBtn.classList.remove('hidden'); 
+                if(this.elements.callBtn) this.elements.callBtn.disabled=true;
+                this.showToast('Connection lost. Click Reconnect to try again.', 'error');
             },
-            
-            handleDisconnection() {
-                this.state.isConnected = false;
-                this.updatePeerStatus('disconnected');
-                this.showConnectionStatus('error', 'Disconnected from server');
-                
-                // Show reconnect button
-                if (this.elements.reconnectBtn) {
-                    this.elements.reconnectBtn.classList.remove('hidden');
-                }
-                
-                // Disable call button
-                if (this.elements.callBtn) {
-                    this.elements.callBtn.disabled = true;
-                }
-                
-                // Auto-reconnect if not in call
-                if (!this.state.isInCall && this.state.reconnectAttempts < this.state.maxReconnectAttempts) {
-                    this.state.reconnectAttempts++;
-                    console.log(`🔄 Auto-reconnecting... Attempt ${this.state.reconnectAttempts}`);
-                    
-                    setTimeout(() => {
-                        this.reconnectPeer();
-                    }, 2000 * this.state.reconnectAttempts);
-                }
-            },
-            
-            handleConnectionError() {
-                this.updatePeerStatus('error');
-                this.showConnectionStatus('error', 'Connection failed');
-                
-                if (this.elements.reconnectBtn) {
-                    this.elements.reconnectBtn.classList.remove('hidden');
-                }
-            },
-            
-            reconnectPeer() {
-                console.log('🔄 Manually reconnecting...');
+            reconnectPeer() { 
+                if(this.state.peer) this.state.peer.destroy(); 
+                this.state.peer=null; 
+                this.state.isConnected=false; 
+                this.state.peerId='cube-'+Math.floor(100000+Math.random()*900000); 
+                setTimeout(()=>this.initPeer(),500); 
                 this.showToast('Reconnecting...');
-                
-                // Clean up existing peer
-                if (this.state.peer) {
-                    try {
-                        this.state.peer.destroy();
-                    } catch (e) {
-                        console.log('Error destroying peer:', e);
-                    }
-                    this.state.peer = null;
-                }
-                
-                // Reset state
-                this.state.isConnected = false;
-                this.state.reconnectAttempts = 0;
-                
-                // Generate new ID
-                this.state.peerId = 'cube-' + Math.floor(100000 + Math.random() * 900000);
-                
-                // Reinitialize
-                setTimeout(() => {
-                    this.initPeer();
-                }, 500);
             },
-            
-            updatePeerStatus(status) {
-                const statusEl = this.elements.peerStatus;
-                if (!statusEl) return;
-                
-                if (status === 'connected') {
-                    statusEl.className = 'ml-auto text-xs px-2 py-0.5 rounded-full bg-success/20 text-success';
-                    statusEl.innerHTML = '<i class="fas fa-circle text-[8px]"></i> Connected';
-                } else if (status === 'disconnected') {
-                    statusEl.className = 'ml-auto text-xs px-2 py-0.5 rounded-full bg-error/20 text-error';
-                    statusEl.innerHTML = '<i class="fas fa-circle text-[8px]"></i> Disconnected';
-                } else if (status === 'connecting') {
-                    statusEl.className = 'ml-auto text-xs px-2 py-0.5 rounded-full bg-warning/20 text-warning';
-                    statusEl.innerHTML = '<i class="fas fa-circle text-[8px]"></i> Connecting';
-                } else {
-                    statusEl.className = 'ml-auto text-xs px-2 py-0.5 rounded-full bg-error/20 text-error';
-                    statusEl.innerHTML = '<i class="fas fa-circle text-[8px]"></i> Error';
-                }
-            },
-            
-            showConnectionStatus(type, message) {
-                const statusEl = this.elements.connectionStatus;
-                const textEl = this.elements.connectionText;
-                
-                if (!statusEl || !textEl) return;
-                
-                statusEl.className = `connection-status ${type} show`;
-                textEl.textContent = message;
-                
-                if (type === 'connected') {
-                    setTimeout(() => this.hideConnectionStatus(), 2000);
-                }
-            },
-            
-            hideConnectionStatus() {
-                const statusEl = this.elements.connectionStatus;
-                if (statusEl) {
-                    statusEl.classList.remove('show');
-                }
-            },
-            
-            async requestWakeLock() {
-                try {
-                    if ('wakeLock' in navigator) {
-                        const wakeLock = await navigator.wakeLock.request('screen');
-                        this.state.wakeLock = wakeLock;
-                    }
-                } catch (err) {
-                    console.log('Wake lock error:', err);
-                }
-            },
-            
-            releaseWakeLock() {
-                if (this.state.wakeLock) {
-                    this.state.wakeLock.release();
-                    this.state.wakeLock = null;
-                }
-            },
-            
-            playRingtone() {
-                if (!this.state.soundEnabled || !this.state.audioContext) return;
-                
-                this.stopRingtone();
-                
-                const ringtone = this.ringtones[this.state.currentRingtone];
-                if (!ringtone) return;
-                
-                try {
-                    const oscillator = this.state.audioContext.createOscillator();
-                    const gainNode = this.state.audioContext.createGain();
-                    
-                    oscillator.connect(gainNode);
-                    gainNode.connect(this.state.audioContext.destination);
-                    
-                    let time = this.state.audioContext.currentTime;
-                    const pattern = ringtone.pattern;
-                    
-                    for (let i = 0; i < pattern.length; i++) {
-                        if (i % 2 === 0) {
-                            oscillator.frequency.setValueAtTime(ringtone.freq1, time);
-                            gainNode.gain.setValueAtTime(0.3, time);
-                            gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
-                        }
-                        time += pattern[i];
-                    }
-                    
-                    oscillator.start();
-                    oscillator.stop(time);
-                    
-                    this.state.oscillator = oscillator;
-                    
-                    const totalDuration = pattern.reduce((a, b) => a + b, 0);
-                    
-                    this.state.ringtoneInterval = setTimeout(() => {
-                        if (this.state.audioContext && this.state.soundEnabled) {
-                            this.playRingtone();
-                        }
-                    }, totalDuration * 1000);
-                    
-                } catch(e) {
-                    console.log('Ringtone error:', e);
-                }
-            },
-            
-            stopRingtone() {
-                if (this.state.oscillator) {
-                    try {
-                        this.state.oscillator.stop();
-                    } catch(e) {}
-                    this.state.oscillator = null;
-                }
-                if (this.state.ringtoneInterval) {
-                    clearTimeout(this.state.ringtoneInterval);
-                    this.state.ringtoneInterval = null;
-                }
-            },
-            
-            playBeep(freq = 800, duration = 0.1) {
-                if (!this.state.soundEnabled || !this.state.audioContext) return;
-                
-                try {
-                    const oscillator = this.state.audioContext.createOscillator();
-                    const gainNode = this.state.audioContext.createGain();
-                    
-                    oscillator.connect(gainNode);
-                    gainNode.connect(this.state.audioContext.destination);
-                    
-                    oscillator.frequency.setValueAtTime(freq, this.state.audioContext.currentTime);
-                    gainNode.gain.setValueAtTime(0.2, this.state.audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.state.audioContext.currentTime + duration);
-                    
-                    oscillator.start();
-                    oscillator.stop(this.state.audioContext.currentTime + duration);
-                } catch(e) {
-                    console.log('Beep error:', e);
-                }
-            },
-            
-            async getMedia(facingMode = 'user') {
-                try {
-                    this.showLoading(true);
-                    
-                    const constraints = {
-                        video: {
-                            width: { ideal: 640 },
-                            height: { ideal: 480 },
-                            frameRate: { ideal: 24 },
-                            facingMode: facingMode
-                        },
-                        audio: {
-                            echoCancellation: true,
-                            noiseSuppression: true,
-                            autoGainControl: true,
-                            channelCount: 1,
-                            sampleRate: 48000
-                        }
-                    };
-                    
-                    console.log('🎥 Requesting camera media');
-                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                    
-                    console.log('✅ Media tracks:', 
-                        stream.getVideoTracks().length, 'video,',
-                        stream.getAudioTracks().length, 'audio'
-                    );
-                    
-                    this.showLoading(false);
-                    return stream;
-                    
-                } catch(err) {
-                    this.showLoading(false);
-                    console.error('❌ Media error:', err);
-                    this.showToast('Camera/mic access required', 'error');
-                    throw err;
-                }
-            },
-            
-            async getScreenMedia() {
-                try {
-                    this.showLoading(true);
-                    
-                    const stream = await navigator.mediaDevices.getDisplayMedia({
-                        video: {
-                            cursor: 'always',
-                            displaySurface: 'monitor'
-                        },
-                        audio: true
-                    });
-                    
-                    console.log('🖥️ Screen share started');
-                    
-                    stream.getVideoTracks()[0].onended = () => {
-                        console.log('Screen share ended by user');
-                        this.stopScreenShare();
-                    };
-                    
-                    this.showLoading(false);
-                    return stream;
-                    
-                } catch(err) {
-                    this.showLoading(false);
-                    console.error('❌ Screen share error:', err);
-                    this.showToast('Screen share cancelled', 'error');
-                    throw err;
-                }
-            },
-            
-            async startCall() {
-                // Check if peer is connected
-                if (!this.state.isConnected || !this.state.peer) {
-                    this.showToast('Not connected to server. Please wait or reconnect.', 'error');
-                    return;
-                }
-                
-                const peerId = this.elements.remoteId.value.trim();
-                if (!peerId) {
-                    this.showToast('Enter Peer ID', 'error');
-                    return;
-                }
-                
-                // Prevent calling self
-                if (peerId === this.state.peerId) {
-                    this.showToast('Cannot call yourself!', 'error');
-                    return;
-                }
-                
-                try {
-                    console.log('📞 Starting call to:', peerId);
-                    this.playBeep(1200, 0.1);
-                    
-                    this.state.stream = await this.getMedia(this.state.currentFacingMode);
-                    this.state.originalStream = this.state.stream;
-                    
-                    this.elements.localVideo.srcObject = this.state.stream;
-                    console.log('📹 Local video set');
-                    
-                    // Make the call
-                    const call = this.state.peer.call(peerId, this.state.stream);
-                    
-                    // Check if call was created successfully
-                    if (!call) {
-                        throw new Error('Failed to create call - peer may be unavailable');
-                    }
-                    
-                    this.setupCall(call);
-                    
-                    this.showScreen('call');
-                    this.startTimer();
-                    this.elements.callerName.textContent = peerId;
-                    this.elements.videoPlaceholder.style.display = 'none';
-                    
-                    this.state.isInCall = true;
-                    this.state.videoMode = 'camera';
-                    this.updateVideoModeUI();
-                    this.requestWakeLock();
-                    
-                    this.showToast('Calling...');
-                    
-                } catch(err) {
-                    console.error('❌ Start call error:', err);
-                    this.showToast(err.message || 'Failed to start call', 'error');
-                    
-                    // Clean up stream if created
-                    if (this.state.stream) {
-                        this.state.stream.getTracks().forEach(t => t.stop());
-                        this.state.stream = null;
-                    }
-                }
-            },
-            
-            async answerCall() {
-                if (!this.state.incomingCall) {
-                    this.showToast('No incoming call', 'error');
-                    return;
-                }
-                
-                try {
-                    console.log('✅ Answering call from:', this.state.incomingCall.peer);
-                    this.stopRingtone();
-                    this.playBeep(1000, 0.2);
-                    
-                    this.state.stream = await this.getMedia(this.state.currentFacingMode);
-                    this.state.originalStream = this.state.stream;
-                    
-                    this.elements.localVideo.srcObject = this.state.stream;
-                    console.log('📹 Local video set');
-                    
-                    this.state.incomingCall.answer(this.state.stream);
-                    
-                    this.setupCall(this.state.incomingCall);
-                    
-                    this.showScreen('call');
-                    this.startTimer();
-                    this.elements.callerName.textContent = this.state.incomingCall.peer;
-                    this.elements.videoPlaceholder.style.display = 'none';
-                    
-                    this.state.isInCall = true;
-                    this.state.videoMode = 'camera';
-                    this.updateVideoModeUI();
-                    this.requestWakeLock();
-                    
-                    this.state.incomingCall = null;
-                    
-                    this.showToast('Call connected');
-                    
-                } catch(err) {
-                    console.error('❌ Answer call error:', err);
-                    this.showToast('Failed to answer: ' + err.message, 'error');
-                    this.showScreen('dialer');
-                }
-            },
-            
-            declineCall() {
-                if (this.state.incomingCall) {
-                    console.log('❌ Declining call from:', this.state.incomingCall.peer);
-                    this.playBeep(400, 0.1);
-                    try {
-                        this.state.incomingCall.close();
-                    } catch(e) {
-                        console.log('Error closing incoming call:', e);
-                    }
-                    this.state.incomingCall = null;
-                }
-                this.stopRingtone();
-                this.showScreen('dialer');
-            },
-            
-            setupCall(call) {
-                if (!call) {
-                    console.error('❌ setupCall called with null call');
-                    return;
-                }
-                
-                console.log('🔗 Setting up call handlers');
-                this.state.call = call;
-                
-                call.on('stream', (remoteStream) => {
-                    console.log('📹 Remote stream received');
-                    
-                    this.elements.remoteVideo.srcObject = remoteStream;
-                    this.elements.remoteAudio.srcObject = remoteStream;
-                    
-                    this.elements.remoteAudio.muted = false;
-                    this.elements.remoteAudio.volume = 1.0;
-                    
-                    this.elements.videoPlaceholder.style.display = 'none';
-                    
-                    this.elements.remoteVideo.play().catch(e => {
-                        console.log('Video auto-play prevented:', e);
-                    });
-                    
-                    this.elements.remoteAudio.play().catch(e => {
-                        console.log('Audio auto-play prevented:', e);
-                    });
-                    
-                    this.showToast('Connected - Audio & Video');
-                });
-                
-                call.on('close', () => {
-                    console.log('📞 Call closed');
-                    this.endCall();
-                });
-                
-                call.on('error', (err) => {
-                    console.error('📞 Call error:', err);
-                    this.showToast('Call error: ' + err.message, 'error');
-                    this.endCall();
-                });
-            },
-            
-            async toggleVideoMode() {
-                if (!this.state.isInCall || !this.state.call) {
-                    this.showToast('Not in an active call', 'error');
-                    return;
-                }
-                
-                if (this.state.videoMode === 'camera') {
-                    try {
-                        this.state.screenStream = await this.getScreenMedia();
-                        
-                        const screenTrack = this.state.screenStream.getVideoTracks()[0];
-                        const sender = this.state.call?.peerConnection?.getSenders().find(s => 
-                            s.track && s.track.kind === 'video'
-                        );
-                        
-                        if (sender) {
-                            await sender.replaceTrack(screenTrack);
-                        }
-                        
-                        this.elements.screenVideo.srcObject = this.state.screenStream;
-                        this.elements.screenPreview.style.display = 'block';
-                        this.elements.screenShareIndicator.style.display = 'flex';
-                        
-                        this.state.videoMode = 'screen';
-                        this.updateVideoModeUI();
-                        this.showToast('Screen sharing started');
-                        
-                    } catch (err) {
-                        console.error('Screen share error:', err);
-                        this.showToast('Failed to share screen', 'error');
-                    }
-                    
-                } else {
-                    this.stopScreenShare();
-                }
-            },
-            
-            async stopScreenShare() {
-                if (this.state.screenStream) {
-                    this.state.screenStream.getTracks().forEach(track => track.stop());
-                    this.state.screenStream = null;
-                }
-                
-                if (this.state.originalStream) {
-                    const cameraTrack = this.state.originalStream.getVideoTracks()[0];
-                    const sender = this.state.call?.peerConnection?.getSenders().find(s => 
-                        s.track && s.track.kind === 'video'
-                    );
-                    
-                    if (sender && cameraTrack) {
-                        await sender.replaceTrack(cameraTrack);
-                    }
-                }
-                
-                this.elements.screenPreview.style.display = 'none';
-                this.elements.screenShareIndicator.style.display = 'none';
-                this.elements.screenVideo.srcObject = null;
-                
-                this.state.videoMode = 'camera';
-                this.updateVideoModeUI();
-                this.showToast('Back to camera');
-            },
-            
-            updateVideoModeUI() {
-                const btn = this.elements.videoToggleBtn;
-                const indicator = this.elements.videoModeIndicator;
-                const text = this.elements.videoModeText;
-                
-                if (this.state.videoMode === 'screen') {
-                    btn.classList.add('active');
-                    btn.style.background = '#06b6d4';
-                    btn.innerHTML = '<i class="fas fa-video"></i>';
-                    btn.title = 'Switch to Camera';
-                    indicator.style.background = 'rgba(6, 182, 212, 0.9)';
-                    text.textContent = 'Screen';
-                } else {
-                    btn.classList.remove('active');
-                    btn.style.background = 'rgba(255, 255, 255, 0.15)';
-                    btn.innerHTML = '<i class="fas fa-desktop"></i>';
-                    btn.title = 'Switch to Screen Share';
-                    indicator.style.background = 'rgba(99, 102, 241, 0.9)';
-                    text.textContent = 'Camera';
-                }
-            },
-            
-            endCall() {
-                console.log('📞 Ending call');
-                this.playBeep(300, 0.1);
-                
-                this.state.isInCall = false;
-                this.releaseWakeLock();
-                
-                if (this.state.screenStream) {
-                    this.state.screenStream.getTracks().forEach(track => track.stop());
-                    this.state.screenStream = null;
-                }
-                
-                if (this.state.call) {
-                    try {
-                        this.state.call.close();
-                    } catch(e) {
-                        console.log('Error closing call:', e);
-                    }
-                    this.state.call = null;
-                }
-                
-                if (this.state.stream) {
-                    this.state.stream.getTracks().forEach(track => track.stop());
-                    this.state.stream = null;
-                }
-                
-                this.state.originalStream = null;
-                
-                this.elements.localVideo.srcObject = null;
-                this.elements.remoteVideo.srcObject = null;
-                this.elements.remoteAudio.srcObject = null;
-                this.elements.screenVideo.srcObject = null;
-                this.elements.screenPreview.style.display = 'none';
-                this.elements.screenShareIndicator.style.display = 'none';
-                this.elements.videoPlaceholder.style.display = 'flex';
-                
-                this.stopTimer();
-                this.showScreen('dialer');
-                this.showToast('Call ended', 'error');
-            },
-            
-            async flipCamera() {
-                if (!this.state.stream || this.state.videoMode === 'screen') {
-                    this.showToast('Camera flip not available', 'error');
-                    return;
-                }
-                
-                this.state.currentFacingMode = this.state.currentFacingMode === 'user' ? 'environment' : 'user';
-                
-                try {
-                    const newStream = await this.getMedia(this.state.currentFacingMode);
-                    
-                    const videoTrack = newStream.getVideoTracks()[0];
-                    const sender = this.state.call?.peerConnection?.getSenders().find(s => 
-                        s.track && s.track.kind === 'video'
-                    );
-                    
-                    if (sender) {
-                        await sender.replaceTrack(videoTrack);
-                    }
-                    
-                    const oldVideoTrack = this.state.stream.getVideoTracks()[0];
-                    if (oldVideoTrack) oldVideoTrack.stop();
-                    
-                    this.state.stream.removeTrack(this.state.stream.getVideoTracks()[0]);
-                    this.state.stream.addTrack(videoTrack);
-                    
-                    this.state.originalStream = this.state.stream;
-                    this.elements.localVideo.srcObject = this.state.stream;
-                    this.showToast('Camera flipped');
-                    
-                } catch (err) {
-                    console.error('Flip camera error:', err);
-                    this.showToast('Failed to flip camera', 'error');
-                }
-            },
-            
-            startTimer() {
-                this.state.callStart = Date.now();
-                this.state.timer = setInterval(() => {
-                    const seconds = Math.floor((Date.now() - this.state.callStart) / 1000);
-                    const mins = Math.floor(seconds / 60);
-                    const secs = seconds % 60;
-                    if (this.elements.callTimer) {
-                        this.elements.callTimer.textContent = 
-                            `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                    }
-                }, 1000);
-            },
-            
-            stopTimer() {
-                if (this.state.timer) {
-                    clearInterval(this.state.timer);
-                    this.state.timer = null;
-                }
-                if (this.elements.callTimer) {
-                    this.elements.callTimer.textContent = '00:00';
-                }
-            },
-            
-            toggleSpeaker() {
-                this.state.isSpeakerOn = !this.state.isSpeakerOn;
-                
-                this.elements.remoteVideo.muted = !this.state.isSpeakerOn;
-                this.elements.remoteAudio.muted = !this.state.isSpeakerOn;
-                
-                const btn = this.elements.speakerBtn;
-                if (this.state.isSpeakerOn) {
-                    btn.classList.add('active');
-                    btn.style.background = '#6366f1';
-                    btn.innerHTML = '<i class="fas fa-volume-up"></i>';
-                } else {
-                    btn.classList.remove('active');
-                    btn.style.background = 'rgba(255, 255, 255, 0.15)';
-                    btn.innerHTML = '<i class="fas fa-volume-mute"></i>';
-                }
-                
-                this.playBeep(this.state.isSpeakerOn ? 800 : 400, 0.1);
-                this.showToast(this.state.isSpeakerOn ? 'Speaker ON' : 'Speaker OFF');
-            },
-            
-            toggleMic() {
-                if (this.state.stream) {
-                    const audioTrack = this.state.stream.getAudioTracks()[0];
-                    if (audioTrack) {
-                        this.state.isMicOn = !audioTrack.enabled;
-                        audioTrack.enabled = this.state.isMicOn;
-                        
-                        const btn = this.elements.micBtn;
-                        if (this.state.isMicOn) {
-                            btn.classList.add('active');
-                            btn.style.background = '#6366f1';
-                            btn.innerHTML = '<i class="fas fa-microphone"></i>';
-                        } else {
-                            btn.classList.remove('active');
-                            btn.style.background = 'rgba(255, 255, 255, 0.15)';
-                            btn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
-                        }
-                        
-                        this.playBeep(this.state.isMicOn ? 1000 : 500, 0.1);
-                        this.showToast(this.state.isMicOn ? 'Microphone ON' : 'Microphone OFF');
-                    }
-                }
-            },
-            
-            toggleVideo() {
-                if (this.state.stream && this.state.videoMode === 'camera') {
-                    const videoTrack = this.state.stream.getVideoTracks()[0];
-                    if (videoTrack) {
-                        this.state.isVideoOn = !videoTrack.enabled;
-                        videoTrack.enabled = this.state.isVideoOn;
-                        
-                        const btn = this.elements.videoBtn;
-                        if (this.state.isVideoOn) {
-                            btn.classList.add('active');
-                            btn.style.background = '#6366f1';
-                            btn.innerHTML = '<i class="fas fa-video"></i>';
-                        } else {
-                            btn.classList.remove('active');
-                            btn.style.background = 'rgba(255, 255, 255, 0.15)';
-                            btn.innerHTML = '<i class="fas fa-video-slash"></i>';
-                        }
-                        
-                        this.playBeep(this.state.isVideoOn ? 1000 : 500, 0.1);
-                        this.showToast(this.state.isVideoOn ? 'Camera ON' : 'Camera OFF');
-                    }
-                }
-            },
-            
-            toggleSound() {
-                this.state.soundEnabled = !this.state.soundEnabled;
-                const btn = this.elements.soundToggle;
-                
-                if (this.state.soundEnabled) {
-                    btn.innerHTML = '<i class="fas fa-volume-up text-primary"></i>';
-                } else {
-                    btn.innerHTML = '<i class="fas fa-volume-mute text-error"></i>';
-                }
-                
-                if (!this.state.soundEnabled) {
-                    this.stopRingtone();
-                }
-                
-                this.showToast(this.state.soundEnabled ? 'Sound ON' : 'Sound OFF');
-            },
-            
-            copyId() {
-                const id = this.elements.yourId.textContent;
-                if (id === 'Loading...') {
-                    this.showToast('Please wait for connection', 'error');
-                    return;
-                }
-                navigator.clipboard.writeText(id).then(() => {
-                    this.playBeep(1200, 0.1);
-                    this.showToast('ID copied to clipboard!');
-                });
-            },
-            
-            async shareId() {
-                const id = this.elements.yourId.textContent;
-                if (id === 'Loading...') {
-                    this.showToast('Please wait for connection', 'error');
-                    return;
-                }
-                
-                const shareData = {
-                    title: 'Cube Dialer',
-                    text: `Call me on Cube Dialer! My Peer ID is: ${id}`,
-                    url: window.location.href
-                };
-                
-                try {
-                    if (navigator.share) {
-                        await navigator.share(shareData);
-                        this.showToast('Shared successfully!');
+            updatePeerStatus(s) { let el=this.elements.peerStatus; if(!el)return; if(s==='connected'){el.className='ml-auto text-xs px-2 py-0.5 rounded-full bg-success/20 text-success';el.innerHTML='<i class="fas fa-circle text-[8px]"></i> Connected';}else if(s==='disconnected'){el.className='ml-auto text-xs px-2 py-0.5 rounded-full bg-error/20 text-error';el.innerHTML='<i class="fas fa-circle text-[8px]"></i> Disconnected';}else{el.className='ml-auto text-xs px-2 py-0.5 rounded-full bg-warning/20 text-warning';el.innerHTML='<i class="fas fa-circle text-[8px]"></i> Connecting';} },
+            showConnectionStatus(t,m){ let s=this.elements.connectionStatus, tx=this.elements.connectionText; if(s&&tx){s.className=`connection-status ${t} show`;tx.textContent=m;if(t==='connected')setTimeout(()=>this.hideConnectionStatus(),2000);} },
+            hideConnectionStatus(){ let s=this.elements.connectionStatus; if(s)s.classList.remove('show'); },
+            playRingtone(){ if(!this.state.soundEnabled||!this.state.audioContext)return; this.stopRingtone(); let r=this.ringtones[this.state.currentRingtone]; if(!r)return; try{ let osc=this.state.audioContext.createOscillator(), gain=this.state.audioContext.createGain(); osc.connect(gain); gain.connect(this.state.audioContext.destination); let time=this.state.audioContext.currentTime, pat=r.pattern; for(let i=0;i<pat.length;i++){ if(i%2===0){ osc.frequency.setValueAtTime(r.freq1,time); gain.gain.setValueAtTime(0.3,time); gain.gain.exponentialRampToValueAtTime(0.01,time+0.1); } time+=pat[i]; } osc.start(); osc.stop(time); this.state.oscillator=osc; let total=pat.reduce((a,b)=>a+b,0); this.state.ringtoneInterval=setTimeout(()=>{ if(this.state.audioContext&&this.state.soundEnabled) this.playRingtone(); },total*1000); }catch(e){} },
+            stopRingtone(){ if(this.state.oscillator){try{this.state.oscillator.stop();}catch(e){} this.state.oscillator=null;} if(this.state.ringtoneInterval){clearTimeout(this.state.ringtoneInterval);this.state.ringtoneInterval=null;} },
+            playBeep(f=800,d=0.1){ if(!this.state.soundEnabled||!this.state.audioContext)return; try{ let osc=this.state.audioContext.createOscillator(), gain=this.state.audioContext.createGain(); osc.connect(gain); gain.connect(this.state.audioContext.destination); osc.frequency.value=f; gain.gain.setValueAtTime(0.2,this.state.audioContext.currentTime); gain.gain.exponentialRampToValueAtTime(0.01,this.state.audioContext.currentTime+d); osc.start(); osc.stop(this.state.audioContext.currentTime+d); }catch(e){} },
+            async getMedia(facing='user'){ this.showLoading(true); try{ let s=await navigator.mediaDevices.getUserMedia({ video:{width:{ideal:640},height:{ideal:480},facingMode:facing}, audio:{echoCancellation:true,noiseSuppression:true} }); this.showLoading(false); return s; }catch(e){ this.showLoading(false); this.showToast('Camera/mic access denied','error'); throw e; } },
+            async getScreenMedia(){ this.showLoading(true); try{ let s=await navigator.mediaDevices.getDisplayMedia({ video:{cursor:'always'}, audio:true }); s.getVideoTracks()[0].onended=()=>this.stopScreenShare(); this.showLoading(false); return s; }catch(e){ this.showLoading(false); this.showToast('Screen share cancelled','error'); throw e; } },
+            async startCall(){ if(!this.state.isConnected){this.showToast('Not connected','error');return;} let peerId=this.elements.remoteId.value.trim(); if(!peerId){this.showToast('Enter Peer ID','error');return;} if(peerId===this.state.peerId){this.showToast('Cannot call yourself','error');return;} try{ this.playBeep(1200,0.1); this.state.stream=await this.getMedia(this.state.currentFacingMode); this.state.originalStream=this.state.stream; this.elements.localVideo.srcObject=this.state.stream; let call=this.state.peer.call(peerId,this.state.stream); if(!call)throw new Error('Call failed'); this.setupCall(call); this.showScreen('call'); this.startTimer(); this.elements.callerName.textContent=peerId; this.elements.videoPlaceholder.style.display='none'; this.state.isInCall=true; this.state.videoMode='camera'; this.updateVideoModeUI(); this.requestWakeLock(); this.showToast('Calling...'); }catch(err){ this.showToast(err.message,'error'); if(this.state.stream){this.state.stream.getTracks().forEach(t=>t.stop());this.state.stream=null;} } },
+            async answerCall(){ if(!this.state.incomingCall)return; this.stopRingtone(); this.playBeep(1000,0.2); try{ this.state.stream=await this.getMedia(this.state.currentFacingMode); this.state.originalStream=this.state.stream; this.elements.localVideo.srcObject=this.state.stream; this.state.incomingCall.answer(this.state.stream); this.setupCall(this.state.incomingCall); this.showScreen('call'); this.startTimer(); this.elements.callerName.textContent=this.state.incomingCall.peer; this.state.isInCall=true; this.state.videoMode='camera'; this.updateVideoModeUI(); this.requestWakeLock(); this.state.incomingCall=null; this.showToast('Call connected'); }catch(e){ this.showToast('Answer failed','error'); this.showScreen('dialer'); } },
+            declineCall(){ if(this.state.incomingCall){ this.playBeep(400,0.1); try{this.state.incomingCall.close();}catch(e){} this.state.incomingCall=null; } this.stopRingtone(); this.showScreen('dialer'); },
+            setupCall(call){ this.state.call=call; call.on('stream',(remoteStream)=>{ this.elements.remoteVideo.srcObject=remoteStream; this.elements.remoteAudio.srcObject=remoteStream; this.elements.remoteAudio.muted=false; this.elements.videoPlaceholder.style.display='none'; this.elements.remoteVideo.play().catch(e=>{}); this.elements.remoteAudio.play().catch(e=>{}); }); call.on('close',()=>this.endCall()); call.on('error',()=>this.endCall()); },
+            async toggleVideoMode(){ if(!this.state.isInCall)return; if(this.state.videoMode==='camera'){ try{ this.state.screenStream=await this.getScreenMedia(); let screenTrack=this.state.screenStream.getVideoTracks()[0]; let sender=this.state.call?.peerConnection?.getSenders().find(s=>s.track&&s.track.kind==='video'); if(sender) await sender.replaceTrack(screenTrack); this.elements.screenVideo.srcObject=this.state.screenStream; this.elements.screenPreview.style.display='block'; this.elements.screenShareIndicator.style.display='flex'; this.state.videoMode='screen'; this.updateVideoModeUI(); this.showToast('Screen sharing'); }catch(e){ this.showToast('Screen share failed','error'); } } else { this.stopScreenShare(); } },
+            async stopScreenShare(){ if(this.state.screenStream){ this.state.screenStream.getTracks().forEach(t=>t.stop()); this.state.screenStream=null; } if(this.state.originalStream){ let camTrack=this.state.originalStream.getVideoTracks()[0]; let sender=this.state.call?.peerConnection?.getSenders().find(s=>s.track&&s.track.kind==='video'); if(sender&&camTrack) await sender.replaceTrack(camTrack); } this.elements.screenPreview.style.display='none'; this.elements.screenShareIndicator.style.display='none'; this.elements.screenVideo.srcObject=null; this.state.videoMode='camera'; this.updateVideoModeUI(); this.showToast('Camera restored'); },
+            updateVideoModeUI(){ let btn=this.elements.videoToggleBtn, ind=this.elements.videoModeIndicator, txt=this.elements.videoModeText; if(this.state.videoMode==='screen'){ btn.classList.add('active'); btn.style.background='#06b6d4'; btn.innerHTML='<i class="fas fa-video"></i>'; btn.title='Switch to Camera'; ind.style.background='rgba(6,182,212,0.9)'; txt.textContent='Screen'; } else { btn.classList.remove('active'); btn.style.background='rgba(255,255,255,0.15)'; btn.innerHTML='<i class="fas fa-desktop"></i>'; btn.title='Switch to Screen Share'; ind.style.background='rgba(99,102,241,0.9)'; txt.textContent='Camera'; } },
+            endCall(){ this.playBeep(300,0.1); this.state.isInCall=false; if(this.state.wakeLock) this.state.wakeLock.release(); if(this.state.screenStream) this.state.screenStream.getTracks().forEach(t=>t.stop()); if(this.state.call){ try{this.state.call.close();}catch(e){} this.state.call=null; } if(this.state.stream){ this.state.stream.getTracks().forEach(t=>t.stop()); this.state.stream=null; } this.elements.localVideo.srcObject=null; this.elements.remoteVideo.srcObject=null; this.elements.remoteAudio.srcObject=null; this.elements.screenVideo.srcObject=null; this.elements.screenPreview.style.display='none'; this.elements.screenShareIndicator.style.display='none'; this.elements.videoPlaceholder.style.display='flex'; this.stopTimer(); this.showScreen('dialer'); this.showToast('Call ended','error'); },
+            async flipCamera(){ if(!this.state.stream||this.state.videoMode==='screen'){this.showToast('Flip not available','error');return;} this.state.currentFacingMode=this.state.currentFacingMode==='user'?'environment':'user'; try{ let newStream=await this.getMedia(this.state.currentFacingMode); let videoTrack=newStream.getVideoTracks()[0]; let sender=this.state.call?.peerConnection?.getSenders().find(s=>s.track&&s.track.kind==='video'); if(sender) await sender.replaceTrack(videoTrack); let oldTrack=this.state.stream.getVideoTracks()[0]; if(oldTrack) oldTrack.stop(); this.state.stream.removeTrack(this.state.stream.getVideoTracks()[0]); this.state.stream.addTrack(videoTrack); this.state.originalStream=this.state.stream; this.elements.localVideo.srcObject=this.state.stream; this.showToast('Camera flipped'); }catch(e){ this.showToast('Flip failed','error'); } },
+            startTimer(){ this.state.callStart=Date.now(); this.state.timer=setInterval(()=>{ let s=Math.floor((Date.now()-this.state.callStart)/1000), m=Math.floor(s/60), sec=s%60; if(this.elements.callTimer) this.elements.callTimer.textContent=`${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`; },1000); },
+            stopTimer(){ if(this.state.timer){clearInterval(this.state.timer);this.state.timer=null;} if(this.elements.callTimer) this.elements.callTimer.textContent='00:00'; },
+            toggleSpeaker(){ this.state.isSpeakerOn=!this.state.isSpeakerOn; this.elements.remoteVideo.muted=!this.state.isSpeakerOn; this.elements.remoteAudio.muted=!this.state.isSpeakerOn; let btn=this.elements.speakerBtn; if(this.state.isSpeakerOn){ btn.classList.add('active'); btn.style.background='#6366f1'; btn.innerHTML='<i class="fas fa-volume-up"></i>'; } else { btn.classList.remove('active'); btn.style.background='rgba(255,255,255,0.15)'; btn.innerHTML='<i class="fas fa-volume-mute"></i>'; } this.playBeep(this.state.isSpeakerOn?800:400,0.1); this.showToast(this.state.isSpeakerOn?'Speaker ON':'Speaker OFF'); },
+            toggleMic(){ if(this.state.stream){ let audioTrack=this.state.stream.getAudioTracks()[0]; if(audioTrack){ this.state.isMicOn=!audioTrack.enabled; audioTrack.enabled=this.state.isMicOn; let btn=this.elements.micBtn; if(this.state.isMicOn){ btn.classList.add('active'); btn.style.background='#6366f1'; btn.innerHTML='<i class="fas fa-microphone"></i>'; } else { btn.classList.remove('active'); btn.style.background='rgba(255,255,255,0.15)'; btn.innerHTML='<i class="fas fa-microphone-slash"></i>'; } this.playBeep(this.state.isMicOn?1000:500,0.1); this.showToast(this.state.isMicOn?'Microphone ON':'Microphone OFF'); } } },
+            toggleVideo(){ if(this.state.stream&&this.state.videoMode==='camera'){ let videoTrack=this.state.stream.getVideoTracks()[0]; if(videoTrack){ this.state.isVideoOn=!videoTrack.enabled; videoTrack.enabled=this.state.isVideoOn; let btn=this.elements.videoBtn; if(this.state.isVideoOn){ btn.classList.add('active'); btn.style.background='#6366f1'; btn.innerHTML='<i class="fas fa-video"></i>'; } else { btn.classList.remove('active'); btn.style.background='rgba(255,255,255,0.15)'; btn.innerHTML='<i class="fas fa-video-slash"></i>'; } this.playBeep(this.state.isVideoOn?1000:500,0.1); this.showToast(this.state.isVideoOn?'Camera ON':'Camera OFF'); } } },
+            toggleSound(){ 
+                this.state.soundEnabled=!this.state.soundEnabled; 
+                const soundIcon = document.getElementById('soundToggleIcon');
+                if(soundIcon) {
+                    if(this.state.soundEnabled) {
+                        soundIcon.className = 'fas fa-volume-up text-primary text-sm sound-toggle-icon';
                     } else {
-                        await navigator.clipboard.writeText(`Call me on Cube Dialer! My Peer ID is: ${id}`);
-                        this.showToast('Share text copied!');
+                        soundIcon.className = 'fas fa-volume-mute text-error text-sm sound-toggle-icon';
                     }
-                } catch (err) {
-                    console.log('Share error:', err);
                 }
+                if(!this.state.soundEnabled) this.stopRingtone(); 
+                this.showToast(this.state.soundEnabled?'Sound ON':'Sound OFF'); 
             },
-            
-            changeRingtone() {
-                this.state.currentRingtone = this.elements.ringtoneSelect.value;
-                this.showToast('Ringtone: ' + this.elements.ringtoneSelect.selectedOptions[0].text);
-                
-                if (document.getElementById('incomingScreen').classList.contains('active')) {
-                    this.stopRingtone();
-                    this.playRingtone();
-                }
-            },
-            
-            showScreen(screenName) {
-                const screens = ['home', 'dialer', 'call', 'incoming', 'help'];
-                
-                screens.forEach(s => {
-                    const el = document.getElementById(s + 'Screen');
-                    if (el) {
-                        el.classList.remove('active');
-                    }
-                });
-                
-                const target = document.getElementById(screenName + 'Screen');
-                if (target) {
-                    target.classList.add('active');
-                }
-                
-                document.querySelectorAll('.nav-item').forEach(nav => {
-                    nav.classList.remove('active');
-                });
-                
-                if (screenName === 'home') document.getElementById('navHome')?.classList.add('active');
-                if (screenName === 'dialer') document.getElementById('navDialer')?.classList.add('active');
-                if (screenName === 'help') document.getElementById('navHelp')?.classList.add('active');
-                
-                this.playBeep(600, 0.05);
-            },
-            
-            showToast(message, type = 'success') {
-                const toast = this.elements.toast;
-                const toastMessage = document.getElementById('toastMessage');
-                
-                if (!toast) return;
-                
-                if (toastMessage) toastMessage.textContent = message;
-                
-                if (type === 'error') {
-                    toast.innerHTML = `<i class="fas fa-exclamation-circle text-error"></i><span>${message}</span>`;
-                } else {
-                    toast.innerHTML = `<i class="fas fa-check-circle text-success"></i><span>${message}</span>`;
-                }
-                
-                toast.classList.add('show');
-                
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 3000);
-            },
-            
-            showLoading(show) {
-                const loading = this.elements.loading;
-                if (loading) {
-                    if (show) {
-                        loading.classList.add('show');
-                    } else {
-                        loading.classList.remove('show');
-                    }
-                }
-            },
-            
-            bindEvents() {
-                if (this.elements.remoteId) {
-                    this.elements.remoteId.addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter') this.startCall();
-                    });
-                }
-                
-                document.addEventListener('click', () => {
-                    if (this.elements.remoteVideo?.srcObject) {
-                        this.elements.remoteVideo.play().catch(e => {});
-                    }
-                    if (this.elements.remoteAudio?.srcObject) {
-                        this.elements.remoteAudio.play().catch(e => {});
-                    }
-                    if (this.elements.localVideo?.srcObject) {
-                        this.elements.localVideo.play().catch(e => {});
-                    }
-                    if (this.elements.screenVideo?.srcObject) {
-                        this.elements.screenVideo.play().catch(e => {});
-                    }
-                }, { once: false });
-            }
+            copyId(){ let id=this.elements.yourId.textContent; if(id==='Loading...'){this.showToast('Wait for connection','error');return;} navigator.clipboard.writeText(id); this.playBeep(1200,0.1); this.showToast('ID copied!'); },
+            async shareId(){ let id=this.elements.yourId.textContent; if(id==='Loading...'){this.showToast('Wait for connection','error');return;} if(navigator.share) await navigator.share({title:'Cube Dialer',text:`Call me! ID: ${id}`,url:window.location.href}); else await navigator.clipboard.writeText(`Call me on Cube Dialer! ID: ${id}`); this.showToast('Shared!'); },
+            changeRingtone(){ this.state.currentRingtone=this.elements.ringtoneSelect.value; this.showToast('Ringtone updated'); if(document.getElementById('incomingScreen').classList.contains('active')){ this.stopRingtone(); this.playRingtone(); } },
+            showScreen(s){ ['home','dialer','call','incoming','help'].forEach(n=>{ let el=document.getElementById(n+'Screen'); if(el)el.classList.remove('active'); }); let t=document.getElementById(s+'Screen'); if(t)t.classList.add('active'); ['navHome','navDialer','navHelp'].forEach(n=>{ let btn=document.getElementById(n); if(btn)btn.classList.remove('active'); }); if(s==='home')document.getElementById('navHome')?.classList.add('active'); if(s==='dialer')document.getElementById('navDialer')?.classList.add('active'); if(s==='help')document.getElementById('navHelp')?.classList.add('active'); this.playBeep(600,0.05); },
+            showToast(m,t='success'){ let toast=this.elements.toast; if(!toast)return; toast.innerHTML=`<i class="fas fa-${t==='error'?'exclamation-circle text-error':'check-circle text-success'}"></i><span>${m}</span>`; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),3000); },
+            showLoading(s){ let ld=this.elements.loading; if(ld) s?ld.classList.add('show'):ld.classList.remove('show'); },
+            async requestWakeLock(){ try{ if('wakeLock' in navigator){ this.state.wakeLock=await navigator.wakeLock.request('screen'); } }catch(e){} },
+            bindEvents(){ if(this.elements.remoteId) this.elements.remoteId.addEventListener('keypress',(e)=>{if(e.key==='Enter')this.startCall();}); document.addEventListener('click',()=>{ if(this.elements.remoteVideo?.srcObject) this.elements.remoteVideo.play().catch(e=>{}); if(this.elements.remoteAudio?.srcObject) this.elements.remoteAudio.play().catch(e=>{}); }); }
         };
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            App.init();
-        });
-        
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden && App.state.audioContext) {
-                App.state.audioContext.suspend();
-            } else if (!document.hidden && App.state.audioContext) {
-                App.state.audioContext.resume();
-            }
-        });
+        document.addEventListener('DOMContentLoaded',()=>App.init());
     </script>
 </body>
 </html>
