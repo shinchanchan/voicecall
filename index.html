@@ -5,60 +5,100 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="google-site-verification" content="C3bRFe_DiKkVQ8mCioHJv78WRf2DLTAAhqJ7lwSkmVk" />
 
-    <title>Cube Dialer | Voice Call & Video Call Web App</title>
+    <title>Cube Dialer | Voice & Video Call</title>
 
-    <meta name="description" content="Fast Phone Dialer is a browser-based voice call and video call application built using WebRTC. Developed by Vallarasu and hosted on GitHub Pages." />
-    <meta name="keywords" content="vallarasu github voice call, fast phone dialer, web rtc voice call, browser video call, github voice call app, peerjs voice call" />
+    <meta name="description" content="Cube Dialer is a browser-based voice call and video call application built using WebRTC." />
+    <meta name="keywords" content="voice call, video call, web rtc, browser call, peerjs voice call" />
     <link rel="canonical" href="https://shinchanchan.github.io/voicecall/" />
    
+    <!-- Tailwind CSS & DaisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- PeerJS -->
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "Fast Phone Dialer",
-      "operatingSystem": "Web",
-      "applicationCategory": "CommunicationApplication",
-      "description": "WebRTC-based voice and video call application built by Vallarasu.",
-      "url": "https://shinchanchan.github.io/voicecall/",
-      "author": {
-        "@type": "Person",
-        "name": "Vallarasu"
-      }
-    }
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#8b5cf6',
+                        accent: '#06b6d4',
+                        dark: '#0f0f1a',
+                        darker: '#080810',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-slow': 'bounce 2s infinite',
+                        'ring': 'ring 1.5s ease-in-out infinite',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'slide-down': 'slideDown 0.3s ease-out',
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'scale-in': 'scaleIn 0.2s ease-out',
+                        'ripple': 'ripple 0.6s linear',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        ring: {
+                            '0%, 100%': { transform: 'rotate(0deg)' },
+                            '10%': { transform: 'rotate(15deg)' },
+                            '20%': { transform: 'rotate(-15deg)' },
+                            '30%': { transform: 'rotate(15deg)' },
+                            '40%': { transform: 'rotate(-15deg)' },
+                            '50%': { transform: 'rotate(0deg)' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(100%)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        slideDown: {
+                            '0%': { transform: 'translateY(-20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        scaleIn: {
+                            '0%': { transform: 'scale(0.9)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        },
+                        ripple: {
+                            '0%': { transform: 'scale(0)', opacity: '1' },
+                            '100%': { transform: 'scale(4)', opacity: '0' },
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 5px #6366f1, 0 0 10px #6366f1' },
+                            '100%': { boxShadow: '0 0 20px #6366f1, 0 0 30px #8b5cf6' },
+                        },
+                    },
+                },
+            },
+        }
     </script>
     
     <style>
-        /* PREVENT PULL-TO-REFRESH - Apply to html and body */
+        /* Prevent pull-to-refresh and bounce effects */
         html, body {
             overscroll-behavior-y: none;
             overscroll-behavior-x: none;
             overflow: hidden;
             touch-action: pan-x pan-y;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            /* Prevent text selection which can cause unwanted behaviors */
             -webkit-user-select: none;
             -webkit-touch-callout: none;
             -webkit-tap-highlight-color: transparent;
         }
         
         body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            /* Prevent bounce effects */
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            min-height: 100dvh;
             position: fixed;
             top: 0;
             left: 0;
@@ -66,290 +106,93 @@
             bottom: 0;
         }
         
-        .phone {
-            width: 380px;
-            height: 700px;
-            background: #000;
-            border-radius: 40px;
-            position: relative;
-            overflow: hidden;
-            border: 12px solid #111;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-            /* Prevent scrolling within the phone container */
-            touch-action: none;
+        /* Glassmorphism effects */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        .status-bar {
-            height: 32px;
-            background: #000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 24px;
-            color: white;
-            font-size: 14px;
-            font-weight: 600;
-            position: relative;
-            z-index: 10;
+        .glass-strong {
+            background: rgba(15, 15, 26, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
         
-        .screen {
-            height: calc(100% - 100px);
-            position: relative;
-            overflow: hidden;
-            /* Prevent scroll chaining */
-            overscroll-behavior: none;
+        /* Gradient backgrounds */
+        .gradient-bg {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
         }
         
-        .screen-base {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            display: none;
-            flex-direction: column;
-            background: linear-gradient(180deg, #0f0f1a 0%, #000 100%);
-            /* Prevent scrolling on all screens */
-            overflow: hidden;
-            touch-action: none;
-        }
-        
-        .screen-base.active {
-            display: flex;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        /* Home Screen */
-        .home {
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            text-align: center;
-        }
-        
-        .home .icon {
-            width: 100px;
-            height: 100px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 24px;
-        }
-        
-        .home .icon i {
-            font-size: 48px;
-            color: white;
-        }
-        
-        .home h1 {
-            font-size: 28px;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 8px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
-        .home p {
-            color: #888;
-            font-size: 14px;
-        }
-        
-        /* Dialer Screen */
-        .dialer {
-            padding: 20px;
-            /* Allow vertical scrolling only in dialer if needed, but prevent refresh */
-            overflow-y: auto;
-            overscroll-behavior-y: contain;
-        }
-        
-        .dialer-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .dialer-header h2 {
-            color: white;
-            font-size: 20px;
-        }
-        
-        .sound-toggle {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: #667eea;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-        
-        .sound-toggle.muted {
-            color: #ff4444;
-        }
-        
-        .id-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .id-label {
-            color: #888;
-            font-size: 12px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .id-value {
-            color: white;
-            font-size: 18px;
-            font-weight: 600;
-            word-break: break-all;
-            font-family: 'Courier New', monospace;
-        }
-        
-        .peer-input {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .peer-input input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 20px;
-            text-align: center;
-            outline: none;
-            /* Allow text selection in input */
-            -webkit-user-select: text;
-            user-select: text;
-        }
-        
-        .peer-input input::placeholder {
-            color: #666;
-        }
-        
-        .action-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        
-        .action-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 16px;
-            color: white;
-            display: flex;
+        /* Screen transitions */
+        .screen {
+            position: absolute;
+            inset: 0;
+            display: none;
             flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
-        .action-btn i {
-            font-size: 20px;
+        .screen.active {
+            display: flex;
+            opacity: 1;
         }
         
-        .action-btn.call {
-            background: linear-gradient(135deg, #00c853, #64dd17);
-        }
-        
-        .action-btn.copy {
-            background: rgba(255, 255, 255, 0.15);
-        }
-        
-        .action-btn:hover {
-            transform: translateY(-2px);
-            opacity: 0.9;
-        }
-        
-        /* Call Screen - FIXED VIDEO & AUDIO */
-        .call {
-            background: #000;
-        }
-        
-        .call-header {
-            padding: 24px 20px;
-            background: rgba(0, 0, 0, 0.8);
-            text-align: center;
-            position: relative;
-            z-index: 2;
-        }
-        
-        .caller-name {
-            color: white;
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        
-        .call-timer {
-            color: #4caf50;
-            font-size: 14px;
-        }
-        
-        .video-area {
-            flex: 1;
+        /* Ripple effect for buttons */
+        .ripple-btn {
             position: relative;
             overflow: hidden;
-            background: #000;
         }
         
+        .ripple-btn::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.3) 10%, transparent 10.01%);
+            background-repeat: no-repeat;
+            background-position: 50%;
+            transform: scale(10, 10);
+            opacity: 0;
+            transition: transform 0.5s, opacity 1s;
+        }
+        
+        .ripple-btn:active::after {
+            transform: scale(0, 0);
+            opacity: 0.3;
+            transition: 0s;
+        }
+        
+        /* Video styling */
         .remote-video {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            background: #000;
-            display: block;
-        }
-        
-        /* Hidden audio element for reliable audio playback */
-        .remote-audio {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            opacity: 0;
-            pointer-events: none;
         }
         
         .local-preview {
             position: absolute;
-            bottom: 16px;
+            bottom: 100px;
             right: 16px;
-            width: 100px;
-            height: 133px;
-            border-radius: 8px;
+            width: 120px;
+            height: 160px;
+            border-radius: 16px;
             overflow: hidden;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            background: #000;
-            z-index: 3;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            z-index: 10;
         }
         
         .local-preview video {
@@ -357,593 +200,618 @@
             height: 100%;
             object-fit: cover;
             transform: scaleX(-1);
-            display: block;
         }
         
-        .video-placeholder {
+        /* Sound wave animation */
+        .sound-wave {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            height: 30px;
+        }
+        
+        .sound-wave span {
+            width: 4px;
+            background: linear-gradient(to top, #6366f1, #8b5cf6);
+            border-radius: 2px;
+            animation: soundWave 0.5s ease-in-out infinite alternate;
+        }
+        
+        .sound-wave span:nth-child(1) { height: 10px; animation-delay: 0s; }
+        .sound-wave span:nth-child(2) { height: 20px; animation-delay: 0.1s; }
+        .sound-wave span:nth-child(3) { height: 15px; animation-delay: 0.2s; }
+        .sound-wave span:nth-child(4) { height: 25px; animation-delay: 0.3s; }
+        .sound-wave span:nth-child(5) { height: 12px; animation-delay: 0.4s; }
+        
+        @keyframes soundWave {
+            0% { transform: scaleY(0.5); opacity: 0.5; }
+            100% { transform: scaleY(1); opacity: 1; }
+        }
+        
+        /* Floating particles */
+        .particle {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #666;
-            text-align: center;
-            display: none;
-        }
-        
-        .video-placeholder i {
-            font-size: 48px;
-            margin-bottom: 10px;
-            display: block;
-        }
-        
-        .call-controls {
-            padding: 24px 20px;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            position: relative;
-            z-index: 2;
-        }
-        
-        .call-btn {
-            width: 60px;
-            height: 60px;
+            width: 4px;
+            height: 4px;
+            background: rgba(99, 102, 241, 0.5);
             border-radius: 50%;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
+            animation: float 6s ease-in-out infinite;
         }
         
-        .call-btn.hangup {
-            background: #f44336;
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
         }
         
-        .call-btn.speaker.active {
-            background: #2196f3;
-        }
-        
-        .call-btn.video.active {
-            background: #4caf50;
-        }
-        
-        .call-btn.mic.active {
-            background: #ff9800;
-        }
-        
-        .call-btn:hover {
-            transform: scale(1.1);
-        }
-        
-        /* Incoming Call Screen */
-        .incoming {
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 40px;
-        }
-        
-        .caller-avatar {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 24px;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4); }
-            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(102, 126, 234, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
-        }
-        
-        .caller-avatar i {
-            font-size: 48px;
-            color: white;
-        }
-        
-        .incoming-name {
-            color: white;
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-        
-        .incoming-status {
-            color: #888;
-            font-size: 14px;
-            margin-bottom: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        .ringing-icon {
-            animation: ring 1.5s infinite;
-        }
-        
-        @keyframes ring {
-            0% { transform: rotate(0); }
-            15% { transform: rotate(20deg); }
-            30% { transform: rotate(-20deg); }
-            45% { transform: rotate(20deg); }
-            60% { transform: rotate(-20deg); }
-            75% { transform: rotate(0); }
-            100% { transform: rotate(0); }
-        }
-        
-        .incoming-controls {
-            display: flex;
-            gap: 30px;
-        }
-        
-        .answer-btn, .decline-btn {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .answer-btn {
-            background: #4caf50;
-            color: white;
-        }
-        
-        .decline-btn {
-            background: #f44336;
-            color: white;
-        }
-        
-        .answer-btn:hover, .decline-btn:hover {
-            transform: scale(1.1);
-        }
-        
-        /* Ringtone Selector */
-        .ringtone-selector {
-            margin-top: 20px;
-            width: 200px;
-        }
-        
-        .ringtone-selector select {
-            width: 100%;
-            padding: 8px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            outline: none;
-        }
-        
-        /* Help Screen */
-        .help {
-            padding: 20px;
-            overflow-y: auto;
-            overscroll-behavior-y: contain;
-        }
-        
-        .help-header {
+        /* Status bar */
+        .status-bar {
+            height: 44px;
+            padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
-        }
-        
-        .help-header h2 {
             color: white;
-            font-size: 20px;
-        }
-        
-        .close-help {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-        
-        .help-section {
-            margin-bottom: 24px;
-        }
-        
-        .help-section h3 {
-            color: #667eea;
-            font-size: 16px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .help-section p {
-            color: #aaa;
             font-size: 14px;
-            line-height: 1.5;
-            margin-bottom: 8px;
+            font-weight: 600;
+            z-index: 100;
         }
         
-        /* Bottom Nav */
-        .nav {
+        /* Bottom nav */
+        .bottom-nav {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            height: 68px;
-            background: rgba(0, 0, 0, 0.9);
+            height: 80px;
+            background: rgba(15, 15, 26, 0.95);
+            backdrop-filter: blur(20px);
             display: flex;
             justify-content: space-around;
             align-items: center;
-            padding: 0 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: env(safe-area-inset-bottom, 0);
+            z-index: 100;
         }
         
-        .nav-btn {
+        .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 4px;
-            color: #888;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 8px;
-            flex: 1;
+            color: #6b7280;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 12px;
         }
         
-        .nav-btn i {
-            font-size: 20px;
+        .nav-item.active {
+            color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
         }
         
-        .nav-btn span {
+        .nav-item i {
+            font-size: 22px;
+        }
+        
+        .nav-item span {
             font-size: 11px;
+            font-weight: 500;
         }
         
-        .nav-btn.active {
-            color: #667eea;
-        }
-        
-        /* Toast */
-        .toast {
+        /* Toast notification */
+        .toast-custom {
             position: fixed;
-            top: 20px;
+            top: 60px;
             left: 50%;
-            transform: translateX(-50%);
-            background: #4caf50;
-            color: white;
+            transform: translateX(-50%) translateY(-100px);
             padding: 12px 24px;
-            border-radius: 8px;
+            border-radius: 50px;
             font-size: 14px;
             font-weight: 500;
             z-index: 1000;
-            display: none;
-            animation: slideDown 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        
-        @keyframes slideDown {
-            from { transform: translate(-50%, -20px); opacity: 0; }
-            to { transform: translate(-50%, 0); opacity: 1; }
-        }
-        
-        .toast.error {
-            background: #f44336;
-        }
-        
-        /* Loading */
-        .loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
+            opacity: 0;
+            transition: all 0.3s ease;
             display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .toast-custom.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
             align-items: center;
             justify-content: center;
             z-index: 2000;
-            display: none;
         }
         
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Refresh Prevention Overlay - Shows when user tries to refresh */
-        .refresh-blocker {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 9999;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .refresh-blocker.active {
+        .loading-overlay.show {
             display: flex;
         }
         
-        .refresh-blocker i {
-            font-size: 48px;
-            margin-bottom: 16px;
-            color: #f44336;
+        /* Call button pulse */
+        .call-pulse {
+            animation: callPulse 2s ease-in-out infinite;
         }
         
-        .refresh-blocker h3 {
-            font-size: 20px;
-            margin-bottom: 8px;
+        @keyframes callPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+            50% { box-shadow: 0 0 0 20px rgba(34, 197, 94, 0); }
         }
         
-        .refresh-blocker p {
-            font-size: 14px;
-            color: #aaa;
+        /* Avatar pulse for incoming call */
+        .avatar-pulse {
+            animation: avatarPulse 2s ease-in-out infinite;
         }
         
-        /* Media Queries */
-        @media (max-height: 700px) {
-            .phone { height: 600px; }
-            .caller-avatar { width: 100px; height: 100px; }
-            .caller-avatar i { font-size: 40px; }
+        @keyframes avatarPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 30px rgba(99, 102, 241, 0); }
         }
         
-        @media (max-width: 400px) {
-            .phone { width: 340px; height: 650px; }
-            .action-buttons { grid-template-columns: 1fr; }
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 2px;
+        }
+        
+        /* Input focus effects */
+        .input-glow:focus {
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        
+        /* Card hover effects */
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Safe area for notched phones */
+        .safe-area-top {
+            padding-top: env(safe-area-inset-top, 0);
+        }
+        
+        .safe-area-bottom {
+            padding-bottom: env(safe-area-inset-bottom, 0);
         }
     </style>
+<base target="_blank">
 </head>
-<body>
-    <!-- Refresh Blocker Overlay -->
-    <div id="refreshBlocker" class="refresh-blocker">
-        <i class="fas fa-exclamation-triangle"></i>
-        <h3>Call in Progress</h3>
-        <p>Please end the call before leaving this page</p>
+<body class="text-white">
+    <!-- Floating Particles Background -->
+    <div id="particles" class="fixed inset-0 pointer-events-none overflow-hidden"></div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="toast-custom glass text-white">
+        <i class="fas fa-check-circle text-success"></i>
+        <span id="toastMessage">Success</span>
     </div>
-
-    <!-- Toast Messages -->
-    <div id="toast" class="toast"></div>
     
     <!-- Loading Overlay -->
-    <div id="loading" class="loading">
-        <div class="loading-spinner"></div>
+    <div id="loading" class="loading-overlay">
+        <div class="flex flex-col items-center gap-4">
+            <span class="loading loading-spinner loading-lg text-primary"></span>
+            <p class="text-white/70 text-sm">Connecting...</p>
+        </div>
     </div>
     
-    <!-- Phone Container -->
-    <div class="phone" id="phoneContainer">
-        <div class="status-bar">
+    <!-- Main Container -->
+    <div class="relative w-full h-full max-w-md mx-auto bg-darker shadow-2xl overflow-hidden">
+        
+        <!-- Status Bar -->
+        <div class="status-bar glass-strong">
             <span id="time">9:41</span>
-            <div>
-                <i class="fas fa-signal"></i>
-                <i class="fas fa-wifi" style="margin-left: 8px;"></i>
-                <i class="fas fa-battery-full" style="margin-left: 8px;"></i>
+            <div class="flex items-center gap-2">
+                <i class="fas fa-signal text-xs"></i>
+                <i class="fas fa-wifi text-xs"></i>
+                <i class="fas fa-battery-full text-xs"></i>
             </div>
         </div>
         
-        <div class="screen">
-            <!-- Home Screen -->
-            <div id="homeScreen" class="screen-base home active">
-                <div class="icon">
-                    <i class="fas fa-phone-alt"></i>
-                </div>
-                <h1>Cube Call</h1>
-                <p>HD Video Calls with Ringtone Options</p>
-            </div>
+        <!-- Screen Container -->
+        <div class="relative flex-1 h-[calc(100%-124px)] overflow-hidden">
             
-            <!-- Dialer Screen -->
-            <div id="dialerScreen" class="screen-base dialer">
-                <div class="dialer-header">
-                    <h2>Connect</h2>
-                    <button id="soundToggle" class="sound-toggle">
-                        <i class="fas fa-volume-up"></i>
-                    </button>
-                </div>
-                
-                <div class="id-card">
-                    <div class="id-label">
-                        <i class="fas fa-id-card"></i> Your ID
+            <!-- HOME SCREEN -->
+            <div id="homeScreen" class="screen active">
+                <div class="flex-1 flex flex-col items-center justify-center p-8 relative">
+                    <!-- Decorative circles -->
+                    <div class="absolute top-20 left-10 w-32 h-32 bg-primary/20 rounded-full blur-3xl"></div>
+                    <div class="absolute bottom-32 right-10 w-40 h-40 bg-secondary/20 rounded-full blur-3xl"></div>
+                    
+                    <!-- App Icon -->
+                    <div class="relative mb-8">
+                        <div class="w-32 h-32 gradient-bg rounded-3xl flex items-center justify-center shadow-2xl animate-glow">
+                            <i class="fas fa-cube text-5xl text-white"></i>
+                        </div>
+                        <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-success rounded-full flex items-center justify-center shadow-lg">
+                            <i class="fas fa-phone text-white text-sm"></i>
+                        </div>
                     </div>
-                    <div id="yourId" class="id-value">Loading...</div>
-                </div>
-                
-                <div class="peer-input">
-                    <input type="text" id="remoteId" placeholder="Enter Peer ID">
-                </div>
-                
-                <div class="action-buttons">
-                    <button id="copyBtn" class="action-btn copy">
-                        <i class="fas fa-copy"></i>
-                        <span>Copy ID</span>
+                    
+                    <!-- Title -->
+                    <h1 class="text-4xl font-bold gradient-text mb-2">Cube Dialer</h1>
+                    <p class="text-white/50 text-center mb-8">HD Voice & Video Calls</p>
+                    
+                    <!-- Sound Wave Animation -->
+                    <div class="sound-wave mb-8">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    
+                    <!-- Feature Cards -->
+                    <div class="grid grid-cols-2 gap-4 w-full max-w-xs">
+                        <div class="glass rounded-2xl p-4 text-center card-hover">
+                            <i class="fas fa-video text-primary text-2xl mb-2"></i>
+                            <p class="text-xs text-white/60">Video Call</p>
+                        </div>
+                        <div class="glass rounded-2xl p-4 text-center card-hover">
+                            <i class="fas fa-microphone text-secondary text-2xl mb-2"></i>
+                            <p class="text-xs text-white/60">Voice Call</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Get Started Button -->
+                    <button onclick="App.showScreen('dialer')" class="mt-8 btn btn-primary btn-lg rounded-full px-8 ripple-btn shadow-lg shadow-primary/30">
+                        <i class="fas fa-rocket mr-2"></i>
+                        Get Started
                     </button>
-                    <button id="callBtn" class="action-btn call">
-                        <i class="fas fa-phone-alt"></i>
-                        <span>Call</span>
-                    </button>
-                </div>
-                
-                <div style="color: #666; font-size: 12px; text-align: center; padding: 10px;">
-                    Share your ID • Enter peer ID to call
                 </div>
             </div>
             
-            <!-- Call Screen -->
-            <div id="callScreen" class="screen-base call">
-                <div class="call-header">
-                    <div id="callerName" class="caller-name">Connecting...</div>
-                    <div id="callTimer" class="call-timer">00:00</div>
+            <!-- DIALER SCREEN -->
+            <div id="dialerScreen" class="screen">
+                <div class="flex-1 flex flex-col p-5 overflow-y-auto">
+                    <!-- Header -->
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold">Connect</h2>
+                            <p class="text-white/50 text-sm">Start a new call</p>
+                        </div>
+                        <button id="soundToggle" class="btn btn-circle btn-ghost btn-sm ripple-btn" onclick="App.toggleSound()">
+                            <i class="fas fa-volume-up text-primary"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Your ID Card -->
+                    <div class="glass rounded-2xl p-5 mb-5 card-hover">
+                        <div class="flex items-center gap-2 mb-3">
+                            <i class="fas fa-id-card text-primary"></i>
+                            <span class="text-white/60 text-sm">Your Peer ID</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <code id="yourId" class="text-xl font-mono text-white">Loading...</code>
+                            <div class="flex gap-2">
+                                <button class="btn btn-circle btn-ghost btn-xs" onclick="App.copyId()" title="Copy ID">
+                                    <i class="fas fa-copy text-white/60"></i>
+                                </button>
+                                <button class="btn btn-circle btn-ghost btn-xs" onclick="App.shareId()" title="Share ID">
+                                    <i class="fas fa-share-alt text-white/60"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Remote ID Input -->
+                    <div class="glass rounded-2xl p-1 mb-5">
+                        <div class="flex items-center px-4">
+                            <i class="fas fa-user-plus text-white/40 mr-3"></i>
+                            <input 
+                                type="text" 
+                                id="remoteId" 
+                                placeholder="Enter Peer ID to call..." 
+                                class="input input-ghost w-full bg-transparent border-none text-lg placeholder:text-white/30 focus:outline-none input-glow"
+                            >
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="grid grid-cols-2 gap-4 mb-5">
+                        <button onclick="App.copyId()" class="btn btn-outline btn-lg rounded-xl h-20 ripple-btn border-white/10 hover:bg-white/5 hover:border-primary/50">
+                            <div class="flex flex-col items-center gap-2">
+                                <i class="fas fa-copy text-xl"></i>
+                                <span class="text-sm">Copy ID</span>
+                            </div>
+                        </button>
+                        <button onclick="App.startCall()" class="btn btn-success btn-lg rounded-xl h-20 ripple-btn call-pulse">
+                            <div class="flex flex-col items-center gap-2">
+                                <i class="fas fa-phone-alt text-xl"></i>
+                                <span class="text-sm">Call Now</span>
+                            </div>
+                        </button>
+                    </div>
+                    
+                    <!-- Recent Calls (Placeholder) -->
+                    <div class="flex-1">
+                        <h3 class="text-white/60 text-sm mb-3 flex items-center gap-2">
+                            <i class="fas fa-history"></i>
+                            Recent Activity
+                        </h3>
+                        <div class="space-y-2">
+                            <div class="glass rounded-xl p-4 flex items-center justify-between opacity-50">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                                        <i class="fas fa-user text-white/40"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium">No recent calls</p>
+                                        <p class="text-xs text-white/40">Start your first call</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tips -->
+                    <div class="mt-4 p-4 rounded-xl bg-primary/10 border border-primary/20">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-lightbulb text-primary mt-0.5"></i>
+                            <div>
+                                <p class="text-sm font-medium text-primary">Pro Tip</p>
+                                <p class="text-xs text-white/60">Share your ID with friends to receive calls!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- CALL SCREEN -->
+            <div id="callScreen" class="screen bg-black">
+                <!-- Call Header -->
+                <div class="absolute top-0 left-0 right-0 z-20 p-5 pt-12 bg-gradient-to-b from-black/80 to-transparent">
+                    <div class="text-center">
+                        <h2 id="callerName" class="text-2xl font-bold text-white mb-1">Connecting...</h2>
+                        <div class="flex items-center justify-center gap-2">
+                            <span class="w-2 h-2 bg-success rounded-full animate-pulse"></span>
+                            <span id="callTimer" class="text-success font-mono">00:00</span>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="video-area">
+                <!-- Video Area -->
+                <div class="flex-1 relative bg-black">
                     <!-- Remote Video -->
                     <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
                     
-                    <!-- Hidden Audio Element for Remote Audio - FIXES AUDIO ISSUE -->
-                    <audio id="remoteAudio" class="remote-audio" autoplay></audio>
+                    <!-- Hidden Audio for Remote -->
+                    <audio id="remoteAudio" autoplay></audio>
                     
-                    <!-- Local Video Preview -->
-                    <div class="local-preview">
+                    <!-- Local Preview -->
+                    <div class="local-preview glass">
                         <video id="localVideo" autoplay playsinline muted></video>
                     </div>
                     
                     <!-- Video Placeholder -->
-                    <div id="videoPlaceholder" class="video-placeholder">
-                        <i class="fas fa-video-slash"></i>
-                        <div>Waiting for video...</div>
+                    <div id="videoPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-white/30">
+                        <i class="fas fa-video-slash text-6xl mb-4"></i>
+                        <p>Waiting for video...</p>
+                    </div>
+                    
+                    <!-- Network Status -->
+                    <div class="absolute top-24 right-4 flex items-center gap-2 glass rounded-full px-3 py-1">
+                        <i class="fas fa-wifi text-success text-xs"></i>
+                        <span class="text-xs text-white/70">HD</span>
                     </div>
                 </div>
                 
-                <div class="call-controls">
-                    <button id="micBtn" class="call-btn mic active">
-                        <i class="fas fa-microphone"></i>
-                    </button>
-                    <button id="speakerBtn" class="call-btn speaker active">
-                        <i class="fas fa-volume-up"></i>
-                    </button>
-                    <button id="hangupBtn" class="call-btn hangup">
-                        <i class="fas fa-phone-slash"></i>
-                    </button>
-                    <button id="videoBtn" class="call-btn video active">
-                        <i class="fas fa-video"></i>
-                    </button>
+                <!-- Call Controls -->
+                <div class="absolute bottom-0 left-0 right-0 p-6 pb-24 bg-gradient-to-t from-black via-black/90 to-transparent">
+                    <div class="flex justify-center items-center gap-6">
+                        <!-- Mic Toggle -->
+                        <button id="micBtn" class="btn btn-circle btn-lg bg-white/10 hover:bg-white/20 border-none ripple-btn active" onclick="App.toggleMic()">
+                            <i class="fas fa-microphone text-xl"></i>
+                        </button>
+                        
+                        <!-- Speaker Toggle -->
+                        <button id="speakerBtn" class="btn btn-circle btn-lg bg-white/10 hover:bg-white/20 border-none ripple-btn active" onclick="App.toggleSpeaker()">
+                            <i class="fas fa-volume-up text-xl"></i>
+                        </button>
+                        
+                        <!-- Hangup -->
+                        <button onclick="App.endCall()" class="btn btn-circle btn-lg btn-error ripple-btn shadow-lg shadow-error/50">
+                            <i class="fas fa-phone-slash text-xl"></i>
+                        </button>
+                        
+                        <!-- Video Toggle -->
+                        <button id="videoBtn" class="btn btn-circle btn-lg bg-white/10 hover:bg-white/20 border-none ripple-btn active" onclick="App.toggleVideo()">
+                            <i class="fas fa-video text-xl"></i>
+                        </button>
+                        
+                        <!-- Flip Camera -->
+                        <button onclick="App.flipCamera()" class="btn btn-circle btn-lg bg-white/10 hover:bg-white/20 border-none ripple-btn">
+                            <i class="fas fa-sync-alt text-xl"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             
-            <!-- Incoming Call Screen -->
-            <div id="incomingScreen" class="screen-base incoming">
-                <div class="caller-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div id="incomingName" class="incoming-name">Unknown</div>
-                <div class="incoming-status">
-                    <i class="fas fa-phone-alt ringing-icon"></i>
-                    <span id="ringStatus">Incoming Call</span>
-                </div>
-                
-                <!-- Ringtone Selector -->
-                <div class="ringtone-selector">
-                    <select id="ringtoneSelect">
-                        <option value="classic">Classic Ringtone</option>
-                        <option value="digital">Digital Beep</option>
-                        <option value="melody">Soft Melody</option>
-                        <option value="pulse">Pulse Tone</option>
-                        <option value="bell">Bell Ring</option>
-                    </select>
-                </div>
-                
-                <div class="incoming-controls">
-                    <button id="declineBtn" class="decline-btn">
-                        <i class="fas fa-phone-slash"></i>
-                    </button>
-                    <button id="answerBtn" class="answer-btn">
-                        <i class="fas fa-phone-alt"></i>
-                    </button>
+            <!-- INCOMING CALL SCREEN -->
+            <div id="incomingScreen" class="screen">
+                <div class="flex-1 flex flex-col items-center justify-center p-8 relative">
+                    <!-- Background effect -->
+                    <div class="absolute inset-0 bg-gradient-to-b from-primary/20 via-transparent to-secondary/20"></div>
+                    
+                    <!-- Caller Avatar -->
+                    <div class="relative mb-8">
+                        <div class="w-36 h-36 gradient-bg rounded-full flex items-center justify-center avatar-pulse">
+                            <i class="fas fa-user text-5xl text-white"></i>
+                        </div>
+                        <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 glass rounded-full px-4 py-1">
+                            <span class="text-xs text-white/70 flex items-center gap-1">
+                                <i class="fas fa-phone-alt animate-ring text-success"></i>
+                                Incoming
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Caller Info -->
+                    <h2 id="incomingName" class="text-3xl font-bold text-white mb-2">Unknown</h2>
+                    <p class="text-white/50 mb-8">is calling you...</p>
+                    
+                    <!-- Ringtone Selector -->
+                    <div class="w-full max-w-xs mb-10">
+                        <label class="text-white/50 text-sm mb-2 block">Ringtone</label>
+                        <select id="ringtoneSelect" onchange="App.changeRingtone()" class="select select-bordered w-full bg-white/5 border-white/10 text-white">
+                            <option value="classic">Classic Ringtone</option>
+                            <option value="digital">Digital Beep</option>
+                            <option value="melody">Soft Melody</option>
+                            <option value="pulse">Pulse Tone</option>
+                            <option value="bell">Bell Ring</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex items-center gap-10">
+                        <!-- Decline -->
+                        <button onclick="App.declineCall()" class="btn btn-circle btn-xl btn-error ripple-btn shadow-lg shadow-error/30">
+                            <i class="fas fa-phone-slash text-2xl"></i>
+                        </button>
+                        
+                        <!-- Answer -->
+                        <button onclick="App.answerCall()" class="btn btn-circle btn-xl btn-success ripple-btn call-pulse shadow-lg shadow-success/30">
+                            <i class="fas fa-phone-alt text-2xl"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             
-            <!-- Help Screen -->
-            <div id="helpScreen" class="screen-base help">
-                <div class="help-header">
-                    <h2>Help</h2>
-                    <button id="closeHelp" class="close-help">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                
-                <div class="help-section">
-                    <h3><i class="fas fa-bell"></i> Ringtone Options</h3>
-                    <p>• Classic Ringtone - Traditional phone ring</p>
-                    <p>• Digital Beep - Modern digital sound</p>
-                    <p>• Soft Melody - Pleasant melody</p>
-                    <p>• Pulse Tone - Pulsating tone</p>
-                    <p>• Bell Ring - Bell sound</p>
-                </div>
-                
-                <div class="help-section">
-                    <h3><i class="fas fa-video"></i> Video Fixes</h3>
-                    <p>• Both videos now display properly</p>
-                    <p>• Local preview in corner</p>
-                    <p>• Remote video full screen</p>
-                    <p>• Auto play enabled</p>
-                </div>
-                
-                <div class="help-section">
-                    <h3><i class="fas fa-phone"></i> How to Call</h3>
-                    <p>1. Share your Peer ID</p>
-                    <p>2. Enter other's ID</p>
-                    <p>3. Tap Call button</p>
-                    <p>4. Answer incoming calls</p>
-                </div>
-                
-                <div class="help-section">
-                    <h3><i class="fas fa-volume-up"></i> Audio Fix</h3>
-                    <p>• Added separate audio element for remote stream</p>
-                    <p>• Both sides can now hear each other clearly</p>
-                    <p>• Added microphone mute button</p>
-                    <p>• Speaker toggle works for both audio and video calls</p>
-                </div>
-
-                <div class="help-section">
-                    <h3><i class="fas fa-shield-alt"></i> Refresh Protection</h3>
-                    <p>• Pull-to-refresh disabled</p>
-                    <p>• Page leave confirmation during calls</p>
-                    <p>• Swipe gestures blocked</p>
-                    <p>• Overscroll behavior controlled</p>
-                </div>
-                
-                <div class="help-section">
-                    <h3><i class="fas fa-envelope"></i> Contact</h3>
-                    <p>Email: vallarasucse200118@gmail.com</p>
+            <!-- HELP SCREEN -->
+            <div id="helpScreen" class="screen">
+                <div class="flex-1 flex flex-col p-5 overflow-y-auto">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold">Help & Info</h2>
+                        <button onclick="App.showScreen('home')" class="btn btn-circle btn-ghost btn-sm ripple-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Help Content -->
+                    <div class="space-y-4">
+                        <!-- How to Call -->
+                        <div class="glass rounded-2xl p-5 card-hover">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                                    <i class="fas fa-phone text-primary"></i>
+                                </div>
+                                <h3 class="font-semibold">How to Call</h3>
+                            </div>
+                            <ol class="text-sm text-white/60 space-y-2 ml-2">
+                                <li class="flex items-start gap-2">
+                                    <span class="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary flex-shrink-0">1</span>
+                                    Share your Peer ID with friends
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary flex-shrink-0">2</span>
+                                    Enter their ID in the dialer
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary flex-shrink-0">3</span>
+                                    Tap Call button
+                                </li>
+                            </ol>
+                        </div>
+                        
+                        <!-- Ringtones -->
+                        <div class="glass rounded-2xl p-5 card-hover">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-secondary/20 flex items-center justify-center">
+                                    <i class="fas fa-music text-secondary"></i>
+                                </div>
+                                <h3 class="font-semibold">Ringtone Options</h3>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="text-xs text-white/60 bg-white/5 rounded-lg p-2">Classic Ringtone</div>
+                                <div class="text-xs text-white/60 bg-white/5 rounded-lg p-2">Digital Beep</div>
+                                <div class="text-xs text-white/60 bg-white/5 rounded-lg p-2">Soft Melody</div>
+                                <div class="text-xs text-white/60 bg-white/5 rounded-lg p-2">Pulse Tone</div>
+                                <div class="text-xs text-white/60 bg-white/5 rounded-lg p-2 col-span-2">Bell Ring</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Features -->
+                        <div class="glass rounded-2xl p-5 card-hover">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
+                                    <i class="fas fa-star text-accent"></i>
+                                </div>
+                                <h3 class="font-semibold">Features</h3>
+                            </div>
+                            <div class="space-y-2 text-sm text-white/60">
+                                <p class="flex items-center gap-2">
+                                    <i class="fas fa-check text-success text-xs"></i>
+                                    HD Video & Audio Quality
+                                </p>
+                                <p class="flex items-center gap-2">
+                                    <i class="fas fa-check text-success text-xs"></i>
+                                    Noise Cancellation
+                                </p>
+                                <p class="flex items-center gap-2">
+                                    <i class="fas fa-check text-success text-xs"></i>
+                                    Screen stays on during calls
+                                </p>
+                                <p class="flex items-center gap-2">
+                                    <i class="fas fa-check text-success text-xs"></i>
+                                    Camera flip support
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Contact -->
+                        <div class="glass rounded-2xl p-5 card-hover">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-success/20 flex items-center justify-center">
+                                    <i class="fas fa-envelope text-success"></i>
+                                </div>
+                                <h3 class="font-semibold">Contact</h3>
+                            </div>
+                            <p class="text-sm text-white/60">vallarasucse200118@gmail.com</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Version -->
+                    <div class="mt-6 text-center">
+                        <p class="text-xs text-white/30">Cube Dialer v2.0</p>
+                    </div>
                 </div>
             </div>
         </div>
         
         <!-- Bottom Navigation -->
-        <div class="nav">
-            <button id="navHome" class="nav-btn active">
+        <div class="bottom-nav">
+            <button id="navHome" class="nav-item active" onclick="App.showScreen('home')">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </button>
-            <button id="navDialer" class="nav-btn">
-                <i class="fas fa-phone"></i>
+            <button id="navDialer" class="nav-item" onclick="App.showScreen('dialer')">
+                <i class="fas fa-phone-alt"></i>
                 <span>Dialer</span>
             </button>
-            <button id="navHelp" class="nav-btn">
+            <button id="navHelp" class="nav-item" onclick="App.showScreen('help')">
                 <i class="fas fa-question-circle"></i>
                 <span>Help</span>
             </button>
@@ -951,12 +819,10 @@
     </div>
 
     <script>
-        // Fast Optimized App with Video, Audio & Refresh Protection
+        // Cube Dialer App - Professional Mobile Design
         const App = {
-            // DOM Elements
             elements: {},
             
-            // State
             state: {
                 peer: null,
                 call: null,
@@ -973,10 +839,10 @@
                 currentRingtone: 'classic',
                 ringtoneInterval: null,
                 incomingCall: null,
-                isInCall: false
+                isInCall: false,
+                currentFacingMode: 'user',
             },
             
-            // Ringtone Patterns
             ringtones: {
                 classic: { freq1: 800, freq2: 800, pattern: [0.1, 0.1, 0.1, 0.1, 1.6] },
                 digital: { freq1: 1000, freq2: 1200, pattern: [0.05, 0.05, 0.05, 0.05, 0.8] },
@@ -985,19 +851,18 @@
                 bell: { freq1: 880, freq2: 440, pattern: [0.5, 1.5] }
             },
             
-            // Initialize
             init() {
-                console.log('🚀 App Initializing...');
+                console.log('🚀 Cube Dialer Initializing...');
                 this.cacheElements();
                 this.setupTime();
                 this.initPeer();
                 this.bindEvents();
                 this.setupAudio();
-                this.setupRefreshPrevention(); // NEW: Setup refresh prevention
+                this.setupRefreshPrevention();
+                this.createParticles();
                 this.showToast('Ready to connect', 'success');
             },
             
-            // Cache DOM elements
             cacheElements() {
                 const ids = [
                     'homeScreen', 'dialerScreen', 'callScreen', 'incomingScreen', 'helpScreen',
@@ -1005,7 +870,7 @@
                     'answerBtn', 'declineBtn', 'soundToggle', 'closeHelp', 'ringtoneSelect',
                     'callerName', 'callTimer', 'incomingName', 'ringStatus',
                     'remoteVideo', 'localVideo', 'remoteAudio', 'time', 'toast', 'loading', 'videoPlaceholder',
-                    'navHome', 'navDialer', 'navHelp', 'refreshBlocker', 'phoneContainer'
+                    'navHome', 'navDialer', 'navHelp'
                 ];
                 
                 ids.forEach(id => {
@@ -1013,7 +878,18 @@
                 });
             },
             
-            // Setup clock
+            createParticles() {
+                const container = document.getElementById('particles');
+                for (let i = 0; i < 20; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.animationDelay = Math.random() * 6 + 's';
+                    particle.style.animationDuration = (6 + Math.random() * 4) + 's';
+                    container.appendChild(particle);
+                }
+            },
+            
             setupTime() {
                 const update = () => {
                     const now = new Date();
@@ -1024,7 +900,6 @@
                 setInterval(update, 60000);
             },
             
-            // Setup audio context for ringtone
             setupAudio() {
                 try {
                     this.state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -1033,60 +908,35 @@
                 }
             },
             
-            // Setup Refresh Prevention - NEW METHOD
             setupRefreshPrevention() {
-                // 1. Prevent pull-to-refresh on mobile browsers
-                this.preventPullToRefresh();
-                
-                // 2. Prevent page leave during active calls
-                this.preventPageLeave();
-                
-                // 3. Prevent zoom gestures that might trigger refresh
-                this.preventZoomRefresh();
-                
-                // 4. Handle visibility change (when app goes to background)
-                this.handleVisibilityChange();
-            },
-            
-            // Prevent Pull-to-Refresh (CSS + JavaScript approach)
-            preventPullToRefresh() {
                 let startY = 0;
                 let startX = 0;
                 
-                // Touch start - record initial position
                 document.addEventListener('touchstart', (e) => {
                     startY = e.touches[0].clientY;
                     startX = e.touches[0].clientX;
                 }, { passive: true });
                 
-                // Touch move - prevent if pulling down from top
                 document.addEventListener('touchmove', (e) => {
                     const y = e.touches[0].clientY;
                     const x = e.touches[0].clientX;
                     const scrollTop = document.scrollingElement.scrollTop;
                     
-                    // If at top of page and pulling down, prevent default
                     if (scrollTop === 0 && y > startY) {
                         e.preventDefault();
                     }
                     
-                    // Prevent horizontal swipe refresh (some browsers)
                     if (Math.abs(x - startX) > Math.abs(y - startY)) {
                         e.preventDefault();
                     }
                 }, { passive: false });
                 
-                // Prevent wheel scroll from triggering refresh (desktop)
                 document.addEventListener('wheel', (e) => {
                     if (document.scrollingElement.scrollTop === 0 && e.deltaY < 0) {
                         e.preventDefault();
                     }
                 }, { passive: false });
-            },
-            
-            // Prevent page leave during active calls
-            preventPageLeave() {
-                // Before unload - show confirmation dialog
+                
                 window.addEventListener('beforeunload', (e) => {
                     if (this.state.isInCall || this.state.call || this.state.incomingCall) {
                         e.preventDefault();
@@ -1095,7 +945,6 @@
                     }
                 });
                 
-                // Handle back button (Android)
                 window.addEventListener('popstate', (e) => {
                     if (this.state.isInCall || this.state.call) {
                         history.pushState(null, null, window.location.href);
@@ -1103,12 +952,8 @@
                     }
                 });
                 
-                // Push initial state to prevent back button exit
                 history.pushState(null, null, window.location.href);
-            },
-            
-            // Prevent zoom double-tap refresh
-            preventZoomRefresh() {
+                
                 let lastTouchEnd = 0;
                 document.addEventListener('touchend', (e) => {
                     const now = Date.now();
@@ -1118,7 +963,6 @@
                     lastTouchEnd = now;
                 }, { passive: false });
                 
-                // Prevent double-tap zoom
                 document.addEventListener('touchstart', (e) => {
                     if (e.touches.length > 1) {
                         e.preventDefault();
@@ -1126,40 +970,10 @@
                 }, { passive: false });
             },
             
-            // Handle visibility change (app background/foreground)
-            handleVisibilityChange() {
-                document.addEventListener('visibilitychange', () => {
-                    if (document.hidden) {
-                        // App went to background
-                        console.log('App in background');
-                        if (this.state.audioContext) {
-                            this.state.audioContext.suspend();
-                        }
-                    } else {
-                        // App came to foreground
-                        console.log('App in foreground');
-                        if (this.state.audioContext) {
-                            this.state.audioContext.resume();
-                        }
-                        // Re-acquire wake lock if in call
-                        if (this.state.isInCall) {
-                            this.requestWakeLock();
-                        }
-                    }
-                });
-            },
-            
-            // Request screen wake lock (prevent screen off during call)
             async requestWakeLock() {
                 try {
                     if ('wakeLock' in navigator) {
                         const wakeLock = await navigator.wakeLock.request('screen');
-                        console.log('Screen wake lock acquired');
-                        
-                        wakeLock.addEventListener('release', () => {
-                            console.log('Screen wake lock released');
-                        });
-                        
                         this.state.wakeLock = wakeLock;
                     }
                 } catch (err) {
@@ -1167,7 +981,6 @@
                 }
             },
             
-            // Release wake lock
             releaseWakeLock() {
                 if (this.state.wakeLock) {
                     this.state.wakeLock.release();
@@ -1175,7 +988,6 @@
                 }
             },
             
-            // Play selected ringtone
             playRingtone() {
                 if (!this.state.soundEnabled || !this.state.audioContext) return;
                 
@@ -1194,10 +1006,8 @@
                     let time = this.state.audioContext.currentTime;
                     const pattern = ringtone.pattern;
                     
-                    // Play pattern
                     for (let i = 0; i < pattern.length; i++) {
                         if (i % 2 === 0) {
-                            // Sound on
                             oscillator.frequency.setValueAtTime(ringtone.freq1, time);
                             gainNode.gain.setValueAtTime(0.3, time);
                             gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
@@ -1210,7 +1020,6 @@
                     
                     this.state.oscillator = oscillator;
                     
-                    // Calculate total pattern duration and repeat
                     const totalDuration = pattern.reduce((a, b) => a + b, 0);
                     
                     this.state.ringtoneInterval = setTimeout(() => {
@@ -1224,7 +1033,6 @@
                 }
             },
             
-            // Stop ringtone
             stopRingtone() {
                 if (this.state.oscillator) {
                     try {
@@ -1238,7 +1046,6 @@
                 }
             },
             
-            // Play beep sound
             playBeep(freq = 800, duration = 0.1) {
                 if (!this.state.soundEnabled || !this.state.audioContext) return;
                 
@@ -1260,7 +1067,6 @@
                 }
             },
             
-            // Initialize Peer.js
             initPeer() {
                 const peerId = 'user-' + Math.floor(1000 + Math.random() * 9000);
                 
@@ -1297,7 +1103,6 @@
                     this.showScreen('incoming');
                     this.playRingtone();
                     
-                    // Auto decline after 30 seconds
                     setTimeout(() => {
                         if (this.state.incomingCall === call) {
                             this.declineCall();
@@ -1307,8 +1112,7 @@
                 });
             },
             
-            // Get media with noise cancellation
-            async getMedia() {
+            async getMedia(facingMode = 'user') {
                 try {
                     this.showLoading(true);
                     
@@ -1317,7 +1121,7 @@
                             width: { ideal: 640 },
                             height: { ideal: 480 },
                             frameRate: { ideal: 24 },
-                            facingMode: 'user'
+                            facingMode: facingMode
                         },
                         audio: {
                             echoCancellation: true,
@@ -1331,7 +1135,6 @@
                     console.log('🎥 Requesting media with constraints:', constraints);
                     const stream = await navigator.mediaDevices.getUserMedia(constraints);
                     
-                    // Log available tracks
                     console.log('✅ Media tracks:', 
                         stream.getVideoTracks().length, 'video,',
                         stream.getAudioTracks().length, 'audio'
@@ -1348,7 +1151,6 @@
                 }
             },
             
-            // Start call - FIXED AUDIO & VIDEO
             async startCall() {
                 const peerId = this.elements.remoteId.value.trim();
                 if (!peerId) {
@@ -1360,28 +1162,22 @@
                     console.log('📞 Starting call to:', peerId);
                     this.playBeep(1200, 0.1);
                     
-                    // Get media stream
-                    this.state.stream = await this.getMedia();
+                    this.state.stream = await this.getMedia(this.state.currentFacingMode);
                     
-                    // Set local video source
                     this.elements.localVideo.srcObject = this.state.stream;
                     console.log('📹 Local video set');
                     
-                    // Start call
                     const call = this.state.peer.call(peerId, this.state.stream);
                     
-                    // Setup call handlers
                     this.setupCall(call);
                     
-                    // Show call screen
                     this.showScreen('call');
                     this.startTimer();
                     this.elements.callerName.textContent = peerId;
-                    this.elements.videoPlaceholder.style.display = 'block';
+                    this.elements.videoPlaceholder.style.display = 'flex';
                     
-                    // Mark as in call
                     this.state.isInCall = true;
-                    this.requestWakeLock(); // Keep screen on
+                    this.requestWakeLock();
                     
                     this.showToast('Calling...');
                     
@@ -1391,7 +1187,6 @@
                 }
             },
             
-            // Answer call - FIXED AUDIO & VIDEO
             async answerCall() {
                 if (!this.state.incomingCall) return;
                 
@@ -1400,30 +1195,23 @@
                     this.stopRingtone();
                     this.playBeep(1000, 0.2);
                     
-                    // Get media stream
-                    this.state.stream = await this.getMedia();
+                    this.state.stream = await this.getMedia(this.state.currentFacingMode);
                     
-                    // Set local video source
                     this.elements.localVideo.srcObject = this.state.stream;
                     console.log('📹 Local video set');
                     
-                    // Answer the call
                     this.state.incomingCall.answer(this.state.stream);
                     
-                    // Setup call handlers
                     this.setupCall(this.state.incomingCall);
                     
-                    // Show call screen
                     this.showScreen('call');
                     this.startTimer();
                     this.elements.callerName.textContent = this.state.incomingCall.peer;
-                    this.elements.videoPlaceholder.style.display = 'block';
+                    this.elements.videoPlaceholder.style.display = 'flex';
                     
-                    // Mark as in call
                     this.state.isInCall = true;
-                    this.requestWakeLock(); // Keep screen on
+                    this.requestWakeLock();
                     
-                    // Clear incoming call reference
                     this.state.incomingCall = null;
                     
                     this.showToast('Call connected');
@@ -1435,7 +1223,6 @@
                 }
             },
             
-            // Decline call
             declineCall() {
                 if (this.state.incomingCall) {
                     console.log('❌ Declining call from:', this.state.incomingCall.peer);
@@ -1447,7 +1234,6 @@
                 this.showScreen('dialer');
             },
             
-            // Setup call handlers - FIXED AUDIO & VIDEO
             setupCall(call) {
                 console.log('🔗 Setting up call handlers');
                 this.state.call = call;
@@ -1457,24 +1243,18 @@
                     console.log('🎵 Remote audio tracks:', remoteStream.getAudioTracks().length);
                     console.log('📹 Remote video tracks:', remoteStream.getVideoTracks().length);
                     
-                    // Set remote video source
                     this.elements.remoteVideo.srcObject = remoteStream;
-                    
-                    // FIX: Also set remote audio to separate audio element for reliable playback
                     this.elements.remoteAudio.srcObject = remoteStream;
                     
-                    // Ensure audio is not muted and volume is up
                     this.elements.remoteAudio.muted = false;
                     this.elements.remoteAudio.volume = 1.0;
                     
                     this.elements.videoPlaceholder.style.display = 'none';
                     
-                    // Force video play
                     this.elements.remoteVideo.play().catch(e => {
                         console.log('Video auto-play prevented:', e);
                     });
                     
-                    // Force audio play
                     this.elements.remoteAudio.play().catch(e => {
                         console.log('Audio auto-play prevented:', e);
                     });
@@ -1493,14 +1273,12 @@
                 });
             },
             
-            // End call
             endCall() {
                 console.log('📞 Ending call');
                 this.playBeep(300, 0.1);
                 
-                // Mark as not in call
                 this.state.isInCall = false;
-                this.releaseWakeLock(); // Release screen lock
+                this.releaseWakeLock();
                 
                 if (this.state.call) {
                     this.state.call.close();
@@ -1515,18 +1293,44 @@
                     this.state.stream = null;
                 }
                 
-                // Clear all media elements
                 this.elements.localVideo.srcObject = null;
                 this.elements.remoteVideo.srcObject = null;
                 this.elements.remoteAudio.srcObject = null;
-                this.elements.videoPlaceholder.style.display = 'block';
+                this.elements.videoPlaceholder.style.display = 'flex';
                 
                 this.stopTimer();
                 this.showScreen('dialer');
                 this.showToast('Call ended', 'error');
             },
             
-            // Start call timer
+            async flipCamera() {
+                if (!this.state.stream) return;
+                
+                this.state.currentFacingMode = this.state.currentFacingMode === 'user' ? 'environment' : 'user';
+                
+                try {
+                    const newStream = await this.getMedia(this.state.currentFacingMode);
+                    
+                    const videoTrack = newStream.getVideoTracks()[0];
+                    const sender = this.state.call?.peerConnection?.getSenders().find(s => s.track?.kind === 'video');
+                    
+                    if (sender) {
+                        sender.replaceTrack(videoTrack);
+                    }
+                    
+                    this.state.stream.getVideoTracks().forEach(track => track.stop());
+                    this.state.stream.removeTrack(this.state.stream.getVideoTracks()[0]);
+                    this.state.stream.addTrack(videoTrack);
+                    
+                    this.elements.localVideo.srcObject = this.state.stream;
+                    this.showToast('Camera flipped');
+                    
+                } catch (err) {
+                    console.error('Flip camera error:', err);
+                    this.showToast('Failed to flip camera', 'error');
+                }
+            },
+            
             startTimer() {
                 this.state.callStart = Date.now();
                 this.state.timer = setInterval(() => {
@@ -1538,7 +1342,6 @@
                 }, 1000);
             },
             
-            // Stop timer
             stopTimer() {
                 if (this.state.timer) {
                     clearInterval(this.state.timer);
@@ -1547,24 +1350,23 @@
                 this.elements.callTimer.textContent = '00:00';
             },
             
-            // Toggle speaker (remote audio)
             toggleSpeaker() {
                 this.state.isSpeakerOn = !this.state.isSpeakerOn;
                 
-                // Toggle both video and audio elements
                 this.elements.remoteVideo.muted = !this.state.isSpeakerOn;
                 this.elements.remoteAudio.muted = !this.state.isSpeakerOn;
                 
                 this.elements.speakerBtn.classList.toggle('active', this.state.isSpeakerOn);
+                this.elements.speakerBtn.classList.toggle('bg-white/10', !this.state.isSpeakerOn);
+                this.elements.speakerBtn.classList.toggle('bg-primary', this.state.isSpeakerOn);
                 this.elements.speakerBtn.innerHTML = this.state.isSpeakerOn ? 
-                    '<i class="fas fa-volume-up"></i>' : 
-                    '<i class="fas fa-volume-mute"></i>';
+                    '<i class="fas fa-volume-up text-xl"></i>' : 
+                    '<i class="fas fa-volume-mute text-xl"></i>';
                 
                 this.playBeep(this.state.isSpeakerOn ? 800 : 400, 0.1);
                 this.showToast(this.state.isSpeakerOn ? 'Speaker ON' : 'Speaker OFF');
             },
             
-            // Toggle microphone (local audio)
             toggleMic() {
                 if (this.state.stream) {
                     const audioTrack = this.state.stream.getAudioTracks()[0];
@@ -1573,9 +1375,11 @@
                         audioTrack.enabled = this.state.isMicOn;
                         
                         this.elements.micBtn.classList.toggle('active', this.state.isMicOn);
+                        this.elements.micBtn.classList.toggle('bg-white/10', !this.state.isMicOn);
+                        this.elements.micBtn.classList.toggle('bg-primary', this.state.isMicOn);
                         this.elements.micBtn.innerHTML = this.state.isMicOn ? 
-                            '<i class="fas fa-microphone"></i>' : 
-                            '<i class="fas fa-microphone-slash"></i>';
+                            '<i class="fas fa-microphone text-xl"></i>' : 
+                            '<i class="fas fa-microphone-slash text-xl"></i>';
                         
                         this.playBeep(this.state.isMicOn ? 1000 : 500, 0.1);
                         this.showToast(this.state.isMicOn ? 'Microphone ON' : 'Microphone OFF');
@@ -1583,30 +1387,37 @@
                 }
             },
             
-            // Toggle video
             toggleVideo() {
                 if (this.state.stream) {
                     const videoTrack = this.state.stream.getVideoTracks()[0];
                     if (videoTrack) {
                         this.state.isVideoOn = !videoTrack.enabled;
                         videoTrack.enabled = this.state.isVideoOn;
+                        
                         this.elements.videoBtn.classList.toggle('active', this.state.isVideoOn);
+                        this.elements.videoBtn.classList.toggle('bg-white/10', !this.state.isVideoOn);
+                        this.elements.videoBtn.classList.toggle('bg-primary', this.state.isVideoOn);
                         this.elements.videoBtn.innerHTML = this.state.isVideoOn ? 
-                            '<i class="fas fa-video"></i>' : 
-                            '<i class="fas fa-video-slash"></i>';
+                            '<i class="fas fa-video text-xl"></i>' : 
+                            '<i class="fas fa-video-slash text-xl"></i>';
+                        
                         this.playBeep(this.state.isVideoOn ? 1000 : 500, 0.1);
                         this.showToast(this.state.isVideoOn ? 'Camera ON' : 'Camera OFF');
                     }
                 }
             },
             
-            // Toggle sound
             toggleSound() {
                 this.state.soundEnabled = !this.state.soundEnabled;
-                this.elements.soundToggle.classList.toggle('muted', !this.state.soundEnabled);
-                this.elements.soundToggle.innerHTML = this.state.soundEnabled ? 
-                    '<i class="fas fa-volume-up"></i>' : 
-                    '<i class="fas fa-volume-mute"></i>';
+                const btn = this.elements.soundToggle;
+                
+                if (this.state.soundEnabled) {
+                    btn.innerHTML = '<i class="fas fa-volume-up text-primary"></i>';
+                    btn.classList.remove('text-error');
+                } else {
+                    btn.innerHTML = '<i class="fas fa-volume-mute text-error"></i>';
+                    btn.classList.add('text-error');
+                }
                 
                 if (!this.state.soundEnabled) {
                     this.stopRingtone();
@@ -1615,112 +1426,114 @@
                 this.showToast(this.state.soundEnabled ? 'Sound ON' : 'Sound OFF');
             },
             
-            // Copy ID to clipboard
             copyId() {
                 const id = this.elements.yourId.textContent;
                 navigator.clipboard.writeText(id).then(() => {
-                    const original = this.elements.copyBtn.innerHTML;
-                    this.elements.copyBtn.innerHTML = '<i class="fas fa-check"></i><span>Copied</span>';
                     this.playBeep(1200, 0.1);
-                    this.showToast('ID copied!');
-                    
-                    setTimeout(() => {
-                        this.elements.copyBtn.innerHTML = original;
-                    }, 2000);
+                    this.showToast('ID copied to clipboard!');
                 });
             },
             
-            // Change ringtone
+            async shareId() {
+                const id = this.elements.yourId.textContent;
+                const shareData = {
+                    title: 'Cube Dialer',
+                    text: `Call me on Cube Dialer! My Peer ID is: ${id}`,
+                    url: window.location.href
+                };
+                
+                try {
+                    if (navigator.share) {
+                        await navigator.share(shareData);
+                        this.showToast('Shared successfully!');
+                    } else {
+                        await navigator.clipboard.writeText(`Call me on Cube Dialer! My Peer ID is: ${id}`);
+                        this.showToast('Share text copied!');
+                    }
+                } catch (err) {
+                    console.log('Share error:', err);
+                }
+            },
+            
             changeRingtone() {
                 this.state.currentRingtone = this.elements.ringtoneSelect.value;
                 this.showToast('Ringtone: ' + this.elements.ringtoneSelect.selectedOptions[0].text);
                 
-                // If currently ringing, restart with new tone
                 if (document.getElementById('incomingScreen').classList.contains('active')) {
                     this.stopRingtone();
                     this.playRingtone();
                 }
             },
             
-            // Show screen
-            showScreen(screen) {
+            showScreen(screenName) {
                 const screens = ['home', 'dialer', 'call', 'incoming', 'help'];
+                
                 screens.forEach(s => {
-                    this.elements[s + 'Screen'].classList.remove('active');
+                    const el = document.getElementById(s + 'Screen');
+                    if (el) {
+                        el.classList.remove('active');
+                    }
                 });
                 
-                this.elements[screen + 'Screen'].classList.add('active');
+                const target = document.getElementById(screenName + 'Screen');
+                if (target) {
+                    target.classList.add('active');
+                }
                 
                 // Update nav
-                ['Home', 'Dialer', 'Help'].forEach(nav => {
-                    this.elements['nav' + nav].classList.remove('active');
+                document.querySelectorAll('.nav-item').forEach(nav => {
+                    nav.classList.remove('active');
                 });
                 
-                if (screen === 'home') this.elements.navHome.classList.add('active');
-                if (screen === 'dialer') this.elements.navDialer.classList.add('active');
-                if (screen === 'help') this.elements.navHelp.classList.add('active');
+                if (screenName === 'home') document.getElementById('navHome')?.classList.add('active');
+                if (screenName === 'dialer') document.getElementById('navDialer')?.classList.add('active');
+                if (screenName === 'help') document.getElementById('navHelp')?.classList.add('active');
                 
                 this.playBeep(600, 0.05);
             },
             
-            // Show toast message
             showToast(message, type = 'success') {
                 const toast = this.elements.toast;
-                toast.textContent = message;
-                toast.className = 'toast';
-                if (type === 'error') toast.classList.add('error');
-                toast.style.display = 'block';
+                const toastMessage = document.getElementById('toastMessage');
+                
+                toastMessage.textContent = message;
+                toast.className = 'toast-custom glass text-white show';
+                
+                if (type === 'error') {
+                    toast.innerHTML = `<i class="fas fa-exclamation-circle text-error"></i><span>${message}</span>`;
+                } else {
+                    toast.innerHTML = `<i class="fas fa-check-circle text-success"></i><span>${message}</span>`;
+                }
                 
                 setTimeout(() => {
-                    toast.style.display = 'none';
+                    toast.classList.remove('show');
                 }, 3000);
             },
             
-            // Show loading
             showLoading(show) {
-                this.elements.loading.style.display = show ? 'flex' : 'none';
+                const loading = this.elements.loading;
+                if (show) {
+                    loading.classList.add('show');
+                } else {
+                    loading.classList.remove('show');
+                }
             },
             
-            // Bind events
             bindEvents() {
-                // Navigation
-                this.elements.navHome.addEventListener('click', () => this.showScreen('home'));
-                this.elements.navDialer.addEventListener('click', () => this.showScreen('dialer'));
-                this.elements.navHelp.addEventListener('click', () => this.showScreen('help'));
-                
-                // Dialer actions
-                this.elements.copyBtn.addEventListener('click', () => this.copyId());
-                this.elements.callBtn.addEventListener('click', () => this.startCall());
-                this.elements.soundToggle.addEventListener('click', () => this.toggleSound());
-                
-                // Call controls
-                this.elements.hangupBtn.addEventListener('click', () => this.endCall());
-                this.elements.speakerBtn.addEventListener('click', () => this.toggleSpeaker());
-                this.elements.videoBtn.addEventListener('click', () => this.toggleVideo());
-                this.elements.micBtn.addEventListener('click', () => this.toggleMic());
-                
-                // Incoming call
-                this.elements.answerBtn.addEventListener('click', () => this.answerCall());
-                this.elements.declineBtn.addEventListener('click', () => this.declineCall());
-                this.elements.ringtoneSelect.addEventListener('change', () => this.changeRingtone());
-                
-                // Help
-                this.elements.closeHelp.addEventListener('click', () => this.showScreen('home'));
-                
                 // Enter key in input
-                this.elements.remoteId.addEventListener('keypress', (e) => {
+                this.elements.remoteId?.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') this.startCall();
                 });
                 
-                // Force video/audio play on user interaction (browser policy fix)
+                // Force video/audio play on user interaction
                 document.addEventListener('click', () => {
-                    if (this.elements.remoteVideo.srcObject) {
+                    if (this.elements.remoteVideo?.srcObject) {
                         this.elements.remoteVideo.play().catch(e => {});
                     }
-                    if (this.elements.remoteAudio.srcObject) {
+                    if (this.elements.remoteAudio?.srcObject) {
                         this.elements.remoteAudio.play().catch(e => {});
                     }
-                    if (this.elements.localVideo.srcObject) {
+                    if (this.elements.localVideo?.srcObject) {
                         this.elements.localVideo.play().catch(e => {});
                     }
                 }, { once: false });
