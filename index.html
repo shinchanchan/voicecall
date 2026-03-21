@@ -394,6 +394,12 @@
             border-top: 1px solid rgba(255, 255, 255, 0.05);
             padding-bottom: env(safe-area-inset-bottom, 0);
             z-index: 100;
+            transition: all 0.3s ease;
+        }
+        
+        .bottom-nav.disabled {
+            opacity: 0.5;
+            pointer-events: none;
         }
         
         .nav-item {
@@ -405,11 +411,17 @@
             transition: all 0.3s ease;
             padding: 8px 16px;
             border-radius: 12px;
+            cursor: pointer;
         }
         
         .nav-item.active {
             color: #6366f1;
             background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .nav-item.disabled {
+            opacity: 0.5;
+            pointer-events: none;
         }
         
         .nav-item i {
@@ -773,6 +785,13 @@
         .answer-btn:active, .decline-btn:active {
             transform: scale(0.95);
         }
+        
+        /* Disabled button style */
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
     </style>
 <base target="_blank">
 </head>
@@ -833,7 +852,7 @@
                         <div class="glass rounded-2xl p-3 text-center card-hover"><i class="fas fa-microphone text-secondary text-xl mb-1"></i><p class="text-xs text-white/60">Voice</p></div>
                         <div class="glass rounded-2xl p-3 text-center card-hover"><i class="fas fa-desktop text-accent text-xl mb-1"></i><p class="text-xs text-white/60">Screen</p></div>
                     </div>
-                    <button onclick="App.showScreen('dialer')" class="mt-8 btn btn-primary btn-lg rounded-full px-8 ripple-btn shadow-lg shadow-primary/30"><i class="fas fa-rocket mr-2"></i>Get Started</button>
+                    <button id="getStartedBtn" onclick="App.showScreen('dialer')" class="mt-8 btn btn-primary btn-lg rounded-full px-8 ripple-btn shadow-lg shadow-primary/30"><i class="fas fa-rocket mr-2"></i>Get Started</button>
                 </div>
             </div>
             
@@ -905,11 +924,15 @@
             <div id="helpScreen" class="screen"><div class="flex-1 flex flex-col p-5 overflow-y-auto"><div class="flex items-center justify-between mb-6"><h2 class="text-2xl font-bold">Help & Info</h2><button onclick="App.showScreen('home')" class="btn btn-circle btn-ghost btn-sm ripple-btn"><i class="fas fa-times"></i></button></div><div class="space-y-4"><div class="glass rounded-2xl p-5 card-hover"><div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center"><i class="fas fa-phone text-primary"></i></div><h3 class="font-semibold">How to Call</h3></div><ol class="text-sm text-white/60 space-y-2 ml-2"><li class="flex items-start gap-2"><span class="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary flex-shrink-0">1</span>Wait for "Connected" status</li><li class="flex items-start gap-2"><span class="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary flex-shrink-0">2</span>Share your Peer ID with friends</li><li class="flex items-start gap-2"><span class="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary flex-shrink-0">3</span>Enter their ID and tap Call</li></ol></div><div class="glass rounded-2xl p-5 card-hover"><div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center"><i class="fas fa-desktop text-accent"></i></div><h3 class="font-semibold">Screen Sharing</h3></div><p class="text-sm text-white/60">During a call, tap the desktop icon to switch between camera and screen share.</p></div><div class="glass rounded-2xl p-5 card-hover"><div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-xl bg-warning/20 flex items-center justify-center"><i class="fas fa-exclamation-triangle text-warning"></i></div><h3 class="font-semibold">Connection Issues?</h3></div><p class="text-sm text-white/60">If you see "Disconnected", tap the Reconnect button.</p></div><div class="glass rounded-2xl p-5 card-hover"><div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-xl bg-success/20 flex items-center justify-center"><i class="fas fa-star text-success"></i></div><h3 class="font-semibold">Features</h3></div><div class="space-y-2 text-sm text-white/60"><p class="flex items-center gap-2"><i class="fas fa-check text-success text-xs"></i>HD Video & Audio Quality</p><p class="flex items-center gap-2"><i class="fas fa-check text-success text-xs"></i>Screen Sharing</p><p class="flex items-center gap-2"><i class="fas fa-check text-success text-xs"></i>Manual Refresh Only</p></div></div></div><div class="mt-6 text-center"><p class="text-xs text-white/30">Cube Dialer v3.2</p></div></div></div>
         </div>
         
-        <div class="bottom-nav"><button id="navHome" class="nav-item active" onclick="App.showScreen('home')"><i class="fas fa-home"></i><span>Home</span></button><button id="navDialer" class="nav-item" onclick="App.showScreen('dialer')"><i class="fas fa-phone-alt"></i><span>Dialer</span></button><button id="navHelp" class="nav-item" onclick="App.showScreen('help')"><i class="fas fa-question-circle"></i><span>Help</span></button></div>
+        <div class="bottom-nav" id="bottomNav">
+            <button id="navHome" class="nav-item active" onclick="App.showScreen('home')"><i class="fas fa-home"></i><span>Home</span></button>
+            <button id="navDialer" class="nav-item" onclick="App.showScreen('dialer')"><i class="fas fa-phone-alt"></i><span>Dialer</span></button>
+            <button id="navHelp" class="nav-item" onclick="App.showScreen('help')"><i class="fas fa-question-circle"></i><span>Help</span></button>
+        </div>
     </div>
 
     <script>
-        // Cube Dialer App v3.2 - Fixed Incoming Call Buttons
+        // Cube Dialer App v3.2 - Fixed Incoming Call & Disabled Navigation During Call
         const App = {
             elements: {},
             state: {
@@ -919,7 +942,7 @@
                 soundEnabled: true, audioContext: null, oscillator: null, currentRingtone: 'classic',
                 ringtoneInterval: null, incomingCall: null, isInCall: false, currentFacingMode: 'user',
                 isConnected: false, reconnectAttempts: 0, maxReconnectAttempts: 5, peerId: null,
-                wakeLock: null
+                wakeLock: null, isIncomingScreenActive: false
             },
             ringtones: {
                 classic: { freq1: 800, freq2: 800, pattern: [0.1, 0.1, 0.1, 0.1, 1.6] },
@@ -945,7 +968,7 @@
                 if(soundIcon) soundIcon.onclick = () => this.toggleSound();
             },
             cacheElements() {
-                const ids = ['homeScreen','dialerScreen','callScreen','incomingScreen','helpScreen','yourId','remoteId','callerName','callTimer','incomingName','remoteVideo','localVideo','remoteAudio','screenVideo','localPreview','screenPreview','screenShareIndicator','videoModeIndicator','videoModeText','micBtn','speakerBtn','videoBtn','videoToggleBtn','flipBtn','time','toast','loading','videoPlaceholder','navHome','navDialer','navHelp','ringtoneSelect','connectionStatus','connectionText','peerStatus','callBtn','reconnectBtn','refreshDialog'];
+                const ids = ['homeScreen','dialerScreen','callScreen','incomingScreen','helpScreen','yourId','remoteId','callerName','callTimer','incomingName','remoteVideo','localVideo','remoteAudio','screenVideo','localPreview','screenPreview','screenShareIndicator','videoModeIndicator','videoModeText','micBtn','speakerBtn','videoBtn','videoToggleBtn','flipBtn','time','toast','loading','videoPlaceholder','navHome','navDialer','navHelp','ringtoneSelect','connectionStatus','connectionText','peerStatus','callBtn','reconnectBtn','refreshDialog','bottomNav'];
                 ids.forEach(id => this.elements[id] = document.getElementById(id));
             },
             setupIncomingButtons() {
@@ -953,6 +976,16 @@
                 const declineBtn = document.getElementById('declineCallBtn');
                 if(answerBtn) answerBtn.onclick = () => this.answerCall();
                 if(declineBtn) declineBtn.onclick = () => this.declineCall();
+            },
+            updateNavigationState() {
+                const isActive = this.state.isInCall || this.state.isIncomingScreenActive;
+                if(this.elements.bottomNav) {
+                    if(isActive) {
+                        this.elements.bottomNav.classList.add('disabled');
+                    } else {
+                        this.elements.bottomNav.classList.remove('disabled');
+                    }
+                }
             },
             createParticles() { const c=document.getElementById('particles'); if(!c)return; for(let i=0;i<15;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDelay=Math.random()*6+'s';c.appendChild(p);} },
             setupTime() { const u=()=>{if(this.elements.time) this.elements.time.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}; u(); setInterval(u,60000); },
@@ -974,6 +1007,8 @@
                 this.state.peer.on('call', (call) => { 
                     console.log('📞 Incoming call from:', call.peer);
                     this.state.incomingCall = call; 
+                    this.state.isIncomingScreenActive = true;
+                    this.updateNavigationState();
                     this.elements.incomingName.textContent = call.peer; 
                     this.showScreen('incoming'); 
                     this.playRingtone(); 
@@ -992,7 +1027,7 @@
             playBeep(f=800,d=0.1){ if(!this.state.soundEnabled||!this.state.audioContext)return; try{ let osc=this.state.audioContext.createOscillator(), gain=this.state.audioContext.createGain(); osc.connect(gain); gain.connect(this.state.audioContext.destination); osc.frequency.value=f; gain.gain.setValueAtTime(0.2,this.state.audioContext.currentTime); gain.gain.exponentialRampToValueAtTime(0.01,this.state.audioContext.currentTime+d); osc.start(); osc.stop(this.state.audioContext.currentTime+d); }catch(e){} },
             async getMedia(facing='user'){ this.showLoading(true); try{ let s=await navigator.mediaDevices.getUserMedia({ video:{width:{ideal:640},height:{ideal:480},facingMode:facing}, audio:{echoCancellation:true,noiseSuppression:true} }); this.showLoading(false); return s; }catch(e){ this.showLoading(false); this.showToast('Camera/mic access denied','error'); throw e; } },
             async getScreenMedia(){ this.showLoading(true); try{ let s=await navigator.mediaDevices.getDisplayMedia({ video:{cursor:'always'}, audio:true }); s.getVideoTracks()[0].onended=()=>this.stopScreenShare(); this.showLoading(false); return s; }catch(e){ this.showLoading(false); this.showToast('Screen share cancelled','error'); throw e; } },
-            async startCall(){ if(!this.state.isConnected){this.showToast('Not connected','error');return;} let peerId=this.elements.remoteId.value.trim(); if(!peerId){this.showToast('Enter Peer ID','error');return;} if(peerId===this.state.peerId){this.showToast('Cannot call yourself','error');return;} try{ this.playBeep(1200,0.1); this.state.stream=await this.getMedia(this.state.currentFacingMode); this.state.originalStream=this.state.stream; this.elements.localVideo.srcObject=this.state.stream; let call=this.state.peer.call(peerId,this.state.stream); if(!call)throw new Error('Call failed'); this.setupCall(call); this.showScreen('call'); this.startTimer(); this.elements.callerName.textContent=peerId; this.elements.videoPlaceholder.style.display='none'; this.state.isInCall=true; this.state.videoMode='camera'; this.updateVideoModeUI(); this.requestWakeLock(); this.showToast('Calling...'); }catch(err){ this.showToast(err.message,'error'); if(this.state.stream){this.state.stream.getTracks().forEach(t=>t.stop());this.state.stream=null;} } },
+            async startCall(){ if(!this.state.isConnected){this.showToast('Not connected','error');return;} let peerId=this.elements.remoteId.value.trim(); if(!peerId){this.showToast('Enter Peer ID','error');return;} if(peerId===this.state.peerId){this.showToast('Cannot call yourself','error');return;} try{ this.playBeep(1200,0.1); this.state.stream=await this.getMedia(this.state.currentFacingMode); this.state.originalStream=this.state.stream; this.elements.localVideo.srcObject=this.state.stream; let call=this.state.peer.call(peerId,this.state.stream); if(!call)throw new Error('Call failed'); this.setupCall(call); this.state.isInCall=true; this.updateNavigationState(); this.showScreen('call'); this.startTimer(); this.elements.callerName.textContent=peerId; this.elements.videoPlaceholder.style.display='none'; this.state.videoMode='camera'; this.updateVideoModeUI(); this.requestWakeLock(); this.showToast('Calling...'); }catch(err){ this.showToast(err.message,'error'); if(this.state.stream){this.state.stream.getTracks().forEach(t=>t.stop());this.state.stream=null;} } },
             async answerCall(){ 
                 if(!this.state.incomingCall) return; 
                 this.stopRingtone(); 
@@ -1003,10 +1038,12 @@
                     this.elements.localVideo.srcObject = this.state.stream; 
                     this.state.incomingCall.answer(this.state.stream); 
                     this.setupCall(this.state.incomingCall); 
+                    this.state.isInCall = true; 
+                    this.state.isIncomingScreenActive = false;
+                    this.updateNavigationState();
                     this.showScreen('call'); 
                     this.startTimer(); 
                     this.elements.callerName.textContent = this.state.incomingCall.peer; 
-                    this.state.isInCall = true; 
                     this.state.videoMode = 'camera'; 
                     this.updateVideoModeUI(); 
                     this.requestWakeLock(); 
@@ -1014,6 +1051,8 @@
                     this.showToast('Call connected'); 
                 } catch(e){ 
                     this.showToast('Answer failed: ' + e.message, 'error'); 
+                    this.state.isIncomingScreenActive = false;
+                    this.updateNavigationState();
                     this.showScreen('dialer'); 
                 } 
             },
@@ -1023,6 +1062,8 @@
                     try{this.state.incomingCall.close();}catch(e){} 
                     this.state.incomingCall=null; 
                 } 
+                this.state.isIncomingScreenActive = false;
+                this.updateNavigationState();
                 this.stopRingtone(); 
                 this.showScreen('dialer'); 
                 this.showToast('Call declined'); 
@@ -1031,7 +1072,7 @@
             async toggleVideoMode(){ if(!this.state.isInCall)return; if(this.state.videoMode==='camera'){ try{ this.state.screenStream=await this.getScreenMedia(); let screenTrack=this.state.screenStream.getVideoTracks()[0]; let sender=this.state.call?.peerConnection?.getSenders().find(s=>s.track&&s.track.kind==='video'); if(sender) await sender.replaceTrack(screenTrack); this.elements.screenVideo.srcObject=this.state.screenStream; this.elements.screenPreview.style.display='block'; this.elements.screenShareIndicator.style.display='flex'; this.state.videoMode='screen'; this.updateVideoModeUI(); this.showToast('Screen sharing'); }catch(e){ this.showToast('Screen share failed','error'); } } else { this.stopScreenShare(); } },
             async stopScreenShare(){ if(this.state.screenStream){ this.state.screenStream.getTracks().forEach(t=>t.stop()); this.state.screenStream=null; } if(this.state.originalStream){ let camTrack=this.state.originalStream.getVideoTracks()[0]; let sender=this.state.call?.peerConnection?.getSenders().find(s=>s.track&&s.track.kind==='video'); if(sender&&camTrack) await sender.replaceTrack(camTrack); } this.elements.screenPreview.style.display='none'; this.elements.screenShareIndicator.style.display='none'; this.elements.screenVideo.srcObject=null; this.state.videoMode='camera'; this.updateVideoModeUI(); this.showToast('Camera restored'); },
             updateVideoModeUI(){ let btn=this.elements.videoToggleBtn, ind=this.elements.videoModeIndicator, txt=this.elements.videoModeText; if(this.state.videoMode==='screen'){ btn.classList.add('active'); btn.style.background='#06b6d4'; btn.innerHTML='<i class="fas fa-video"></i>'; btn.title='Switch to Camera'; ind.style.background='rgba(6,182,212,0.9)'; txt.textContent='Screen'; } else { btn.classList.remove('active'); btn.style.background='rgba(255,255,255,0.15)'; btn.innerHTML='<i class="fas fa-desktop"></i>'; btn.title='Switch to Screen Share'; ind.style.background='rgba(99,102,241,0.9)'; txt.textContent='Camera'; } },
-            endCall(){ this.playBeep(300,0.1); this.state.isInCall=false; if(this.state.wakeLock) this.state.wakeLock.release(); if(this.state.screenStream) this.state.screenStream.getTracks().forEach(t=>t.stop()); if(this.state.call){ try{this.state.call.close();}catch(e){} this.state.call=null; } if(this.state.stream){ this.state.stream.getTracks().forEach(t=>t.stop()); this.state.stream=null; } this.elements.localVideo.srcObject=null; this.elements.remoteVideo.srcObject=null; this.elements.remoteAudio.srcObject=null; this.elements.screenVideo.srcObject=null; this.elements.screenPreview.style.display='none'; this.elements.screenShareIndicator.style.display='none'; this.elements.videoPlaceholder.style.display='flex'; this.stopTimer(); this.showScreen('dialer'); this.showToast('Call ended','error'); },
+            endCall(){ this.playBeep(300,0.1); this.state.isInCall=false; this.state.isIncomingScreenActive=false; this.updateNavigationState(); if(this.state.wakeLock) this.state.wakeLock.release(); if(this.state.screenStream) this.state.screenStream.getTracks().forEach(t=>t.stop()); if(this.state.call){ try{this.state.call.close();}catch(e){} this.state.call=null; } if(this.state.stream){ this.state.stream.getTracks().forEach(t=>t.stop()); this.state.stream=null; } this.elements.localVideo.srcObject=null; this.elements.remoteVideo.srcObject=null; this.elements.remoteAudio.srcObject=null; this.elements.screenVideo.srcObject=null; this.elements.screenPreview.style.display='none'; this.elements.screenShareIndicator.style.display='none'; this.elements.videoPlaceholder.style.display='flex'; this.stopTimer(); this.showScreen('dialer'); this.showToast('Call ended','error'); },
             async flipCamera(){ if(!this.state.stream||this.state.videoMode==='screen'){this.showToast('Flip not available','error');return;} this.state.currentFacingMode=this.state.currentFacingMode==='user'?'environment':'user'; try{ let newStream=await this.getMedia(this.state.currentFacingMode); let videoTrack=newStream.getVideoTracks()[0]; let sender=this.state.call?.peerConnection?.getSenders().find(s=>s.track&&s.track.kind==='video'); if(sender) await sender.replaceTrack(videoTrack); let oldTrack=this.state.stream.getVideoTracks()[0]; if(oldTrack) oldTrack.stop(); this.state.stream.removeTrack(this.state.stream.getVideoTracks()[0]); this.state.stream.addTrack(videoTrack); this.state.originalStream=this.state.stream; this.elements.localVideo.srcObject=this.state.stream; this.showToast('Camera flipped'); }catch(e){ this.showToast('Flip failed','error'); } },
             startTimer(){ this.state.callStart=Date.now(); this.state.timer=setInterval(()=>{ let s=Math.floor((Date.now()-this.state.callStart)/1000), m=Math.floor(s/60), sec=s%60; if(this.elements.callTimer) this.elements.callTimer.textContent=`${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`; },1000); },
             stopTimer(){ if(this.state.timer){clearInterval(this.state.timer);this.state.timer=null;} if(this.elements.callTimer) this.elements.callTimer.textContent='00:00'; },
@@ -1042,7 +1083,21 @@
             copyId(){ let id=this.elements.yourId.textContent; if(id==='Loading...'){this.showToast('Wait for connection','error');return;} navigator.clipboard.writeText(id); this.playBeep(1200,0.1); this.showToast('ID copied!'); },
             async shareId(){ let id=this.elements.yourId.textContent; if(id==='Loading...'){this.showToast('Wait for connection','error');return;} if(navigator.share) await navigator.share({title:'Cube Dialer',text:`Call me! ID: ${id}`,url:window.location.href}); else await navigator.clipboard.writeText(`Call me on Cube Dialer! ID: ${id}`); this.showToast('Shared!'); },
             changeRingtone(){ this.state.currentRingtone=this.elements.ringtoneSelect.value; this.showToast('Ringtone updated'); if(document.getElementById('incomingScreen').classList.contains('active')){ this.stopRingtone(); this.playRingtone(); } },
-            showScreen(s){ ['home','dialer','call','incoming','help'].forEach(n=>{ let el=document.getElementById(n+'Screen'); if(el)el.classList.remove('active'); }); let t=document.getElementById(s+'Screen'); if(t)t.classList.add('active'); ['navHome','navDialer','navHelp'].forEach(n=>{ let btn=document.getElementById(n); if(btn)btn.classList.remove('active'); }); if(s==='home')document.getElementById('navHome')?.classList.add('active'); if(s==='dialer')document.getElementById('navDialer')?.classList.add('active'); if(s==='help')document.getElementById('navHelp')?.classList.add('active'); this.playBeep(600,0.05); },
+            showScreen(s){ 
+                // Prevent screen switching during active call or incoming call
+                if((this.state.isInCall || this.state.isIncomingScreenActive) && s !== 'call' && s !== 'incoming') {
+                    this.showToast('Cannot navigate during active call', 'error');
+                    return;
+                }
+                ['home','dialer','call','incoming','help'].forEach(n=>{ let el=document.getElementById(n+'Screen'); if(el)el.classList.remove('active'); }); 
+                let t=document.getElementById(s+'Screen'); 
+                if(t)t.classList.add('active'); 
+                ['navHome','navDialer','navHelp'].forEach(n=>{ let btn=document.getElementById(n); if(btn)btn.classList.remove('active'); }); 
+                if(s==='home')document.getElementById('navHome')?.classList.add('active'); 
+                if(s==='dialer')document.getElementById('navDialer')?.classList.add('active'); 
+                if(s==='help')document.getElementById('navHelp')?.classList.add('active'); 
+                this.playBeep(600,0.05); 
+            },
             showToast(m,t='success'){ let toast=this.elements.toast; if(!toast)return; toast.innerHTML=`<i class="fas fa-${t==='error'?'exclamation-circle text-error':'check-circle text-success'}"></i><span>${m}</span>`; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),3000); },
             showLoading(s){ let ld=this.elements.loading; if(ld) s?ld.classList.add('show'):ld.classList.remove('show'); },
             async requestWakeLock(){ try{ if('wakeLock' in navigator){ this.state.wakeLock=await navigator.wakeLock.request('screen'); } }catch(e){} },
