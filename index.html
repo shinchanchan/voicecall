@@ -38,7 +38,6 @@
                         'slide-up': 'slideUp 0.3s ease-out',
                         'fade-in': 'fadeIn 0.3s ease-out',
                         'glow': 'glow 2s ease-in-out infinite alternate',
-                        'bounce-subtle': 'bounceSubtle 2s ease-in-out infinite',
                     },
                     keyframes: {
                         ring: {
@@ -60,10 +59,6 @@
                         glow: {
                             '0%': { boxShadow: '0 0 5px #6366f1, 0 0 10px #6366f1' },
                             '100%': { boxShadow: '0 0 20px #6366f1, 0 0 30px #8b5cf6' },
-                        },
-                        bounceSubtle: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-5px)' },
                         },
                     },
                 },
@@ -100,7 +95,6 @@
             bottom: 0;
         }
         
-        /* Glassmorphism */
         .glass {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
@@ -114,7 +108,6 @@
             -webkit-backdrop-filter: blur(20px);
         }
         
-        /* Gradients */
         .gradient-bg {
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
         }
@@ -126,7 +119,6 @@
             background-clip: text;
         }
         
-        /* Screen transitions */
         .screen {
             position: absolute;
             inset: 0;
@@ -141,7 +133,6 @@
             opacity: 1;
         }
         
-        /* Video containers - RESPONSIVE */
         .video-container {
             position: relative;
             width: 100%;
@@ -159,7 +150,6 @@
             background: #000;
         }
         
-        /* Local preview - responsive sizing */
         .local-preview {
             position: absolute;
             border-radius: 12px;
@@ -177,7 +167,6 @@
             transform: scaleX(-1);
         }
         
-        /* Mobile local preview */
         @media (max-width: 640px) {
             .local-preview {
                 bottom: 100px;
@@ -187,7 +176,6 @@
             }
         }
         
-        /* Tablet local preview */
         @media (min-width: 641px) and (max-width: 1024px) {
             .local-preview {
                 bottom: 120px;
@@ -197,7 +185,6 @@
             }
         }
         
-        /* Desktop local preview */
         @media (min-width: 1025px) {
             .local-preview {
                 bottom: 140px;
@@ -207,7 +194,6 @@
             }
         }
         
-        /* Screen share preview */
         .screen-preview {
             position: absolute;
             border-radius: 12px;
@@ -245,7 +231,6 @@
             }
         }
         
-        /* Call controls - RESPONSIVE */
         .call-controls {
             position: absolute;
             bottom: 0;
@@ -260,7 +245,6 @@
             padding-bottom: env(safe-area-inset-bottom, 0);
         }
         
-        /* Mobile controls */
         @media (max-width: 640px) {
             .call-controls {
                 padding: 16px 8px 24px;
@@ -291,7 +275,6 @@
             }
         }
         
-        /* Tablet controls */
         @media (min-width: 641px) and (max-width: 1024px) {
             .call-controls {
                 padding: 20px 16px 32px;
@@ -321,7 +304,6 @@
             }
         }
         
-        /* Desktop controls */
         @media (min-width: 1025px) {
             .call-controls {
                 padding: 24px 20px 40px;
@@ -351,7 +333,6 @@
             }
         }
         
-        /* Control button styles */
         .control-btn {
             border-radius: 50%;
             border: none;
@@ -387,7 +368,6 @@
             cursor: not-allowed;
         }
         
-        /* Status bar */
         .status-bar {
             height: 44px;
             padding: 0 20px;
@@ -400,7 +380,6 @@
             z-index: 100;
         }
         
-        /* Bottom nav */
         .bottom-nav {
             position: absolute;
             bottom: 0;
@@ -442,7 +421,6 @@
             font-weight: 500;
         }
         
-        /* Toast */
         .toast-custom {
             position: fixed;
             top: 60px;
@@ -465,7 +443,6 @@
             opacity: 1;
         }
         
-        /* Loading */
         .loading-overlay {
             position: fixed;
             inset: 0;
@@ -481,7 +458,40 @@
             display: flex;
         }
         
-        /* Call pulse */
+        .connection-status {
+            position: fixed;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            z-index: 999;
+            display: none;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .connection-status.show {
+            display: flex;
+        }
+        
+        .connection-status.connecting {
+            background: rgba(99, 102, 241, 0.9);
+            color: white;
+        }
+        
+        .connection-status.connected {
+            background: rgba(34, 197, 94, 0.9);
+            color: white;
+        }
+        
+        .connection-status.error {
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+        }
+        
         .call-pulse {
             animation: callPulse 2s ease-in-out infinite;
         }
@@ -491,7 +501,6 @@
             50% { box-shadow: 0 0 0 20px rgba(34, 197, 94, 0); }
         }
         
-        /* Avatar pulse */
         .avatar-pulse {
             animation: avatarPulse 2s ease-in-out infinite;
         }
@@ -501,7 +510,6 @@
             50% { transform: scale(1.05); box-shadow: 0 0 0 30px rgba(99, 102, 241, 0); }
         }
         
-        /* Sound wave */
         .sound-wave {
             display: flex;
             align-items: center;
@@ -527,7 +535,6 @@
             100% { transform: scaleY(1); opacity: 1; }
         }
         
-        /* Particles */
         .particle {
             position: absolute;
             width: 4px;
@@ -544,7 +551,6 @@
             100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
         }
         
-        /* Card hover */
         .card-hover {
             transition: all 0.3s ease;
         }
@@ -554,35 +560,11 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }
         
-        /* Ripple */
         .ripple-btn {
             position: relative;
             overflow: hidden;
         }
         
-        .ripple-btn::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            background-image: radial-gradient(circle, rgba(255,255,255,0.3) 10%, transparent 10.01%);
-            background-repeat: no-repeat;
-            background-position: 50%;
-            transform: scale(10, 10);
-            opacity: 0;
-            transition: transform 0.5s, opacity 1s;
-        }
-        
-        .ripple-btn:active::after {
-            transform: scale(0, 0);
-            opacity: 0.3;
-            transition: 0s;
-        }
-        
-        /* Video placeholder */
         .video-placeholder {
             position: absolute;
             inset: 0;
@@ -599,7 +581,6 @@
             margin-bottom: 16px;
         }
         
-        /* Scrollbar */
         ::-webkit-scrollbar {
             width: 4px;
         }
@@ -613,7 +594,6 @@
             border-radius: 2px;
         }
         
-        /* Main container responsive */
         .main-container {
             position: relative;
             width: 100%;
@@ -632,7 +612,6 @@
             }
         }
         
-        /* Screen share indicator */
         .screen-share-indicator {
             position: absolute;
             top: 80px;
@@ -650,7 +629,6 @@
             animation: pulse 2s infinite;
         }
         
-        /* Video mode indicator */
         .video-mode-indicator {
             position: absolute;
             top: 80px;
@@ -666,31 +644,18 @@
             gap: 6px;
             z-index: 15;
         }
-        
-        /* Toggle switch for video mode */
-        .mode-toggle {
-            position: absolute;
-            top: 120px;
-            right: 16px;
-            z-index: 15;
-        }
-        
-        /* Label for buttons */
-        .control-label {
-            position: absolute;
-            bottom: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 10px;
-            color: rgba(255,255,255,0.6);
-            white-space: nowrap;
-        }
     </style>
 <base target="_blank">
 </head>
 <body class="text-white">
     <!-- Floating Particles -->
     <div id="particles" class="fixed inset-0 pointer-events-none overflow-hidden"></div>
+    
+    <!-- Connection Status -->
+    <div id="connectionStatus" class="connection-status connecting">
+        <span class="loading loading-spinner loading-xs"></span>
+        <span id="connectionText">Connecting to server...</span>
+    </div>
     
     <!-- Toast -->
     <div id="toast" class="toast-custom glass text-white">
@@ -787,6 +752,9 @@
                         <div class="flex items-center gap-2 mb-3">
                             <i class="fas fa-id-card text-primary"></i>
                             <span class="text-white/60 text-sm">Your Peer ID</span>
+                            <span id="peerStatus" class="ml-auto text-xs px-2 py-0.5 rounded-full bg-warning/20 text-warning">
+                                <i class="fas fa-circle text-[8px]"></i> Connecting
+                            </span>
                         </div>
                         <div class="flex items-center justify-between">
                             <code id="yourId" class="text-lg font-mono text-white">Loading...</code>
@@ -820,7 +788,7 @@
                                 <span class="text-sm">Copy ID</span>
                             </div>
                         </button>
-                        <button onclick="App.startCall()" class="btn btn-success btn-lg rounded-xl h-20 ripple-btn call-pulse">
+                        <button id="callBtn" onclick="App.startCall()" class="btn btn-success btn-lg rounded-xl h-20 ripple-btn call-pulse" disabled>
                             <div class="flex flex-col items-center gap-2">
                                 <i class="fas fa-phone-alt text-xl"></i>
                                 <span class="text-sm">Call Now</span>
@@ -857,6 +825,12 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Reconnect Button -->
+                    <button id="reconnectBtn" onclick="App.reconnectPeer()" class="mt-4 btn btn-warning btn-sm w-full hidden">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        Reconnect to Server
+                    </button>
                 </div>
             </div>
             
@@ -1008,15 +982,15 @@
                             <ol class="text-sm text-white/60 space-y-2 ml-2">
                                 <li class="flex items-start gap-2">
                                     <span class="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary flex-shrink-0">1</span>
-                                    Share your Peer ID with friends
+                                    Wait for "Connected" status
                                 </li>
                                 <li class="flex items-start gap-2">
                                     <span class="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary flex-shrink-0">2</span>
-                                    Enter their ID in the dialer
+                                    Share your Peer ID with friends
                                 </li>
                                 <li class="flex items-start gap-2">
                                     <span class="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs text-primary flex-shrink-0">3</span>
-                                    Tap Call button
+                                    Enter their ID and tap Call
                                 </li>
                             </ol>
                         </div>
@@ -1028,23 +1002,17 @@
                                 </div>
                                 <h3 class="font-semibold">Screen Sharing</h3>
                             </div>
-                            <p class="text-sm text-white/60">During a call, tap the desktop icon to switch between camera and screen share. Your screen will be visible to the other person.</p>
+                            <p class="text-sm text-white/60">During a call, tap the desktop icon to switch between camera and screen share.</p>
                         </div>
                         
                         <div class="glass rounded-2xl p-5 card-hover">
                             <div class="flex items-center gap-3 mb-3">
-                                <div class="w-10 h-10 rounded-xl bg-secondary/20 flex items-center justify-center">
-                                    <i class="fas fa-music text-secondary"></i>
+                                <div class="w-10 h-10 rounded-xl bg-warning/20 flex items-center justify-center">
+                                    <i class="fas fa-exclamation-triangle text-warning"></i>
                                 </div>
-                                <h3 class="font-semibold">Ringtone Options</h3>
+                                <h3 class="font-semibold">Connection Issues?</h3>
                             </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div class="text-xs text-white/60 bg-white/5 rounded-lg p-2">Classic Ringtone</div>
-                                <div class="text-xs text-white/60 bg-white/5 rounded-lg p-2">Digital Beep</div>
-                                <div class="text-xs text-white/60 bg-white/5 rounded-lg p-2">Soft Melody</div>
-                                <div class="text-xs text-white/60 bg-white/5 rounded-lg p-2">Pulse Tone</div>
-                                <div class="text-xs text-white/60 bg-white/5 rounded-lg p-2 col-span-2">Bell Ring</div>
-                            </div>
+                            <p class="text-sm text-white/60">If you see "Disconnected", tap the Reconnect button or refresh the page.</p>
                         </div>
                         
                         <div class="glass rounded-2xl p-5 card-hover">
@@ -1065,28 +1033,14 @@
                                 </p>
                                 <p class="flex items-center gap-2">
                                     <i class="fas fa-check text-success text-xs"></i>
-                                    Camera/Screen Toggle
-                                </p>
-                                <p class="flex items-center gap-2">
-                                    <i class="fas fa-check text-success text-xs"></i>
-                                    Noise Cancellation
+                                    Auto-reconnect on disconnect
                                 </p>
                             </div>
-                        </div>
-                        
-                        <div class="glass rounded-2xl p-5 card-hover">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-10 h-10 rounded-xl bg-warning/20 flex items-center justify-center">
-                                    <i class="fas fa-envelope text-warning"></i>
-                                </div>
-                                <h3 class="font-semibold">Contact</h3>
-                            </div>
-                            <p class="text-sm text-white/60">vallarasucse200118@gmail.com</p>
                         </div>
                     </div>
                     
                     <div class="mt-6 text-center">
-                        <p class="text-xs text-white/30">Cube Dialer v3.0</p>
+                        <p class="text-xs text-white/30">Cube Dialer v3.1</p>
                     </div>
                 </div>
             </div>
@@ -1110,7 +1064,7 @@
     </div>
 
     <script>
-        // Cube Dialer App v3.0 - With Screen Sharing & Video Toggle
+        // Cube Dialer App v3.1 - With Connection Error Fixes
         const App = {
             elements: {},
             
@@ -1124,18 +1078,22 @@
                 isSpeakerOn: true,
                 isMicOn: true,
                 isScreenSharing: false,
-                videoMode: 'camera', // 'camera' or 'screen'
+                videoMode: 'camera',
                 callStart: null,
                 timer: null,
                 soundEnabled: true,
                 audioContext: null,
                 oscillator: null,
-                currentRingtone: 'classic', // Default ringtone
+                currentRingtone: 'classic',
                 ringtoneInterval: null,
                 incomingCall: null,
                 isInCall: false,
                 currentFacingMode: 'user',
                 originalStream: null,
+                isConnected: false,
+                reconnectAttempts: 0,
+                maxReconnectAttempts: 5,
+                peerId: null,
             },
             
             ringtones: {
@@ -1147,22 +1105,19 @@
             },
             
             init() {
-                console.log('🚀 Cube Dialer v3.0 Initializing...');
+                console.log('🚀 Cube Dialer v3.1 Initializing...');
                 this.cacheElements();
                 this.setupTime();
-                this.initPeer();
-                this.bindEvents();
                 this.setupAudio();
                 this.setupRefreshPrevention();
                 this.createParticles();
+                this.initPeer();
+                this.bindEvents();
                 
-                // Set default ringtone
                 this.state.currentRingtone = 'classic';
                 if (this.elements.ringtoneSelect) {
                     this.elements.ringtoneSelect.value = 'classic';
                 }
-                
-                this.showToast('Ready to connect', 'success');
             },
             
             cacheElements() {
@@ -1173,7 +1128,8 @@
                     'localPreview', 'screenPreview', 'screenShareIndicator', 'videoModeIndicator', 'videoModeText',
                     'micBtn', 'speakerBtn', 'videoBtn', 'videoToggleBtn', 'flipBtn',
                     'time', 'toast', 'loading', 'videoPlaceholder',
-                    'navHome', 'navDialer', 'navHelp', 'soundToggle', 'ringtoneSelect'
+                    'navHome', 'navDialer', 'navHelp', 'soundToggle', 'ringtoneSelect',
+                    'connectionStatus', 'connectionText', 'peerStatus', 'callBtn', 'reconnectBtn'
                 ];
                 
                 ids.forEach(id => {
@@ -1276,6 +1232,225 @@
                 }, { passive: false });
             },
             
+            // Initialize Peer with better error handling
+            initPeer() {
+                // Generate a persistent peer ID
+                this.state.peerId = 'cube-' + Math.floor(100000 + Math.random() * 900000);
+                
+                this.showConnectionStatus('connecting', 'Connecting to server...');
+                
+                try {
+                    this.state.peer = new Peer(this.state.peerId, {
+                        host: '0.peerjs.com',
+                        port: 443,
+                        path: '/',
+                        secure: true,
+                        config: {
+                            'iceServers': [
+                                { urls: 'stun:stun.l.google.com:19302' },
+                                { urls: 'stun:stun1.l.google.com:19302' },
+                                { urls: 'stun:stun2.l.google.com:19302' }
+                            ]
+                        },
+                        debug: 1
+                    });
+                    
+                    this.setupPeerEvents();
+                    
+                } catch (err) {
+                    console.error('❌ Peer initialization error:', err);
+                    this.handleConnectionError();
+                }
+            },
+            
+            setupPeerEvents() {
+                if (!this.state.peer) return;
+                
+                // Peer opened successfully
+                this.state.peer.on('open', (id) => {
+                    console.log('✅ Peer connected:', id);
+                    this.state.isConnected = true;
+                    this.state.reconnectAttempts = 0;
+                    
+                    if (this.elements.yourId) {
+                        this.elements.yourId.textContent = id;
+                    }
+                    
+                    this.updatePeerStatus('connected');
+                    this.hideConnectionStatus();
+                    this.showToast('Connected to server ✓');
+                    
+                    // Enable call button
+                    if (this.elements.callBtn) {
+                        this.elements.callBtn.disabled = false;
+                    }
+                    
+                    // Hide reconnect button
+                    if (this.elements.reconnectBtn) {
+                        this.elements.reconnectBtn.classList.add('hidden');
+                    }
+                });
+                
+                // Handle incoming calls
+                this.state.peer.on('call', (call) => {
+                    console.log('📞 Incoming call from:', call.peer);
+                    
+                    if (!call || typeof call !== 'object') {
+                        console.error('❌ Invalid call object received');
+                        return;
+                    }
+                    
+                    this.state.incomingCall = call;
+                    if (this.elements.incomingName) {
+                        this.elements.incomingName.textContent = call.peer;
+                    }
+                    this.showScreen('incoming');
+                    this.playRingtone();
+                    
+                    // Auto decline after 30 seconds
+                    setTimeout(() => {
+                        if (this.state.incomingCall === call) {
+                            this.declineCall();
+                            this.showToast('Call timed out', 'error');
+                        }
+                    }, 30000);
+                });
+                
+                // Handle connection errors
+                this.state.peer.on('error', (err) => {
+                    console.error('❌ Peer error:', err.type, err.message);
+                    
+                    // Don't show error for these non-critical errors
+                    const nonCriticalErrors = ['disconnected', 'socket-error', 'network'];
+                    
+                    if (err.type === 'unavailable-id') {
+                        this.showToast('ID already in use, generating new one...', 'error');
+                        setTimeout(() => this.reconnectPeer(), 1000);
+                    } else if (err.type === 'peer-unavailable') {
+                        this.showToast('Peer not found. Check the ID and try again.', 'error');
+                        this.showLoading(false);
+                    } else if (err.type === 'disconnected') {
+                        this.handleDisconnection();
+                    } else if (!nonCriticalErrors.includes(err.type)) {
+                        this.showToast('Connection error: ' + err.type, 'error');
+                    }
+                });
+                
+                // Handle disconnection
+                this.state.peer.on('disconnected', () => {
+                    console.log('⚠️ Peer disconnected from server');
+                    this.handleDisconnection();
+                });
+                
+                // Handle close
+                this.state.peer.on('close', () => {
+                    console.log('🔌 Peer connection closed');
+                    this.handleDisconnection();
+                });
+            },
+            
+            handleDisconnection() {
+                this.state.isConnected = false;
+                this.updatePeerStatus('disconnected');
+                this.showConnectionStatus('error', 'Disconnected from server');
+                
+                // Show reconnect button
+                if (this.elements.reconnectBtn) {
+                    this.elements.reconnectBtn.classList.remove('hidden');
+                }
+                
+                // Disable call button
+                if (this.elements.callBtn) {
+                    this.elements.callBtn.disabled = true;
+                }
+                
+                // Auto-reconnect if not in call
+                if (!this.state.isInCall && this.state.reconnectAttempts < this.state.maxReconnectAttempts) {
+                    this.state.reconnectAttempts++;
+                    console.log(`🔄 Auto-reconnecting... Attempt ${this.state.reconnectAttempts}`);
+                    
+                    setTimeout(() => {
+                        this.reconnectPeer();
+                    }, 2000 * this.state.reconnectAttempts);
+                }
+            },
+            
+            handleConnectionError() {
+                this.updatePeerStatus('error');
+                this.showConnectionStatus('error', 'Connection failed');
+                
+                if (this.elements.reconnectBtn) {
+                    this.elements.reconnectBtn.classList.remove('hidden');
+                }
+            },
+            
+            reconnectPeer() {
+                console.log('🔄 Manually reconnecting...');
+                this.showToast('Reconnecting...');
+                
+                // Clean up existing peer
+                if (this.state.peer) {
+                    try {
+                        this.state.peer.destroy();
+                    } catch (e) {
+                        console.log('Error destroying peer:', e);
+                    }
+                    this.state.peer = null;
+                }
+                
+                // Reset state
+                this.state.isConnected = false;
+                this.state.reconnectAttempts = 0;
+                
+                // Generate new ID
+                this.state.peerId = 'cube-' + Math.floor(100000 + Math.random() * 900000);
+                
+                // Reinitialize
+                setTimeout(() => {
+                    this.initPeer();
+                }, 500);
+            },
+            
+            updatePeerStatus(status) {
+                const statusEl = this.elements.peerStatus;
+                if (!statusEl) return;
+                
+                if (status === 'connected') {
+                    statusEl.className = 'ml-auto text-xs px-2 py-0.5 rounded-full bg-success/20 text-success';
+                    statusEl.innerHTML = '<i class="fas fa-circle text-[8px]"></i> Connected';
+                } else if (status === 'disconnected') {
+                    statusEl.className = 'ml-auto text-xs px-2 py-0.5 rounded-full bg-error/20 text-error';
+                    statusEl.innerHTML = '<i class="fas fa-circle text-[8px]"></i> Disconnected';
+                } else if (status === 'connecting') {
+                    statusEl.className = 'ml-auto text-xs px-2 py-0.5 rounded-full bg-warning/20 text-warning';
+                    statusEl.innerHTML = '<i class="fas fa-circle text-[8px]"></i> Connecting';
+                } else {
+                    statusEl.className = 'ml-auto text-xs px-2 py-0.5 rounded-full bg-error/20 text-error';
+                    statusEl.innerHTML = '<i class="fas fa-circle text-[8px]"></i> Error';
+                }
+            },
+            
+            showConnectionStatus(type, message) {
+                const statusEl = this.elements.connectionStatus;
+                const textEl = this.elements.connectionText;
+                
+                if (!statusEl || !textEl) return;
+                
+                statusEl.className = `connection-status ${type} show`;
+                textEl.textContent = message;
+                
+                if (type === 'connected') {
+                    setTimeout(() => this.hideConnectionStatus(), 2000);
+                }
+            },
+            
+            hideConnectionStatus() {
+                const statusEl = this.elements.connectionStatus;
+                if (statusEl) {
+                    statusEl.classList.remove('show');
+                }
+            },
+            
             async requestWakeLock() {
                 try {
                     if ('wakeLock' in navigator) {
@@ -1373,55 +1548,6 @@
                 }
             },
             
-            initPeer() {
-                const peerId = 'user-' + Math.floor(1000 + Math.random() * 9000);
-                
-                this.state.peer = new Peer(peerId, {
-                    host: '0.peerjs.com',
-                    port: 443,
-                    path: '/',
-                    secure: true,
-                    config: {
-                        'iceServers': [
-                            { urls: 'stun:stun.l.google.com:19302' },
-                            { urls: 'stun:stun1.l.google.com:19302' }
-                        ]
-                    },
-                    debug: 0
-                });
-                
-                this.state.peer.on('open', (id) => {
-                    console.log('✅ Peer connected:', id);
-                    if (this.elements.yourId) {
-                        this.elements.yourId.textContent = id;
-                    }
-                    this.showToast('Connected ✓');
-                });
-                
-                this.state.peer.on('error', (err) => {
-                    console.error('Peer error:', err);
-                    this.showToast('Connection error', 'error');
-                });
-                
-                this.state.peer.on('call', (call) => {
-                    console.log('📞 Incoming call from:', call.peer);
-                    
-                    this.state.incomingCall = call;
-                    if (this.elements.incomingName) {
-                        this.elements.incomingName.textContent = call.peer;
-                    }
-                    this.showScreen('incoming');
-                    this.playRingtone();
-                    
-                    setTimeout(() => {
-                        if (this.state.incomingCall === call) {
-                            this.declineCall();
-                            this.showToast('Call timed out', 'error');
-                        }
-                    }, 30000);
-                });
-            },
-            
             async getMedia(facingMode = 'user') {
                 try {
                     this.showLoading(true);
@@ -1475,7 +1601,6 @@
                     
                     console.log('🖥️ Screen share started');
                     
-                    // Listen for screen share end
                     stream.getVideoTracks()[0].onended = () => {
                         console.log('Screen share ended by user');
                         this.stopScreenShare();
@@ -1493,9 +1618,21 @@
             },
             
             async startCall() {
+                // Check if peer is connected
+                if (!this.state.isConnected || !this.state.peer) {
+                    this.showToast('Not connected to server. Please wait or reconnect.', 'error');
+                    return;
+                }
+                
                 const peerId = this.elements.remoteId.value.trim();
                 if (!peerId) {
                     this.showToast('Enter Peer ID', 'error');
+                    return;
+                }
+                
+                // Prevent calling self
+                if (peerId === this.state.peerId) {
+                    this.showToast('Cannot call yourself!', 'error');
                     return;
                 }
                 
@@ -1509,7 +1646,13 @@
                     this.elements.localVideo.srcObject = this.state.stream;
                     console.log('📹 Local video set');
                     
+                    // Make the call
                     const call = this.state.peer.call(peerId, this.state.stream);
+                    
+                    // Check if call was created successfully
+                    if (!call) {
+                        throw new Error('Failed to create call - peer may be unavailable');
+                    }
                     
                     this.setupCall(call);
                     
@@ -1527,12 +1670,21 @@
                     
                 } catch(err) {
                     console.error('❌ Start call error:', err);
-                    this.showToast('Failed to start call', 'error');
+                    this.showToast(err.message || 'Failed to start call', 'error');
+                    
+                    // Clean up stream if created
+                    if (this.state.stream) {
+                        this.state.stream.getTracks().forEach(t => t.stop());
+                        this.state.stream = null;
+                    }
                 }
             },
             
             async answerCall() {
-                if (!this.state.incomingCall) return;
+                if (!this.state.incomingCall) {
+                    this.showToast('No incoming call', 'error');
+                    return;
+                }
                 
                 try {
                     console.log('✅ Answering call from:', this.state.incomingCall.peer);
@@ -1565,7 +1717,7 @@
                     
                 } catch(err) {
                     console.error('❌ Answer call error:', err);
-                    this.showToast('Failed to answer', 'error');
+                    this.showToast('Failed to answer: ' + err.message, 'error');
                     this.showScreen('dialer');
                 }
             },
@@ -1574,7 +1726,11 @@
                 if (this.state.incomingCall) {
                     console.log('❌ Declining call from:', this.state.incomingCall.peer);
                     this.playBeep(400, 0.1);
-                    this.state.incomingCall.close();
+                    try {
+                        this.state.incomingCall.close();
+                    } catch(e) {
+                        console.log('Error closing incoming call:', e);
+                    }
                     this.state.incomingCall = null;
                 }
                 this.stopRingtone();
@@ -1582,6 +1738,11 @@
             },
             
             setupCall(call) {
+                if (!call) {
+                    console.error('❌ setupCall called with null call');
+                    return;
+                }
+                
                 console.log('🔗 Setting up call handlers');
                 this.state.call = call;
                 
@@ -1614,19 +1775,21 @@
                 
                 call.on('error', (err) => {
                     console.error('📞 Call error:', err);
+                    this.showToast('Call error: ' + err.message, 'error');
                     this.endCall();
                 });
             },
             
             async toggleVideoMode() {
-                if (!this.state.isInCall) return;
+                if (!this.state.isInCall || !this.state.call) {
+                    this.showToast('Not in an active call', 'error');
+                    return;
+                }
                 
                 if (this.state.videoMode === 'camera') {
-                    // Switch to screen share
                     try {
                         this.state.screenStream = await this.getScreenMedia();
                         
-                        // Replace video track in the call
                         const screenTrack = this.state.screenStream.getVideoTracks()[0];
                         const sender = this.state.call?.peerConnection?.getSenders().find(s => 
                             s.track && s.track.kind === 'video'
@@ -1636,7 +1799,6 @@
                             await sender.replaceTrack(screenTrack);
                         }
                         
-                        // Show screen preview
                         this.elements.screenVideo.srcObject = this.state.screenStream;
                         this.elements.screenPreview.style.display = 'block';
                         this.elements.screenShareIndicator.style.display = 'flex';
@@ -1651,7 +1813,6 @@
                     }
                     
                 } else {
-                    // Switch back to camera
                     this.stopScreenShare();
                 }
             },
@@ -1662,7 +1823,6 @@
                     this.state.screenStream = null;
                 }
                 
-                // Switch back to camera
                 if (this.state.originalStream) {
                     const cameraTrack = this.state.originalStream.getVideoTracks()[0];
                     const sender = this.state.call?.peerConnection?.getSenders().find(s => 
@@ -1712,21 +1872,22 @@
                 this.state.isInCall = false;
                 this.releaseWakeLock();
                 
-                // Stop screen share if active
                 if (this.state.screenStream) {
                     this.state.screenStream.getTracks().forEach(track => track.stop());
                     this.state.screenStream = null;
                 }
                 
                 if (this.state.call) {
-                    this.state.call.close();
+                    try {
+                        this.state.call.close();
+                    } catch(e) {
+                        console.log('Error closing call:', e);
+                    }
                     this.state.call = null;
                 }
                 
                 if (this.state.stream) {
-                    this.state.stream.getTracks().forEach(track => {
-                        track.stop();
-                    });
+                    this.state.stream.getTracks().forEach(track => track.stop());
                     this.state.stream = null;
                 }
                 
@@ -1746,7 +1907,10 @@
             },
             
             async flipCamera() {
-                if (!this.state.stream || this.state.videoMode === 'screen') return;
+                if (!this.state.stream || this.state.videoMode === 'screen') {
+                    this.showToast('Camera flip not available', 'error');
+                    return;
+                }
                 
                 this.state.currentFacingMode = this.state.currentFacingMode === 'user' ? 'environment' : 'user';
                 
@@ -1762,11 +1926,9 @@
                         await sender.replaceTrack(videoTrack);
                     }
                     
-                    // Stop old video track
                     const oldVideoTrack = this.state.stream.getVideoTracks()[0];
                     if (oldVideoTrack) oldVideoTrack.stop();
                     
-                    // Replace video track in stream
                     this.state.stream.removeTrack(this.state.stream.getVideoTracks()[0]);
                     this.state.stream.addTrack(videoTrack);
                     
@@ -1891,6 +2053,10 @@
             
             copyId() {
                 const id = this.elements.yourId.textContent;
+                if (id === 'Loading...') {
+                    this.showToast('Please wait for connection', 'error');
+                    return;
+                }
                 navigator.clipboard.writeText(id).then(() => {
                     this.playBeep(1200, 0.1);
                     this.showToast('ID copied to clipboard!');
@@ -1899,6 +2065,11 @@
             
             async shareId() {
                 const id = this.elements.yourId.textContent;
+                if (id === 'Loading...') {
+                    this.showToast('Please wait for connection', 'error');
+                    return;
+                }
+                
                 const shareData = {
                     title: 'Cube Dialer',
                     text: `Call me on Cube Dialer! My Peer ID is: ${id}`,
