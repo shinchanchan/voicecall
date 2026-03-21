@@ -412,16 +412,13 @@
             padding: 8px 16px;
             border-radius: 12px;
             cursor: pointer;
+            background: transparent;
+            border: none;
         }
         
         .nav-item.active {
             color: #6366f1;
             background: rgba(99, 102, 241, 0.1);
-        }
-        
-        .nav-item.disabled {
-            opacity: 0.5;
-            pointer-events: none;
         }
         
         .nav-item i {
@@ -615,7 +612,6 @@
             align-items: center;
             gap: 6px;
             z-index: 15;
-            animation: pulse 2s infinite;
         }
         
         .video-mode-indicator {
@@ -755,45 +751,16 @@
             transition: all 0.2s ease;
         }
         
-        .incoming-buttons {
-            display: flex;
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .answer-btn, .decline-btn {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* Incoming call button styles */
+        .incoming-action-btn {
             cursor: pointer;
             transition: all 0.2s ease;
-            border: none;
         }
         
-        .answer-btn {
-            background: #22c55e;
-            box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
-        }
-        
-        .decline-btn {
-            background: #ef4444;
-        }
-        
-        .answer-btn:active, .decline-btn:active {
+        .incoming-action-btn:active {
             transform: scale(0.95);
         }
-        
-        /* Disabled button style */
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
     </style>
-<base target="_blank">
 </head>
 <body class="text-white">
     <div id="particles" class="fixed inset-0 pointer-events-none overflow-hidden"></div>
@@ -909,11 +876,11 @@
                     </div>
                     
                     <div class="flex items-center gap-8 sm:gap-10">
-                        <button id="declineCallBtn" class="btn btn-circle btn-lg sm:btn-xl btn-error ripple-btn shadow-lg shadow-error/30">
+                        <button id="declineCallBtn" class="btn btn-circle btn-lg sm:btn-xl btn-error ripple-btn shadow-lg shadow-error/30 incoming-action-btn">
                             <i class="fas fa-phone-slash text-xl sm:text-2xl"></i>
                         </button>
                         
-                        <button id="answerCallBtn" class="btn btn-circle btn-lg sm:btn-xl btn-success ripple-btn call-pulse shadow-lg shadow-success/30">
+                        <button id="answerCallBtn" class="btn btn-circle btn-lg sm:btn-xl btn-success ripple-btn call-pulse shadow-lg shadow-success/30 incoming-action-btn">
                             <i class="fas fa-phone-alt text-xl sm:text-2xl"></i>
                         </button>
                     </div>
@@ -932,7 +899,7 @@
     </div>
 
     <script>
-        // Cube Dialer App v3.2 - Fixed Incoming Call & Disabled Navigation During Call
+        // Cube Dialer App v3.2 - FULLY FIXED Incoming Call Buttons
         const App = {
             elements: {},
             state: {
@@ -972,10 +939,32 @@
                 ids.forEach(id => this.elements[id] = document.getElementById(id));
             },
             setupIncomingButtons() {
+                // Direct DOM element binding - most reliable method
                 const answerBtn = document.getElementById('answerCallBtn');
                 const declineBtn = document.getElementById('declineCallBtn');
-                if(answerBtn) answerBtn.onclick = () => this.answerCall();
-                if(declineBtn) declineBtn.onclick = () => this.declineCall();
+                
+                if(answerBtn) {
+                    // Remove any existing listeners
+                    const newAnswerBtn = answerBtn.cloneNode(true);
+                    answerBtn.parentNode.replaceChild(newAnswerBtn, answerBtn);
+                    newAnswerBtn.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Answer button clicked');
+                        this.answerCall();
+                    };
+                }
+                
+                if(declineBtn) {
+                    const newDeclineBtn = declineBtn.cloneNode(true);
+                    declineBtn.parentNode.replaceChild(newDeclineBtn, declineBtn);
+                    newDeclineBtn.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Decline button clicked');
+                        this.declineCall();
+                    };
+                }
             },
             updateNavigationState() {
                 const isActive = this.state.isInCall || this.state.isIncomingScreenActive;
@@ -1009,7 +998,7 @@
                     this.state.incomingCall = call; 
                     this.state.isIncomingScreenActive = true;
                     this.updateNavigationState();
-                    this.elements.incomingName.textContent = call.peer; 
+                    if(this.elements.incomingName) this.elements.incomingName.textContent = call.peer; 
                     this.showScreen('incoming'); 
                     this.playRingtone(); 
                     setTimeout(()=>{ if(this.state.incomingCall === call) this.declineCall(); },30000); 
@@ -1029,10 +1018,15 @@
             async getScreenMedia(){ this.showLoading(true); try{ let s=await navigator.mediaDevices.getDisplayMedia({ video:{cursor:'always'}, audio:true }); s.getVideoTracks()[0].onended=()=>this.stopScreenShare(); this.showLoading(false); return s; }catch(e){ this.showLoading(false); this.showToast('Screen share cancelled','error'); throw e; } },
             async startCall(){ if(!this.state.isConnected){this.showToast('Not connected','error');return;} let peerId=this.elements.remoteId.value.trim(); if(!peerId){this.showToast('Enter Peer ID','error');return;} if(peerId===this.state.peerId){this.showToast('Cannot call yourself','error');return;} try{ this.playBeep(1200,0.1); this.state.stream=await this.getMedia(this.state.currentFacingMode); this.state.originalStream=this.state.stream; this.elements.localVideo.srcObject=this.state.stream; let call=this.state.peer.call(peerId,this.state.stream); if(!call)throw new Error('Call failed'); this.setupCall(call); this.state.isInCall=true; this.updateNavigationState(); this.showScreen('call'); this.startTimer(); this.elements.callerName.textContent=peerId; this.elements.videoPlaceholder.style.display='none'; this.state.videoMode='camera'; this.updateVideoModeUI(); this.requestWakeLock(); this.showToast('Calling...'); }catch(err){ this.showToast(err.message,'error'); if(this.state.stream){this.state.stream.getTracks().forEach(t=>t.stop());this.state.stream=null;} } },
             async answerCall(){ 
-                if(!this.state.incomingCall) return; 
+                console.log('AnswerCall triggered, incomingCall exists:', !!this.state.incomingCall);
+                if(!this.state.incomingCall) {
+                    this.showToast('No incoming call to answer', 'error');
+                    return;
+                }
                 this.stopRingtone(); 
                 this.playBeep(1000,0.2); 
                 try{ 
+                    this.showLoading(true);
                     this.state.stream = await this.getMedia(this.state.currentFacingMode); 
                     this.state.originalStream = this.state.stream; 
                     this.elements.localVideo.srcObject = this.state.stream; 
@@ -1048,8 +1042,11 @@
                     this.updateVideoModeUI(); 
                     this.requestWakeLock(); 
                     this.state.incomingCall = null; 
+                    this.showLoading(false);
                     this.showToast('Call connected'); 
                 } catch(e){ 
+                    this.showLoading(false);
+                    console.error('Answer call error:', e);
                     this.showToast('Answer failed: ' + e.message, 'error'); 
                     this.state.isIncomingScreenActive = false;
                     this.updateNavigationState();
@@ -1057,6 +1054,7 @@
                 } 
             },
             declineCall(){ 
+                console.log('DeclineCall triggered');
                 if(this.state.incomingCall){ 
                     this.playBeep(400,0.1); 
                     try{this.state.incomingCall.close();}catch(e){} 
@@ -1084,7 +1082,6 @@
             async shareId(){ let id=this.elements.yourId.textContent; if(id==='Loading...'){this.showToast('Wait for connection','error');return;} if(navigator.share) await navigator.share({title:'Cube Dialer',text:`Call me! ID: ${id}`,url:window.location.href}); else await navigator.clipboard.writeText(`Call me on Cube Dialer! ID: ${id}`); this.showToast('Shared!'); },
             changeRingtone(){ this.state.currentRingtone=this.elements.ringtoneSelect.value; this.showToast('Ringtone updated'); if(document.getElementById('incomingScreen').classList.contains('active')){ this.stopRingtone(); this.playRingtone(); } },
             showScreen(s){ 
-                // Prevent screen switching during active call or incoming call
                 if((this.state.isInCall || this.state.isIncomingScreenActive) && s !== 'call' && s !== 'incoming') {
                     this.showToast('Cannot navigate during active call', 'error');
                     return;
